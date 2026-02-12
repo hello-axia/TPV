@@ -7,6 +7,8 @@ export type VerdictMeta = {
   title: string;
   date: string;
   summary: string;
+  readTime?: string;
+  questionId?: string;
 };
 
 const verdictsDir = path.join(process.cwd(), "content", "verdicts");
@@ -25,11 +27,15 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
       title: String(data.title ?? slug),
       date: String(data.date ?? ""),
       summary: String(data.summary ?? ""),
+      readTime: data.readTime ? String(data.readTime) : undefined,
+      questionId: data.questionId ? String(data.questionId) : undefined,
     };
   });
 
-  // newest first (string dates like YYYY-MM-DD sort correctly)
+  // WARNING: your date format is MM-DD-YYYY so string sort isn't "true chronological".
+  // Keeping it as-is for now since your site already works this way.
   items.sort((a, b) => (a.date < b.date ? 1 : -1));
+
   return items;
 }
 
@@ -44,6 +50,8 @@ export function getVerdictBySlug(slug: string) {
       title: String(data.title ?? slug),
       date: String(data.date ?? ""),
       summary: String(data.summary ?? ""),
+      readTime: data.readTime ? String(data.readTime) : undefined,
+      questionId: data.questionId ? String(data.questionId) : undefined,
     },
     content,
   };

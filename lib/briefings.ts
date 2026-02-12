@@ -7,6 +7,8 @@ export type BriefingMeta = {
   title: string;
   date: string;
   summary: string;
+  readTime?: string;
+  questionId?: string;
 };
 
 const briefingsDir = path.join(process.cwd(), "content", "briefings");
@@ -25,6 +27,8 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
       title: String(data.title ?? slug),
       date: String(data.date ?? ""),
       summary: String(data.summary ?? ""),
+      readTime: data.readTime ? String(data.readTime) : undefined,
+      questionId: data.questionId ? String(data.questionId) : undefined,
     };
   });
 
@@ -43,6 +47,8 @@ export function getBriefingBySlug(slug: string) {
       title: String(data.title ?? slug),
       date: String(data.date ?? ""),
       summary: String(data.summary ?? ""),
+      readTime: data.readTime ? String(data.readTime) : undefined,
+      questionId: data.questionId ? String(data.questionId) : undefined,
     },
     content,
   };

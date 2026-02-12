@@ -6,11 +6,13 @@ function Row({
   title,
   summary,
   date,
+  readTime,
   href,
 }: {
   title: string;
   summary: string;
   date: string;
+  readTime?: string;
   href: string;
 }) {
   return (
@@ -30,9 +32,19 @@ function Row({
           color: "#6b7280",
           letterSpacing: 1,
           textTransform: "uppercase",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          flexWrap: "wrap",
         }}
       >
-        Briefing • {date}
+        <span>Briefing • {date}</span>
+
+        {readTime ? (
+          <span style={{ color: "#9ca3af", fontWeight: 600 }}>
+            • {readTime}
+          </span>
+        ) : null}
       </div>
 
       <div
@@ -76,6 +88,7 @@ export default function BriefingsPage({ items }: { items: BriefingMeta[] }) {
           <Row
             key={b.slug}
             date={b.date}
+            readTime={b.readTime}
             title={b.title}
             summary={b.summary}
             href={`/briefings/${b.slug}`}

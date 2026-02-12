@@ -6,11 +6,13 @@ function Row({
   title,
   summary,
   date,
+  readTime,
   href,
 }: {
   title: string;
   summary: string;
   date: string;
+  readTime?: string;
   href: string;
 }) {
   return (
@@ -25,15 +27,25 @@ function Row({
       }}
     >
       <div
-        style={{
-          fontSize: 12,
-          color: "#6b7280",
-          letterSpacing: 1,
-          textTransform: "uppercase",
-        }}
-      >
-        Verdict • {date}
-      </div>
+  style={{
+    fontSize: 12,
+    color: "#6b7280",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+  }}
+>
+  <span>Verdict • {date}</span>
+
+  {readTime ? (
+    <span style={{ color: "#9ca3af", fontWeight: 600 }}>
+      • {readTime}
+    </span>
+  ) : null}
+</div>
 
       <div
         style={{
@@ -76,6 +88,7 @@ export default function VerdictsPage({ items }: { items: VerdictMeta[] }) {
           <Row
             key={v.slug}
             date={v.date}
+            readTime={v.readTime}
             title={v.title}
             summary={v.summary}
             href={`/verdicts/${v.slug}`}

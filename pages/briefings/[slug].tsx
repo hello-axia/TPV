@@ -3,26 +3,47 @@ import Link from "next/link";
 import { remark } from "remark";
 import html from "remark-html";
 import { getAllBriefingsMeta, getBriefingBySlug } from "../../lib/briefings";
+import GlobalQuestion from "../../components/GlobalQuestion";
+
+type BriefingMeta = {
+  title: string;
+  date: string;
+  summary: string;
+  readTime?: string;
+  questionId?: string;
+};
 
 export default function BriefingPostPage({
   meta,
   contentHtml,
 }: {
-  meta: { title: string; date: string; summary: string };
+  meta: BriefingMeta;
   contentHtml: string;
 }) {
   return (
     <main style={{ maxWidth: 760, margin: "0 auto", padding: "42px 24px 72px" }}>
-      <Link href="/briefings" style={{ textDecoration: "none", color: "#6b7280", fontSize: 14 }}>
+      <Link
+        href="/briefings"
+        style={{ textDecoration: "none", color: "#6b7280", fontSize: 14 }}
+      >
         ← Back to Briefings
       </Link>
 
-      <h1 style={{ marginTop: 14, fontSize: 44, fontWeight: 900, letterSpacing: -1.1, lineHeight: 1.05 }}>
+      <h1
+        style={{
+          marginTop: 14,
+          fontSize: 44,
+          fontWeight: 900,
+          letterSpacing: -1.1,
+          lineHeight: 1.05,
+        }}
+      >
         {meta.title}
       </h1>
 
       <div style={{ marginTop: 10, color: "#6b7280", fontSize: 14 }}>
         Briefing • {meta.date}
+        {meta.readTime ? ` • ${meta.readTime}` : ""}
       </div>
 
       <p style={{ marginTop: 14, color: "#6b7280", lineHeight: 1.7, fontSize: 18 }}>
@@ -37,6 +58,8 @@ export default function BriefingPostPage({
         }}
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
+
+{meta.questionId ? <GlobalQuestion questionId={meta.questionId} /> : null}
 
       <style jsx>{`
         article :global(h1),

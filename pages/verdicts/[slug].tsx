@@ -3,12 +3,21 @@ import Link from "next/link";
 import { remark } from "remark";
 import html from "remark-html";
 import { getAllVerdictsMeta, getVerdictBySlug } from "../../lib/verdicts";
+import GlobalQuestion from "../../components/GlobalQuestion";
+
+type VerdictMeta = {
+  title: string;
+  date: string;
+  summary: string;
+  readTime?: string;
+  questionId?: string;
+};
 
 export default function VerdictPostPage({
   meta,
   contentHtml,
 }: {
-  meta: { title: string; date: string; summary: string };
+  meta: VerdictMeta;
   contentHtml: string;
 }) {
   return (
@@ -23,6 +32,7 @@ export default function VerdictPostPage({
 
       <div style={{ marginTop: 10, color: "#6b7280", fontSize: 14 }}>
         Verdict • {meta.date}
+        {meta.readTime ? ` • ${meta.readTime}` : ""}
       </div>
 
       <p style={{ marginTop: 14, color: "#6b7280", lineHeight: 1.7, fontSize: 18 }}>
@@ -38,7 +48,9 @@ export default function VerdictPostPage({
         dangerouslySetInnerHTML={{ __html: contentHtml }}
       />
 
-      {/* Lightweight “prose” styling */}
+      {/* Global Question (renders the poll UI, swaps to results after voting) */}
+      {meta.questionId ? <GlobalQuestion questionId={meta.questionId} /> : null}
+
       <style jsx>{`
         article :global(h1),
         article :global(h2),
@@ -53,6 +65,7 @@ export default function VerdictPostPage({
         article :global(p) {
           margin: 12px 0;
         }
+        article :global(ol),
         article :global(ul) {
           padding-left: 20px;
           margin: 12px 0;
