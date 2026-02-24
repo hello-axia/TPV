@@ -32,8 +32,8 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
     };
   });
 
-  // WARNING: your date format is MM-DD-YYYY so string sort isn't "true chronological".
-  // Keeping it as-is for now since your site already works this way.
+  // NOTE: your date format is "MM-DD-YYYY" so lexicographic sort is imperfect.
+  // Keeping this behavior unchanged to avoid surprising you.
   items.sort((a, b) => (a.date < b.date ? 1 : -1));
 
   return items;

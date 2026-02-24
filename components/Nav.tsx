@@ -3,31 +3,31 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 
 const desktopLinkStyle = (active: boolean): React.CSSProperties => ({
-    padding: "8px 10px",
-    borderRadius: 10,
-    textDecoration: "none",
-    color: active ? "#111827" : "#6b7280",
-    background: active ? "#f3f4f6" : "transparent",
-    fontWeight: active ? 600 : 500,
-    whiteSpace: "nowrap",
-  });
-  
-  const mobileLinkStyle = (active: boolean): React.CSSProperties => ({
-    padding: "7px 10px",
-    borderRadius: 9,
-    fontSize: 15,
-    textDecoration: "none",
-    color: active ? "#111827" : "#6b7280",
-    background: active ? "#f3f4f6" : "transparent",
-    fontWeight: active ? 600 : 500,
-  });
+  padding: "6px 10px",
+  borderRadius: 10,
+  textDecoration: "none",
+  color: active ? "#111827" : "#6b7280",
+  background: active ? "#f3f4f6" : "transparent",
+  fontWeight: active ? 600 : 500,
+  whiteSpace: "nowrap",
+});
+
+const mobileLinkStyle = (active: boolean): React.CSSProperties => ({
+  padding: "7px 10px",
+  borderRadius: 9,
+  fontSize: 15,
+  textDecoration: "none",
+  color: active ? "#111827" : "#6b7280",
+  background: active ? "#f3f4f6" : "transparent",
+  fontWeight: active ? 600 : 500,
+});
 
 export default function Nav() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    setOpen(false); // close menu on navigation
+    setOpen(false);
   }, [router.pathname]);
 
   return (
@@ -35,26 +35,25 @@ export default function Nav() {
       style={{
         position: "sticky",
         top: 0,
-        background: "rgba(255,255,255,0.9)",
+        background: "rgba(255,255,255,0.92)",
         backdropFilter: "blur(10px)",
         borderBottom: "1px solid #e5e7eb",
         zIndex: 50,
-        paddingBottom: 10,
       }}
     >
       <div
         style={{
           maxWidth: 1120,
           margin: "0 auto",
-          height: 64,          // lock header height
-          padding: "0 14px",   // no vertical padding
+          height: 72, // ✅ compact header height
+          padding: "4px 14px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: 16,
         }}
       >
-        {/* Logo */}
+        {/* Logo (visually large, but does NOT make header tall) */}
         <Link
           href="/"
           style={{
@@ -62,38 +61,64 @@ export default function Nav() {
             display: "flex",
             alignItems: "center",
             textDecoration: "none",
+            overflow: "visible",
           }}
         >
           <img
             src="/tpv.png"
             alt="TPV"
             style={{
-              height: 150, // your preferred big logo
+              height: 125, // ✅ still big visually
               width: "auto",
               display: "block",
-              transform: "translateY(6px)",
+              position: "relative",
+              top: 6, // ✅ slight drop without forcing header height
             }}
           />
         </Link>
 
-        {/* Desktop nav */}
-        <nav
-          className="tpv-desktop-nav"
-          style={{ display: "flex", gap: 6, alignItems: "center" }}
+        {/* Desktop nav (main row + Bound underneath, right-aligned) */}
+        <div
+          className="tpv-desktop-wrap"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            justifyContent: "center",
+            gap: 0, // ✅ no extra whitespace
+            lineHeight: 1.1,
+          }}
         >
-          <Link href="/verdicts" style={desktopLinkStyle(router.pathname === "/verdicts")}>
-            Verdicts
+          <nav
+            className="tpv-desktop-nav"
+            style={{ display: "flex", gap: 6, alignItems: "center" }}
+          >
+            <Link href="/verdicts" style={desktopLinkStyle(router.pathname === "/verdicts")}>
+              Verdicts
+            </Link>
+            <Link href="/briefings" style={desktopLinkStyle(router.pathname === "/briefings")}>
+              Briefings
+            </Link>
+            <Link href="/about" style={desktopLinkStyle(router.pathname === "/about")}>
+              About
+            </Link>
+            <Link href="/contact" style={desktopLinkStyle(router.pathname === "/contact")}>
+              Contact
+            </Link>
+          </nav>
+
+          <Link
+            href="/bound"
+            style={{
+              ...desktopLinkStyle(router.pathname === "/bound"),
+              fontStyle: "italic",
+              paddingTop: 4,
+              paddingBottom: 4,
+            }}
+          >
+            Bound
           </Link>
-          <Link href="/briefings" style={desktopLinkStyle(router.pathname === "/briefings")}>
-            Briefings
-          </Link>
-          <Link href="/about" style={desktopLinkStyle(router.pathname === "/about")}>
-            About
-          </Link>
-          <Link href="/contact" style={desktopLinkStyle(router.pathname === "/contact")}>
-            Contact
-          </Link>
-        </nav>
+        </div>
 
         {/* Mobile button */}
         <button
@@ -140,14 +165,24 @@ export default function Nav() {
             <Link href="/contact" style={mobileLinkStyle(router.pathname === "/contact")}>
               Contact
             </Link>
+
+            <Link
+              href="/bound"
+              style={{
+                ...mobileLinkStyle(router.pathname === "/bound"),
+                fontStyle: "italic",
+                marginTop: 6,
+              }}
+            >
+              Bound
+            </Link>
           </div>
         </div>
       )}
 
-      {/* CSS-only breakpoint to swap desktop links for hamburger */}
       <style jsx>{`
         @media (max-width: 768px) {
-          .tpv-desktop-nav {
+          .tpv-desktop-wrap {
             display: none !important;
           }
           .tpv-mobile-btn {
