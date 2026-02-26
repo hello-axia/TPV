@@ -7,8 +7,6 @@ pollId: "dhs-funding-2026-02-11"
 questionId: "dhs-funding-2026-02-11"
 ---
 
-# DHS funding deadline and ICE guardrails
-
 ## **The Overview**
 As the February 13, 2026 deadline quickly approaches, Congress must finalize a bill determining how much funding the Department of Homeland Security (DHS), which oversees ICE, will receive in the following year. The Republican Senate Majority Leader is pushing for a bill already passed by the House of Representatives. Because the Senate requires 60 votes to advance the bill, but only has 49 seats, Republicans will need several Democratic seats to move forward. Democrats are conditioning their support on binding “guardrails” for immigration enforcement following the two fatalities committed by ICE that were largely publicized. DHS has warned that in the event of a shutdown (if no bill passes), most employees will still need to work but without pay. However, ICE may be the least affected out of other DHS operations (such as TSA or Border Control) due to large funding increases passed through last year.  
 

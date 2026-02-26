@@ -29,7 +29,7 @@ export default function Footer() {
             style={{ height: 36, width: "auto", display: "block" }}
           />
           <div style={{ color: "#6b7280", fontSize: 13 }}>
-            © {new Date().getFullYear()} The People’s Verdict
+            © {new Date().getFullYear()} The People’s Verdict. All rights reserved.
           </div>
         </div>
 
@@ -67,6 +67,18 @@ export default function Footer() {
               style={{ textDecoration: "none", color: "#6b7280", fontSize: 13 }}
             >
               Contact
+            </Link>
+            <Link
+              href="/privacy"
+              style={{ textDecoration: "none", color: "#6b7280", fontSize: 13 }}
+            >
+              Privacy
+            </Link>
+            <Link
+              href="/terms"
+              style={{ textDecoration: "none", color: "#6b7280", fontSize: 13 }}
+            >
+              Terms
             </Link>
           </div>
 

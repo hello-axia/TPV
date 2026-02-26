@@ -6,7 +6,6 @@ summary: 'In recent weeks, social media has claimed that Congress has "passed" a
 questionId: "miles-driven-tax-2026-02-11"
 ---
 
-# Congress and a “miles driven” tax
 
 ## **The Recap**
 In recent weeks, social media has claimed that Congress has "passed" a new federal tax based on how much you drive. Some posts say that you will be charged 6 to 9 cents a mile. But the reality of the situation is much less extreme. Congress has authorized federal pilot work to study a per-mile road fee, but has not enacted a nationwide mandatory per-mile tax. Several states, such as California are advancing bills that study the “road usage charges” that could potentially become mileage-based fees, but these reports emphasize that these actions are studies. 

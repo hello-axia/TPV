@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { supabase } from "../lib/supabaseClients";
+import type { User } from "@supabase/supabase-js";
 
 type QuestionRow = {
   id: string;
@@ -22,14 +25,43 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
+
+  // keep "real errors" separate from "needs auth"
   const [error, setError] = useState<string | null>(null);
+  const [mustSignIn, setMustSignIn] = useState(false);
+
+  // track auth state (so we can hide results + avoid hitting API)
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
+      setUser(data.session?.user ?? null);
+    })();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      // when they sign in/out, clear the banner
+      setMustSignIn(false);
+    });
+
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   async function load() {
     try {
       setError(null);
       setLoading(true);
+
       const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`);
       const json = (await res.json()) as ApiResponse;
+
       if (!res.ok) throw new Error((json as any)?.error || "Failed to load");
       setData(json);
     } catch (e: any) {
@@ -46,9 +78,18 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
 
   async function vote(choice: "A" | "B" | "C" | "D") {
     if (submitting) return;
+
+    // Treat "not signed in" as normal UI state (no alert, no scary error)
+    if (!user) {
+      setMustSignIn(true);
+      setError(null);
+      return;
+    }
+
     try {
       setSubmitting(true);
       setError(null);
+      setMustSignIn(false);
 
       const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
         method: "POST",
@@ -57,7 +98,16 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
       });
 
       const json = (await res.json()) as ApiResponse;
+
+      if (res.status === 401) {
+        // in case server says they're signed out
+        setMustSignIn(true);
+        setError(null);
+        return;
+      }
+
       if (!res.ok) throw new Error((json as any)?.error || "Vote failed");
+
       setData(json);
     } catch (e: any) {
       setError(e?.message || "Vote failed");
@@ -79,8 +129,45 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     return { total, A, B, C, D };
   }, [q]);
 
-  const pct = (n: number) =>
-    totals.total ? Math.round((n / totals.total) * 100) : 0;
+  const pct = (n: number) => (totals.total ? Math.round((n / totals.total) * 100) : 0);
+
+  const SignInBanner = () => (
+    <div
+      style={{
+        border: "1px solid #e5e7eb",
+        background: "#fff",
+        borderRadius: 12,
+        padding: "12px 12px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+      }}
+    >
+      <div style={{ color: "#111827", fontWeight: 700 }}>
+        Sign in to vote, and to see results!
+        <div style={{ color: "#6b7280", fontWeight: 500, fontSize: 13, marginTop: 2 }}>
+          One vote per account.
+        </div>
+      </div>
+
+      <Link
+        href="/signin"
+        style={{
+          textDecoration: "none",
+          border: "1px solid #e5e7eb",
+          background: "#111827",
+          color: "#fff",
+          borderRadius: 12,
+          padding: "10px 12px",
+          fontWeight: 800,
+          whiteSpace: "nowrap",
+        }}
+      >
+        Sign in
+      </Link>
+    </div>
+  );
 
   const OptionRow = ({
     letter,
@@ -149,13 +236,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
           </div>
         </div>
 
-        <div
-          style={{
-            height: 8,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
-          }}
-        >
+        <div style={{ height: 8, border: "1px solid #e5e7eb", background: "#fff" }}>
           <div
             style={{
               height: "100%",
@@ -173,20 +254,30 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
   if (loading) return null;
   if (!q) return null;
 
+  const canSeeResults = !!user && !!voted;
+
   return (
     <section style={{ marginTop: 14 }}>
       {/* thin line UNDER the article’s prompt */}
       <div style={{ borderTop: "1px solid #e5e7eb", marginBottom: 14 }} />
 
+      {/* real errors only */}
       {error ? (
         <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 10 }}>
           {error}
         </div>
       ) : null}
 
-      {/* integrated block: swaps in-place */}
+      {/* inline sign-in prompt */}
+      {(!user || mustSignIn) && (
+        <div style={{ marginBottom: 10 }}>
+          <SignInBanner />
+        </div>
+      )}
+
+      {/* integrated block */}
       <div style={{ display: "grid", gap: 8 }}>
-        {!voted ? (
+        {!canSeeResults ? (
           <>
             <OptionRow letter="A" text={q.a_text} />
             <OptionRow letter="B" text={q.b_text} />

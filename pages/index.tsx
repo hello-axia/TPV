@@ -20,7 +20,7 @@ function parseMDY(dateStr: string) {
   return new Date(yyyy, mm - 1, dd);
 }
 
-function Card({
+function SmallCard({
   kicker,
   title,
   desc,
@@ -38,35 +38,44 @@ function Card({
         textDecoration: "none",
         color: "inherit",
         display: "block",
-        border: "1px solid #e5e7eb",
-        background: "#fff",
-        padding: 16,
+        borderTop: "1px solid #e5e7eb",
+        paddingTop: 16,
       }}
     >
       <div
         style={{
           fontSize: 12,
-          letterSpacing: 1,
           color: "#6b7280",
-          textTransform: "uppercase",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
         }}
       >
-        {kicker}
+        <span>{kicker}</span>
       </div>
 
       <div
         style={{
-          marginTop: 8,
-          fontSize: 18,
-          fontWeight: 800,
-          letterSpacing: -0.3,
-          lineHeight: 1.2,
+          marginTop: 10,
+          fontSize: 22,
+          lineHeight: 1.18,
+          fontWeight: 900,
+          letterSpacing: -0.6,
+          color: "#111827",
         }}
       >
         {title}
       </div>
 
-      <div style={{ marginTop: 8, color: "#6b7280", lineHeight: 1.65 }}>
+      <div
+        style={{
+          marginTop: 10,
+          fontSize: 15,
+          lineHeight: 1.65,
+          color: "#374151",
+        }}
+      >
         {desc}
       </div>
     </Link>
@@ -76,46 +85,86 @@ function Card({
 function Hero({ post }: { post: Post | null }) {
   if (!post) {
     return (
-      <div style={{ border: "1px solid #e5e7eb", background: "#f9fafb", padding: 18 }}>
-        <div style={{ fontSize: 12, letterSpacing: 1, color: "#6b7280", textTransform: "uppercase" }}>
+      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            letterSpacing: 1.2,
+            color: "#ef4444",
+            textTransform: "uppercase",
+          }}
+        >
           Latest
         </div>
-        <p style={{ marginTop: 10, color: "#6b7280", lineHeight: 1.7 }}>
+        <p style={{ marginTop: 12, color: "#6b7280", lineHeight: 1.7 }}>
           Add a Briefing or Verdict markdown file to see it here.
         </p>
       </div>
     );
   }
 
-  const href =
-    post.type === "Verdict"
-      ? `/verdicts/${post.slug}`
-      : `/briefings/${post.slug}`;
+  const href = post.type === "Verdict" ? `/verdicts/${post.slug}` : `/briefings/${post.slug}`;
 
   return (
-    <div style={{ border: "1px solid #e5e7eb", background: "#f9fafb", padding: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        <div style={{ fontSize: 12, letterSpacing: 1, color: "#6b7280", textTransform: "uppercase" }}>
-          Latest {post.type}
-        </div>
-        <div style={{ fontSize: 12, color: "#6b7280" }}>
-          {post.date}
-          {post.readTime ? ` • ${post.readTime}` : ""}
-        </div>
+    <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+      {/* meta line */}
+      <div
+        style={{
+          fontSize: 12,
+          color: "#6b7280",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        <span>{post.date}</span>
+        {post.readTime ? (
+          <span style={{ color: "rgba(239, 68, 68, 0.65)", fontWeight: 700 }}>
+            • {post.readTime}
+          </span>
+        ) : null}
+        <span style={{ color: "#9ca3af", fontWeight: 700 }}>• {post.type}</span>
       </div>
 
-      <h2 style={{ marginTop: 12, fontSize: 32, fontWeight: 900, letterSpacing: -0.9 }}>
+      {/* title */}
+      <h2
+        style={{
+          marginTop: 12,
+          fontSize: 44,
+          lineHeight: 1.02,
+          fontWeight: 900,
+          letterSpacing: -1.1,
+          marginBottom: 0,
+          color: "#111827",
+        }}
+      >
         {post.title}
       </h2>
 
-      <p style={{ marginTop: 12, color: "#6b7280", lineHeight: 1.75 }}>
+      {/* summary */}
+      <p
+        style={{
+          marginTop: 14,
+          color: "#374151",
+          fontSize: 18,
+          lineHeight: 1.7,
+          maxWidth: 900,
+        }}
+      >
         {post.summary}
       </p>
 
       <div style={{ marginTop: 14 }}>
         <Link
           href={href}
-          style={{ color: "#1f4fbf", textDecoration: "none", fontWeight: 700 }}
+          style={{
+            color: "#111827",
+            textDecoration: "none",
+            fontWeight: 900,
+            letterSpacing: -0.2,
+          }}
         >
           Read →
         </Link>
@@ -165,95 +214,150 @@ export default function HomePage({
   const below = all.slice(1, 4);
 
   return (
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "32px 24px 72px" }}>
-      
-{/* Masthead */}
-<div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "1fr 1.2fr",
-    gap: 32,
-    alignItems: "center", // 👈 THIS fixes the alignment
-  }}
->
-  {/* Left */}
-  <div>
-    <h1 style={{ fontSize: 48, fontWeight: 900, letterSpacing: -1.3, margin: 0 }}>
-      TPV
-    </h1>
+    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
+      {/* Masthead */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1.2fr",
+          gap: 32,
+          alignItems: "center",
+        }}
+      >
+        {/* Left */}
+        <div>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              letterSpacing: 1.2,
+              color: "#ef4444",
+              textTransform: "uppercase",
+            }}
+          >
+            TPV
+          </div>
 
-    <p style={{ marginTop: 8, color: "#6b7280", fontSize: 20 }}>
-      <em>News, Structured.</em>
-    </p>
-  </div>
+          <h1
+            style={{
+              fontSize: 56,
+              lineHeight: 1.02,
+              fontWeight: 900,
+              letterSpacing: -1.2,
+              margin: "10px 0 0",
+            }}
+          >
+            News, structured
+          </h1>
 
-  {/* Right */}
-  <div
-    style={{
-      borderLeft: "1px solid #e5e7eb",
-      paddingLeft: 24,
-      fontSize: 13,
-      lineHeight: 1.7,
-      color: "#4b5563",
-    }}
-  >
-    <div
-      style={{
-        fontSize: 11,
-        letterSpacing: 1.4,
-        textTransform: "uppercase",
-        color: "#6b7280",
-        fontWeight: 800,
-        marginBottom: 6,
-      }}
-    >
-      Publishing Commitment
-    </div>
+          <p
+            style={{
+              marginTop: 12,
+              color: "#374151",
+              fontSize: 18,
+              lineHeight: 1.6,
+              fontStyle: "italic",
+              maxWidth: 900,
+            }}
+          >
 
-    Two structured analyses weekly — <strong>Briefing</strong> (Tue) and{" "}
-    <strong>Verdict</strong> (Fri). Coverage is limited to developments of
-    structural or national significance; TPV is not a breaking-news service.
-  </div>
-</div>
+          </p>
+        </div>
 
-      {/* Hero + Below */}
+        {/* Right */}
+        <div
+          style={{
+            borderLeft: "1px solid #e5e7eb",
+            paddingLeft: 24,
+            fontSize: 13,
+            lineHeight: 1.7,
+            color: "#4b5563",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              letterSpacing: 1.4,
+              textTransform: "uppercase",
+              color: "#6b7280",
+              fontWeight: 900,
+              marginBottom: 6,
+            }}
+          >
+            Publishing Commitment
+          </div>
+          Two structured analyses weekly — <strong>Briefing</strong> (Tue) and{" "}
+          <strong>Verdict</strong> (Fri). Coverage is limited to developments of
+          structural or national significance; TPV is not a breaking-news service.
+        </div>
+      </div>
+
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "18px 0 22px" }} />
+
+      {/* Hero + Below (layout unchanged) */}
       <div
         className="homegrid"
         style={{
-          marginTop: 22,
-          paddingTop: 18,
-          borderTop: "1px solid #e5e7eb",
           display: "grid",
           gridTemplateColumns: "1.6fr 1fr",
-          gap: 16,
+          gap: 18,
           alignItems: "start",
         }}
       >
         <Hero post={hero} />
 
-        <div style={{ display: "grid", gap: 12 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
-            <div style={{ fontSize: 14, fontWeight: 800 }}>More recent</div>
+        <div style={{ display: "grid", gap: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>More recent</div>
 
             <div style={{ display: "flex", gap: 12 }}>
-              <Link href="/briefings" style={{ color: "#6b7280", textDecoration: "none", fontSize: 13 }}>
+              <Link
+                href="/briefings"
+                style={{
+                  color: "#6b7280",
+                  textDecoration: "none",
+                  fontSize: 13,
+                  fontWeight: 800,
+                }}
+              >
                 Briefings
               </Link>
-              <Link href="/verdicts" style={{ color: "#6b7280", textDecoration: "none", fontSize: 13 }}>
+              <Link
+                href="/verdicts"
+                style={{
+                  color: "#6b7280",
+                  textDecoration: "none",
+                  fontSize: 13,
+                  fontWeight: 800,
+                }}
+              >
                 Verdicts
               </Link>
             </div>
           </div>
 
-          {below.map((p) => (
-            <Card
-              key={`${p.type}-${p.slug}`}
-              kicker={`${p.type} • ${p.date}${p.readTime ? ` • ${p.readTime}` : ""}`}
-              title={p.title}
-              desc={p.summary}
-              href={p.type === "Verdict" ? `/verdicts/${p.slug}` : `/briefings/${p.slug}`}
-            />
-          ))}
+          {below.map((p) => {
+            const kicker = `${p.date}${
+              p.readTime ? ` • ${p.readTime}` : ""
+            } • ${p.type}`;
+
+            return (
+              <SmallCard
+                key={`${p.type}-${p.slug}`}
+                kicker={kicker}
+                title={p.title}
+                desc={p.summary}
+                href={p.type === "Verdict" ? `/verdicts/${p.slug}` : `/briefings/${p.slug}`}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -261,6 +365,13 @@ export default function HomePage({
         @media (max-width: 980px) {
           .homegrid {
             grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 900px) {
+          main {
+            padding-left: 14px !important;
+            padding-right: 14px !important;
           }
         }
       `}</style>

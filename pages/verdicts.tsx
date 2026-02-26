@@ -2,7 +2,7 @@ import Link from "next/link";
 import { GetStaticProps } from "next";
 import { getAllVerdictsMeta, VerdictMeta } from "../lib/verdicts";
 
-function Row({
+function Card({
   title,
   summary,
   date,
@@ -22,43 +22,52 @@ function Row({
         textDecoration: "none",
         color: "inherit",
         display: "block",
-        padding: "14px 0",
-        borderBottom: "1px solid #e5e7eb",
+        borderTop: "1px solid #e5e7eb",
+        paddingTop: 16,
       }}
     >
-      <div
-  style={{
-    fontSize: 12,
-    color: "#6b7280",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    flexWrap: "wrap",
-  }}
->
-  <span>Verdict • {date}</span>
-
-  {readTime ? (
-    <span style={{ color: "#9ca3af", fontWeight: 600 }}>
-      • {readTime}
-    </span>
-  ) : null}
-</div>
-
+      {/* meta line */}
       <div
         style={{
-          marginTop: 6,
-          fontSize: 20,
-          fontWeight: 800,
-          letterSpacing: -0.4,
+          fontSize: 12,
+          color: "#6b7280",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        <span>{date}</span>
+        {readTime ? (
+          <span style={{ color: "rgba(239, 68, 68, 0.65)", fontWeight: 700 }}>
+            • {readTime}
+          </span>
+        ) : null}
+      </div>
+
+      {/* title */}
+      <div
+        style={{
+          marginTop: 10,
+          fontSize: 22,
+          lineHeight: 1.18,
+          fontWeight: 900,
+          letterSpacing: -0.6,
+          color: "#111827",
         }}
       >
         {title}
       </div>
 
-      <div style={{ marginTop: 8, color: "#6b7280", lineHeight: 1.7 }}>
+      {/* summary */}
+      <div
+        style={{
+          marginTop: 10,
+          fontSize: 15,
+          lineHeight: 1.65,
+          color: "#374151",
+        }}
+      >
         {summary}
       </div>
     </Link>
@@ -67,34 +76,83 @@ function Row({
 
 export default function VerdictsPage({ items }: { items: VerdictMeta[] }) {
   return (
-    <main style={{ maxWidth: 960, margin: "0 auto", padding: "42px 24px 72px" }}>
-      <h1
-        style={{
-          fontSize: 46,
-          fontWeight: 900,
-          letterSpacing: -1.2,
-          margin: 0,
-        }}
-      >
-        Verdicts
-      </h1>
+    <main
+      style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        padding: "28px 14px 64px",
+      }}
+    >
+      {/* header */}
+      <div style={{ marginBottom: 18 }}>
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            letterSpacing: 1.2,
+            color: "#ef4444",
+            textTransform: "uppercase",
+          }}
+        >
+          Verdicts
+        </div>
 
-      <p style={{ marginTop: 12, color: "#6b7280", fontSize: 18, lineHeight: 1.6 }}>
-        Short, structured maps of political disagreement—written so both sides feel accurately represented.
-      </p>
+        <h1
+          style={{
+            fontSize: 56,
+            lineHeight: 1.02,
+            fontWeight: 900,
+            letterSpacing: -1.2,
+            margin: "10px 0 0",
+          }}
+        >
+          News under examination
+        </h1>
 
-      <div style={{ marginTop: 28 }}>
+        <p
+          style={{
+            marginTop: 12,
+            color: "#374151",
+            fontSize: 18,
+            lineHeight: 1.6,
+            fontStyle: "italic",
+            maxWidth: 900,
+          }}
+        >
+          Short, structured articles of political disagreement, written in a consistent format across all issues.
+        </p>
+      </div>
+
+      <div style={{ borderTop: "1px solid #e5e7eb", margin: "18px 0 22px" }} />
+
+      {/* grid */}
+      <div className="tpv-grid">
         {items.map((v) => (
-          <Row
+          <Card
             key={v.slug}
-            date={v.date}
-            readTime={v.readTime}
             title={v.title}
             summary={v.summary}
+            date={v.date}
+            readTime={v.readTime}
             href={`/verdicts/${v.slug}`}
           />
         ))}
       </div>
+
+      <style jsx>{`
+        .tpv-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 26px;
+        }
+
+        @media (min-width: 900px) {
+          .tpv-grid {
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+          }
+        }
+      `}</style>
     </main>
   );
 }

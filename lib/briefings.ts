@@ -13,6 +13,17 @@ export type BriefingMeta = {
 
 const briefingsDir = path.join(process.cwd(), "content", "briefings");
 
+function normalizeDateForSort(date: string) {
+  // Supports "YYYY-MM-DD" or "MM-DD-YYYY"
+  const d = String(date || "").trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d; // already sortable
+  if (/^\d{2}-\d{2}-\d{4}$/.test(d)) {
+    const [mm, dd, yyyy] = d.split("-");
+    return `${yyyy}-${mm}-${dd}`;
+  }
+  return d; // fallback
+}
+
 export function getAllBriefingsMeta(): BriefingMeta[] {
   const files = fs.readdirSync(briefingsDir).filter((f) => f.endsWith(".md"));
 
@@ -32,7 +43,13 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
     };
   });
 
-  items.sort((a, b) => (a.date < b.date ? 1 : -1));
+  // Newest first (handles both YYYY-MM-DD and MM-DD-YYYY)
+  items.sort((a, b) => {
+    const ad = normalizeDateForSort(a.date);
+    const bd = normalizeDateForSort(b.date);
+    return ad < bd ? 1 : -1;
+  });
+
   return items;
 }
 

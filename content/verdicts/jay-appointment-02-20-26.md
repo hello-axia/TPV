@@ -6,10 +6,8 @@ summary: "Jay Bhattacharya, a physician-economist with a medical degree and mult
 questionId: "cdc-leadership-2026-02-20"
 ---
 
-# CDC Leadership, RFK Jr, and the Fight Over Public Health Authority
-
 ## **The Overview**
-Jay Bhattacharya, a physician-economist with a medical degree and multiple economic degrees from Stanfod, was confirmed as the director of the National Institutes of Health (NIH), and is now reportedly serving as the acting head of the Centers for Disease Control and Prevention (CDC). He was known for being a co-author of the Great Barrington Declaration, which advocated for anti-lockdown measures during the pandemic.[^1] These reports are following the removal of Susan Monarez from CDC leadership when she had conflicted with Robert F. Kennedy Jr, the Secretary of the Department of Health and Human Services (HHS), over vaccine-related decisions.[^2]
+Jay Bhattacharya, a physician-economist with a medical degree and multiple economic degrees from Stanford, was confirmed as the director of the National Institutes of Health (NIH), and is now reportedly serving as the acting head of the Centers for Disease Control and Prevention (CDC). He was known for being a co-author of the Great Barrington Declaration, which advocated for anti-lockdown measures during the pandemic.[^1] These reports are following the removal of Susan Monarez from CDC leadership when she had conflicted with Robert F. Kennedy Jr, the Secretary of the Department of Health and Human Services (HHS), over vaccine-related decisions.[^2]
 
 This change in leadership comes at a moment in which national health indicators show mixed signals. Metrics like life expectancy have risen after the pandemic,[^3] but obesity and other chronic diseases still affect a large share of Americans.[^4] Leadership changes at CDC therefore not only have an impact over vaccine policy, but over the broader direction of the U.S. Public Health.
 
@@ -27,7 +25,7 @@ This change in leadership comes at a moment in which national health indicators 
 
 - The first value conflict is about *institutional independence versus democratic control*.  
   - Under the first value, public health guidance must be buffered from political ideology to preserve credibility and scientific findings. If elected officials can pressure the process, trust erodes and scientific integrity becomes contingent on political factors.  
-  - Under the second value, accountability is prioritized. Agencies are not a fourth branch of the government and must operate under elated leadership and should reflect democratic consensus. If the agencies become self-governing, and resistant to correction, public trust declines.
+  - Under the second value, accountability is prioritized. Agencies are not a fourth branch of the government and must operate under elected leadership and should reflect democratic consensus. If the agencies become self-governing, and resistant to correction, public trust declines.
 
 - The second value conflict is about *precautionary public health versus liberty and pluralism*.  
   - The first value sees centralized guidance and high vaccine uptake as essential to protecting the population from outbreaks. There is a moral urgency in preventing avoidable harm that must be upheld.  
@@ -68,10 +66,10 @@ A major driver of disagreement is that the same words may mean different things.
 - *Political*: Jay Bhattacharya is not simply a public health administrator, but a figure of dissent towards centralized authority. RFK Jr., in appointing Bhattacharya, can be signalling an intention reward for those who identify with his ideology.[^9]
 - *Institutional Reform*: RFK Jr. has argued that federal health agencies like the CDC are too intertwined with big pharma, leading to insufficient transparency. Reform therefore requires leadership that is not embedded within the current system, but one who questions the status quo.[^9]
 
-**Incentives for why one might not way to choose Jay Bhattacharya**
+**Incentives for why one might not want to choose Jay Bhattacharya**
 - *Trust Stability*: the Public Health authority depends on voluntary compliance, and a shift in leadership to someone as polarizing as Bhattacharya may lead to even less stable trust in the CDC[^7]
 - *Institutional Morale*: The CDC is a large bureaucracy composed of epidemiologists, analysts, career public servants, etc… Bhattacharya’s critiques of mainstream public health leadership can be interpreted as a direct critique to the current staff’s adequacy.
-- *Crisis Risk*: Critics argue that RFK Jr.’s vaccine skepticism could undermine public health efforts Former CDC leaders have warned of risks to outbreak management. Those who hold to the importance of precautionary public health standards on the basis of scientific evidence may believe the appointment of Bhattacharya can lead to health crisis outbreaks.[^5]
+- *Crisis Risk*: Critics argue that RFK Jr.’s vaccine skepticism could undermine public health efforts Former CDC leaders have warned of risks to outbreak management. Those who hold to the importance of precautionary public health standards on the basis of scientific evidence may believe the appointment of Bhattacharya can lead to public health crisis.[^5]
 
 ## **The Persuasion Point**
 - For those who are against this appointment:  
