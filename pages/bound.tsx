@@ -334,6 +334,19 @@ const zipfHard = clamp(100 / (1 + Math.exp(k * (zipf - mid))), 0, 100);
   return clamp(0.65 * zipfHard + 0.35 * aoaHard, 0, 100);
 }
 
+function aoaHardnessPct(aoaValue: number | undefined) {
+  // "Lower AoA = easier". This returns 0..100 hardness.
+  // Tune these two numbers to match your dataset’s scale.
+  // Good defaults if your AoA values look like ~3–12:
+  const EASY = 5.5;  // learned by ~K/1st
+  const HARD = 10.5; // learned later
+
+  const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : NaN;
+  if (!Number.isFinite(aoa)) return 50;
+
+  return clamp(((aoa - EASY) / (HARD - EASY)) * 100, 0, 100);
+}
+
 function percentileRank(values: number[], x: number) {
   // returns 0..100, where higher means "harder" (higher AoA)
   // uses rank among sorted values (ties handled by <=)
@@ -789,23 +802,31 @@ console.log("[ZIPF candidates]", candidateForms(w).map((k) => [k, zipf[k]]));
     // Higher = harder
     // AoA higher => harder
     // Zipf higher => easier, so invert with (100 - zipfPct)
-    const relativePct = clamp(
-      BLEND_AOA_WEIGHT * aoaPct + (1 - BLEND_AOA_WEIGHT) * (100 - zipfPct),
-      0,
-      100
-    );
-    
-    // absolute “floor” so objectively rare/late words can still be Advanced
-    const absolutePct = absoluteHardnessPct(myAoa, myZipf);
-    
-    // take the harder of the two
-// Absolute should *nudge* difficulty, not hard-cap it.
-const ABS_WEIGHT = 0.25; // 0..1 (try 0.2–0.35)
-const pct = clamp((1 - ABS_WEIGHT) * relativePct + ABS_WEIGHT * absolutePct, 0, 100);
+// Zipf: higher zipf => easier, so invert percentile (100 - zipfPct) = harder
+const zipfHardRel = clamp(100 - zipfPct, 0, 100);
+
+// Absolute AoA hardness (what you actually care about for “should never be rare”)
+const aoaHardAbs = aoaHardnessPct(myAoa);
+
+// If AoA is available, let it dominate.
+// If AoA missing, fall back to Zipf-relative only.
+const hasAoa = Number.isFinite(myAoa);
+
+const pct = hasAoa
+  ? clamp(0.85 * aoaHardAbs + 0.15 * zipfHardRel, 0, 100)
+  : clamp(zipfHardRel, 0, 100);
     let tierEmoji = tierFromPercentile(pct);
     
     // SHIPPABLE SAFETY: clamp tier based on absolute frequency
     tierEmoji = applyZipfCapsOnly(tierEmoji, myZipf);    
+
+// Hard cap: if learned early, never show as Rare/Advanced
+if (hasAoa && myAoa <= 6.0) {
+  if (tierEmoji === "🟧" || tierEmoji === "🟥") tierEmoji = "🟨";
+}
+if (hasAoa && myAoa <= 5.0) {
+  tierEmoji = "🟦";
+}
     const tierName = TIER_LABELS[tierEmoji];
     const points = TIER_POINTS[tierEmoji];
 
