@@ -342,7 +342,7 @@ function aoaHardnessPct(aoaValue: number | undefined) {
   const HARD = 10.5; // learned later
 
   const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : NaN;
-  if (!Number.isFinite(aoa)) return 50;
+  if (!Number.isFinite(aoa)) return 0;
 
   return clamp(((aoa - EASY) / (HARD - EASY)) * 100, 0, 100);
 }
@@ -362,8 +362,19 @@ function percentileRank(values: number[], x: number) {
   return clamp(rank01 * 100, 0, 100);
 }
 
-function buildShareText(puzzleNumber: number, finalScore: number, tierEmoji: string) {
-  return `Bounds #${puzzleNumber}\n` + `Score: ${finalScore}\n` + `${tierEmoji}`;
+function buildShareText(
+  puzzleNumber: number,
+  finalScore: number,
+  tierEmoji: string,
+  percentile: number
+) {
+  const pct = Math.round(percentile * 10) / 10;
+  return (
+    `Bounds #${puzzleNumber}\n` +
+    `Score: ${finalScore}\n` +
+    `Percentile: ${pct}\n` +
+    `${tierEmoji}`
+  );
 }
 
 function tierIndexFromEmoji(t: TierEmoji) {
@@ -402,6 +413,7 @@ function formatOrdinal(n: number) {
   }
 }
 
+
 export default function BoundPage() {
   // daily puzzle (local midnight)
   const [localDayKeyState, setLocalDayKeyState] = useState(() => localDateKey());
@@ -415,6 +427,8 @@ export default function BoundPage() {
 
   // NOTE: we keep this derived, and we only use the pattern once bank is ready
   const pattern = useMemo(() => {
+
+
     if (!patternBank?.length) return "A _ A";
   
     const seed = hashStringToInt(`BOUND:${puzzleNumber}`);
@@ -590,7 +604,8 @@ const candidateCacheRef = useRef<{
   async function loadAoaPred(): Promise<Record<string, number> | null> {
     if (aoaCacheRef.current) return aoaCacheRef.current;
     try {
-      const res = await fetch("/aoa_pred.json", { cache: "force-cache" });
+      const AOA_VERSION = "2026-03-03b"; // bump when you regenerate aoa_pred.json
+const res = await fetch(`/aoa_pred.json?v=${AOA_VERSION}`, { cache: "no-store" });
       if (!res.ok) return null;
       const json = (await res.json()) as Record<string, number>;
       // keys are expected uppercase already, but normalize anyway
@@ -763,10 +778,13 @@ const candidateCacheRef = useRef<{
     console.log("[ZIPF CHECK] YOU", zipfForWord(zipf, "YOU"));
     console.log("[ZIPF CHECK] PITCHER", zipfForWord(zipf, "PITCHER"));
     console.log("[ZIPF CHECK] PITCHERS", zipfForWord(zipf, "PITCHERS"));
+    console.log("[AOA RAW LOOKUP] INSECT =", aoa["INSECT"]);
+console.log("[AOA FORMS] INSECT forms =", candidateForms("INSECT"));
+console.log("[AOA FORMS LOOKUP] =", candidateForms("INSECT").map(k => [k, aoa[k]]));
 
-    const myAoaRaw = aoaForWord(aoa, w);
-const myAoa: number = Number.isFinite(myAoaRaw) ? (myAoaRaw as number) : 10; // neutral fallback
-
+const myAoaRaw = aoaForWord(aoa, w);
+const hasAoa = Number.isFinite(myAoaRaw);
+const myAoa: number = hasAoa ? (myAoaRaw as number) : NaN;
     const myZipfRaw = zipfForWord(zipf, w);
     let myZipf: number = Number.isFinite(myZipfRaw) ? (myZipfRaw as number) : 3.8; // neutral fallback
 
@@ -810,7 +828,7 @@ const aoaHardAbs = aoaHardnessPct(myAoa);
 
 // If AoA is available, let it dominate.
 // If AoA missing, fall back to Zipf-relative only.
-const hasAoa = Number.isFinite(myAoa);
+
 
 const pct = hasAoa
   ? clamp(0.85 * aoaHardAbs + 0.15 * zipfHardRel, 0, 100)
@@ -893,8 +911,12 @@ if (hasAoa && myAoa <= 5.0) {
   async function onCopyShare() {
     if (!submitted || !scoreResult) return;
   
-    const text = buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji);
-  
+    const text = buildShareText(
+      puzzleNumber,
+      scoreResult.finalScore,
+      scoreResult.tierEmoji,
+      scoreResult.percentile
+    );  
     try {
       await navigator.clipboard.writeText(text);
       setShowShare(true);
@@ -1224,7 +1246,13 @@ if (hasAoa && myAoa <= 5.0) {
                   padding: 12,
                 }}
               >
-{buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji)}              </pre>
+{buildShareText(
+  puzzleNumber,
+  scoreResult.finalScore,
+  scoreResult.tierEmoji,
+  scoreResult.percentile
+)}            
+</pre>
             </div>
           ) : null}
         </section>
