@@ -402,9 +402,25 @@ export default function BoundPage() {
 
   // NOTE: we keep this derived, and we only use the pattern once bank is ready
   const pattern = useMemo(() => {
-    if (!patternBank?.length) return "A _ A"; // placeholder while loading
-    const idx = (puzzleNumber - 1) % patternBank.length;
-    const p = patternBank[idx];
+    if (!patternBank?.length) return "A _ A";
+  
+    const seed = hashStringToInt(`BOUND:${puzzleNumber}`);
+    let idx = seed % patternBank.length;
+  
+    let p = patternBank[idx];
+  
+    // Prevent same length as yesterday
+    if (puzzleNumber > 1) {
+      const prevSeed = hashStringToInt(`BOUND:${puzzleNumber - 1}`);
+      const prevIdx = prevSeed % patternBank.length;
+      const prev = patternBank[prevIdx];
+  
+      if (prev && p.len === prev.len) {
+        idx = (idx + 1) % patternBank.length;
+        p = patternBank[idx];
+      }
+    }
+  
     return buildPattern(p.len, p.start, p.end);
   }, [patternBank, puzzleNumber]);
 
