@@ -1,11 +1,135 @@
 // pages/bound.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Tier = "🟦" | "🟨" | "🟧" | "🟥";
-const TIER_POINTS: Record<Tier, number> = { "🟦": 1, "🟨": 2, "🟧": 3, "🟥": 4 };
+type TierEmoji = "🟦" | "🟨" | "🟧" | "🟥";
+type TierName = "Common" | "Uncommon" | "Rare" | "Advanced";
+
+const TIER_POINTS: Record<TierEmoji, number> = { "🟦": 1, "🟨": 2, "🟧": 3, "🟥": 4 };
+const TIER_LABELS: Record<TierEmoji, TierName> = {
+  "🟦": "Common",
+  "🟨": "Uncommon",
+  "🟧": "Rare",
+  "🟥": "Advanced",
+};
+
+// Relative-per-puzzle percentile buckets (adjust anytime)
+// 0..35 common, 35..50 uncommon, 50..80 rare, 80..100 advanced
+const PCT_COMMON_MAX = 35;
+const PCT_UNCOMMON_MAX = 50;
+const PCT_RARE_MAX = 80;
+
+// Time multiplier (minute buckets):
+// - 0–60s: 2.0x (insanely fast)
+// - 60–120s: 1.7x
+// - 120–180s: 1.45x
+// - 180–240s: 1.25x
+// - 240s+: 1.0x (no boost)
+function multiplierFromSeconds(timeSec: number) {
+  const t = Math.max(0, timeSec);
+
+  if (t < 60) return 2.0;
+  if (t < 120) return 1.7;
+  if (t < 180) return 1.45;
+  if (t < 240) return 1.25;
+  return 1.0;
+}
+
+function formatMult(mult: number) {
+  // show 2.0x, 1.7x, 1.45x, etc.
+  const s = String(Math.round(mult * 100) / 100);
+  return `${s}x`;
+}
+
+function speedLabelFromSeconds(timeSec: number) {
+  const t = Math.max(0, timeSec);
+  if (t < 60) return "Insane speed bonus";
+  if (t < 120) return "Fast speed bonus";
+  if (t < 180) return "Quick speed bonus";
+  if (t < 240) return "Speed bonus";
+  return "No speed bonus";
+}
 
 function onlyLettersUpper(s: string) {
   return (s || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
+}
+
+function candidateForms(rawWord: string): string[] {
+  const W = onlyLettersUpper(rawWord);
+  if (!W) return [];
+
+  const forms: string[] = [];
+  const add = (s: string) => {
+    const k = onlyLettersUpper(s);
+    if (!k) return;
+    if (!forms.includes(k)) forms.push(k);
+  };
+
+  add(W);
+
+  // plurals / nouns
+  if (W.endsWith("IES") && W.length > 3) add(W.slice(0, -3) + "Y");
+  if (W.endsWith("ES") && W.length > 2) add(W.slice(0, -2));
+  if (W.endsWith("S") && W.length > 1) add(W.slice(0, -1));
+
+  // -ING
+  if (W.endsWith("ING") && W.length > 4) {
+    const stem = W.slice(0, -3);
+    add(stem);
+    if (stem.length > 1) add(stem.slice(0, -1)); // doubled consonant
+    add(stem + "E"); // silent-e
+  }
+
+  // -ED
+  if (W.endsWith("ED") && W.length > 3) {
+    const stem = W.slice(0, -2);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    if (stem.length > 1) add(stem.slice(0, -1)); // doubled consonant
+    add(stem + "E"); // silent-e
+  }
+
+  // -ER / -EST
+  if (W.endsWith("ER") && W.length > 3) {
+    const stem = W.slice(0, -2);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    add(stem + "E");
+  }
+
+  if (W.endsWith("EST") && W.length > 4) {
+    const stem = W.slice(0, -3);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    add(stem + "E");
+  }
+
+  return forms;
+}
+
+function zipfForWord(zipf: Record<string, number>, rawWord: string): number | undefined {
+  const forms = candidateForms(rawWord);
+  let best: number | undefined = undefined;
+
+  for (const k of forms) {
+    const v = zipf[k];
+    if (!Number.isFinite(v)) continue;
+    if (best == null || (v as number) > best) best = v as number; // MAX zipf = most common
+  }
+
+  return best;
+}
+
+function aoaForWord(aoa: Record<string, number>, rawWord: string): number | undefined {
+  const forms = candidateForms(rawWord);
+  let best: number | undefined = undefined;
+
+  for (const k of forms) {
+    const v = aoa[k];
+    if (!Number.isFinite(v)) continue;
+    if (best == null || (v as number) < best) best = v as number; // MIN aoa = simplest/earliest
+  }
+
+  return best;
 }
 
 function normalizePattern(p: string) {
@@ -31,39 +155,17 @@ function fitsPattern(word: string, pattern: string) {
   return true;
 }
 
-function uniqueUpperWords(words: string[]) {
-  const set = new Set(words);
-  return set.size === words.length;
-}
-
-function storageKey(puzzleNumber: number) {
-  return `bound:submitted:${puzzleNumber}`;
-}
-
-function submissionKey(puzzleNumber: number) {
-  return `bound:submission:${puzzleNumber}`;
-}
-
-type StoredSubmission = {
-  puzzleNumber: number;
-  pattern: string;
-  words: [string, string, string];
-  scoreResult: ScoreResult;
-  submittedAt: string; // ISO
-};
-
 type BoundPatternEntry = {
   len: number;
   start: string; // "A".."Z"
-  end: string;   // "A".."Z"
-  count: number; // how many candidate words exist
+  end: string; // "A".."Z"
+  count: number;
 };
 
 // CHANGE THIS if you want puzzle #1 to start on your actual launch date.
 // Format: "YYYY-MM-DD" (local date)
-const PUZZLE_START_LOCAL_DATE = "2026-02-25";
+const PUZZLE_START_LOCAL_DATE = "2026-03-03";
 
-// Returns local date string like "2026-02-25" in the user's local timezone
 function localDateKey(d = new Date()) {
   const yyyy = d.getFullYear();
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -71,7 +173,6 @@ function localDateKey(d = new Date()) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-// Day index starting at 1, based on local timezone midnight boundaries
 function puzzleNumberFromLocalDate(todayKey: string) {
   const [y0, m0, d0] = PUZZLE_START_LOCAL_DATE.split("-").map(Number);
   const [y1, m1, d1] = todayKey.split("-").map(Number);
@@ -82,13 +183,11 @@ function puzzleNumberFromLocalDate(todayKey: string) {
   const msPerDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.floor((today.getTime() - start.getTime()) / msPerDay);
 
-  // If someone visits before start date, clamp to 1
   return Math.max(1, diffDays + 1);
 }
 
-// Simple deterministic hash for picking a pattern index
 function hashStringToInt(s: string) {
-  let h = 2166136261; // FNV-ish
+  let h = 2166136261;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 16777619);
@@ -96,25 +195,12 @@ function hashStringToInt(s: string) {
   return h >>> 0;
 }
 
-// Converts (len,start,end) into your displayed pattern like "S _ _ _ E"
 function buildPattern(len: number, start: string, end: string) {
   if (len < 2) return start;
   const middle = Array.from({ length: len - 2 }, () => "_").join(" ");
   return `${start} ${middle} ${end}`.trim();
 }
 
-// Difficulty points (1..4) -> Tier emoji
-function tierFromPoints(points: number): Tier {
-  if (points <= 1) return "🟦";
-  if (points === 2) return "🟨";
-  if (points === 3) return "🟧";
-  return "🟥";
-}
-
-/**
- * NEW: Hard bonus (not a mode)
- * Later you can compute this from puzzleNumber/date.
- */
 function bonusLetterForDay(localDayKey: string) {
   const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const idx = hashStringToInt(`BONUS:${localDayKey}`) % letters.length;
@@ -173,33 +259,192 @@ function Pill({ children }: { children: React.ReactNode }) {
 }
 
 type ScoreResult = {
-  tiers: Tier[];
-  score: number;
+  tierEmoji: TierEmoji;
+  tierName: TierName;
+  points: number; // 1..4
+  percentile: number; // 0..100
+
+  aoaPct: number;   // 0..100
+  zipfPct: number;  // 0..100
+  blendPct: number; // 0..100
+
+  bonusPoints: number; // 0..1
+  timeSec: number;
+  multiplier: number;
+  finalScore: number; // rounded
   shareText: string;
-  bonusPoints: number;
 };
 
-type BoundPattern = {
-  id: number;          // 1-based puzzle number
-  pattern: string;     // e.g. "S _ _ _ _ _ E"
-  length: number;      // 5..10
-  bonusLetter: string; // the bonus letter (+1 per word)
+type StoredSubmission = {
+  v: 2;
+  puzzleNumber: number;
+  localDayKey: string;
+  pattern: string;
+  length: number;
+  startedAtMs: number;
+  submittedAt: string; // ISO
+  word: string;
+  scoreResult: ScoreResult;
 };
+
+function startedKey(puzzleNumber: number) {
+  return `bound:v2:startedAt:${puzzleNumber}`;
+}
+function submissionKey(puzzleNumber: number) {
+  return `bound:v2:submission:${puzzleNumber}`;
+}
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+function tierFromPercentile(pct: number): TierEmoji {
+  const p = clamp(pct, 0, 100);
+  if (p < PCT_COMMON_MAX) return "🟦";
+  if (p < PCT_UNCOMMON_MAX) return "🟨";
+  if (p < PCT_RARE_MAX) return "🟧";
+  return "🟥";
+}
+
+
+// Zipf scale (SUBTLEX) is usually ~1 (very rare) to ~7 (very common).
+// Lower Zipf = rarer/harder. Higher AoA = learned later/harder.
+function absoluteHardnessPct(aoaValue: number | undefined, zipfValue: number | undefined) {
+  const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : 10;
+  const zipf = Number.isFinite(zipfValue as number) ? (zipfValue as number) : 2.5;
+  // Map Zipf to 0..100 hardness:
+  // zipf 5.5+ => ~0 (super common)
+  // zipf 4.5  => ~25
+  // zipf 3.5  => ~60
+  // zipf 3.0  => ~75
+  // zipf 2.5- => ~90-100
+// Smooth curve: still penalizes rare words, but avoids "everything near 2.2 = 100"
+const k = 2.2;   // steepness (try 1.8–2.8)
+const mid = 3.4; // midpoint where hardness ~50 (try 3.2–3.6)
+const zipfHard = clamp(100 / (1 + Math.exp(k * (zipf - mid))), 0, 100);
+  // Map AoA to 0..100 hardness:
+  // aoa 6 => 0 (early)
+  // aoa 9 => 40
+  // aoa 11 => 70
+  // aoa 13+ => 100
+  let aoaHard = clamp(((aoa - 6) / (13 - 6)) * 100, 0, 100);
+  // predicted AoA can be noisy; don't let it fully dominate
+  aoaHard = Math.min(aoaHard, 85);
+  // Combine: frequency usually tracks “feels hard” more than AoA, so weight Zipf a bit more
+  return clamp(0.65 * zipfHard + 0.35 * aoaHard, 0, 100);
+}
+
+function percentileRank(values: number[], x: number) {
+  // returns 0..100, where higher means "harder" (higher AoA)
+  // uses rank among sorted values (ties handled by <=)
+  if (!values.length) return 50;
+  const sorted = values.slice().sort((a, b) => a - b);
+  let count = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i] <= x) count++;
+    else break;
+  }
+  const denom = Math.max(1, sorted.length - 1);
+  const rank01 = (count - 1) / denom;
+  return clamp(rank01 * 100, 0, 100);
+}
+
+function buildShareText(puzzleNumber: number, finalScore: number, tierEmoji: string) {
+  return `Bounds #${puzzleNumber}\n` + `Score: ${finalScore}\n` + `${tierEmoji}`;
+}
+
+function tierIndexFromEmoji(t: TierEmoji) {
+  return t === "🟦" ? 0 : t === "🟨" ? 1 : t === "🟧" ? 2 : 3;
+}
+function tierEmojiFromIndex(i: number): TierEmoji {
+  if (i <= 0) return "🟦";
+  if (i === 1) return "🟨";
+  if (i === 2) return "🟧";
+  return "🟥";
+}
+
+function applyZipfCapsOnly(baseTier: TierEmoji, zipfValue: number | undefined) {
+  if (!Number.isFinite(zipfValue as number)) return baseTier;
+  const z = zipfValue as number;
+
+  let capIdx: number | null = null;
+  if (z >= 5.1) capIdx = 0;
+  else if (z >= 4.7) capIdx = 1;
+  else if (z >= 4.2) capIdx = 2;
+
+  let idx = tierIndexFromEmoji(baseTier);
+  if (capIdx != null) idx = Math.min(idx, capIdx);
+  return tierEmojiFromIndex(idx);
+}
+
+function formatOrdinal(n: number) {
+  const x = Math.round(n);
+  const mod100 = x % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${x}th`;
+  switch (x % 10) {
+    case 1: return `${x}st`;
+    case 2: return `${x}nd`;
+    case 3: return `${x}rd`;
+    default: return `${x}th`;
+  }
+}
 
 export default function BoundPage() {
-  // Daily puzzle (local-midnight)
+  // daily puzzle (local midnight)
   const [localDayKeyState, setLocalDayKeyState] = useState(() => localDateKey());
-  const [daily, setDaily] = useState<BoundPattern | null>(null);
+  const puzzleNumber = useMemo(
+    () => puzzleNumberFromLocalDate(localDayKeyState),
+    [localDayKeyState]
+  );
+
+  // pattern bank
   const [patternBank, setPatternBank] = useState<BoundPatternEntry[] | null>(null);
-  const bonusLetter = useMemo(() => bonusLetterForDay(localDayKeyState), [localDayKeyState]);
 
-  // Starts at 1 on PUZZLE_START_LOCAL_DATE (local time)
-  const puzzleNumber = useMemo(() => puzzleNumberFromLocalDate(localDayKeyState), [localDayKeyState]);
+  // NOTE: we keep this derived, and we only use the pattern once bank is ready
+  const pattern = useMemo(() => {
+    if (!patternBank?.length) return "A _ A"; // placeholder while loading
+    const idx = (puzzleNumber - 1) % patternBank.length;
+    const p = patternBank[idx];
+    return buildPattern(p.len, p.start, p.end);
+  }, [patternBank, puzzleNumber]);
 
-  // Load the allowed pattern bank
+  const len = useMemo(() => patternLength(pattern), [pattern]);
+
+  const puzzleReady = !!patternBank?.length;
+
+  // gameplay state
+  const [revealed, setRevealed] = useState(false);
+  const [startedAtMs, setStartedAtMs] = useState<number | null>(null);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+
+  const [word, setWord] = useState("");
+  const [locked, setLocked] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
+  const [showShare, setShowShare] = useState(false);
+
+  const [error, setError] = useState<string | null>(null);
+
+  // animation triggers (we bump these to re-run CSS keyframe pops)
+  const [revealAnimKey, setRevealAnimKey] = useState(0);
+  const [resultAnimKey, setResultAnimKey] = useState(0);
+
+// caches
+const wordbankCacheRef = useRef<Record<string, 1> | null>(null); // validity
+const aoaCacheRef = useRef<Record<string, number> | null>(null); // AoA
+const zipfCacheRef = useRef<Record<string, number> | null>(null); // SUBTLEX Zipf
+
+const candidateCacheRef = useRef<{
+  key: string;
+  aoaValues: number[];
+  zipfValues: number[];
+} | null>(null);
+
+
+  // load patterns once
   useEffect(() => {
     let alive = true;
-
     (async () => {
       try {
         const res = await fetch("/bound-patterns.json", { cache: "force-cache" });
@@ -210,38 +455,12 @@ export default function BoundPage() {
         // ignore
       }
     })();
-
     return () => {
       alive = false;
     };
   }, []);
 
-  // Compute today's pattern deterministically (cycles through bank)
-  const pattern = useMemo(() => {
-    if (!patternBank?.length) return "A _ A"; // temporary placeholder while loading
-    const idx = (puzzleNumber - 1) % patternBank.length;
-    const p = patternBank[idx];
-    return buildPattern(p.len, p.start, p.end);
-  }, [patternBank, puzzleNumber]);
-
-  const len = patternLength(pattern);
-  useEffect(() => {
-    if (!patternBank?.length) return;
-  
-    const idx = (puzzleNumber - 1) % patternBank.length;
-    const p = patternBank[idx];
-  
-    const computed: BoundPattern = {
-      id: puzzleNumber,
-      pattern: buildPattern(p.len, p.start, p.end),
-      length: p.len,
-      bonusLetter: bonusLetter,
-    };
-  
-    setDaily(computed);
-  }, [patternBank, puzzleNumber, bonusLetter]);
-
-  // Auto-rollover at local midnight
+  // auto-rollover at local midnight
   useEffect(() => {
     const now = new Date();
     const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -254,227 +473,416 @@ export default function BoundPage() {
     return () => window.clearTimeout(t);
   }, [localDayKeyState]);
 
-  const [w1, setW1] = useState("");
-  const [w2, setW2] = useState("");
-  const [w3, setW3] = useState("");
-
-  const [submitted, setSubmitted] = useState(false);
-  const [locked, setLocked] = useState(false);
-
-  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
-  const [submittedAt, setSubmittedAt] = useState<string | null>(null);
-  const [showShare, setShowShare] = useState(false);
-
-  // per-input + global errors
-  const [errors, setErrors] = useState<{
-    w1?: string;
-    w2?: string;
-    w3?: string;
-    global?: string;
-  }>({});
-
-  // Cache "dictionary" + difficulty map in memory
-  // dictionary map is used ONLY for validity (fast for now)
-  const dictCacheRef = useRef<Record<string, number> | null>(null);
-  const difficultyCacheRef = useRef<Record<string, number> | null>(null);
-
-  const words = useMemo(() => [w1, w2, w3].map(onlyLettersUpper), [w1, w2, w3]);
- 
-
-  const puzzleReady = !!patternBank?.length;
-
+  // tick timer only when started + not locked
   useEffect(() => {
-    // 1) Immediately reset UI for the new puzzle so nothing old flashes
-    setW1("");
-    setW2("");
-    setW3("");
-    setErrors({});
-    setSubmitted(false);
+    if (!startedAtMs) return;
+    if (locked) return;
+    const t = window.setInterval(() => setNowMs(Date.now()), 200);
+    return () => window.clearInterval(t);
+  }, [startedAtMs, locked]);
+
+  const elapsedSec = useMemo(() => {
+    if (!startedAtMs) return 0;
+    return Math.max(0, Math.floor((nowMs - startedAtMs) / 1000));
+  }, [nowMs, startedAtMs]);
+
+  const liveMultiplier = useMemo(() => {
+    if (!revealed) return null;
+    if (submitted) return null;
+    return multiplierFromSeconds(elapsedSec);
+  }, [revealed, submitted, elapsedSec]);
+
+  const liveSpeedLabel = useMemo(() => {
+    if (liveMultiplier == null) return null;
+    return speedLabelFromSeconds(elapsedSec);
+  }, [liveMultiplier, elapsedSec]);
+
+  // reset for new puzzle + restore persisted state (safe, no flashing old state)
+  useEffect(() => {
+    // hard reset UI
+    setRevealed(false);
+    setStartedAtMs(null);
+    setWord("");
+    setError(null);
     setLocked(false);
-    setScoreResult(null);
+    setSubmitted(false);
     setSubmittedAt(null);
+    setScoreResult(null);
     setShowShare(false);
-  
-    // 2) Then restore from storage if this device already submitted this puzzle
+    if (typeof window === "undefined") return;
+
+    // restore submission if already submitted
     try {
-      const raw = localStorage.getItem(submissionKey(puzzleNumber));
-      if (raw) {
-        const parsed = JSON.parse(raw) as StoredSubmission;
-  
-        setW1(parsed.words[0] || "");
-        setW2(parsed.words[1] || "");
-        setW3(parsed.words[2] || "");
-  
-        setScoreResult(parsed.scoreResult);
-        setSubmittedAt(parsed.submittedAt || null);
-        setSubmitted(true);
-        setLocked(true);
-        return;
+      const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
+      if (rawSub) {
+        const parsed = JSON.parse(rawSub) as StoredSubmission;
+        if (parsed && parsed.v === 2 && parsed.puzzleNumber === puzzleNumber) {
+          setRevealed(true);
+          setStartedAtMs(parsed.startedAtMs ?? null);
+          setWord(parsed.word ?? "");
+          setScoreResult(parsed.scoreResult ?? null);
+          setSubmittedAt(parsed.submittedAt ?? null);
+          setSubmitted(true);
+          setLocked(true);
+          return;
+        }
       }
-  
-      // Back-compat cleanup (old flag-only lock)
-      const old = localStorage.getItem(storageKey(puzzleNumber));
-      if (old) localStorage.removeItem(storageKey(puzzleNumber));
+
+      // restore startedAt (timer resumes) if they revealed but didn’t submit
+      const rawStarted = localStorage.getItem(startedKey(puzzleNumber));
+      if (rawStarted) {
+        const ms = Number(rawStarted);
+        if (Number.isFinite(ms) && ms > 0) {
+          setRevealed(true);
+          setStartedAtMs(ms);
+        }
+      }
     } catch {
       // ignore
     }
   }, [puzzleNumber]);
 
-  async function loadDictionary(): Promise<Record<string, number> | null> {
-    if (dictCacheRef.current) return dictCacheRef.current;
-
+  async function loadWordbank(): Promise<Record<string, 1> | null> {
+    if (wordbankCacheRef.current) return wordbankCacheRef.current;
     try {
-      // still using this as your "valid word list" for now
+      const res = await fetch("/wordbank.json", { cache: "force-cache" });
+      if (!res.ok) return null;
+      const json = (await res.json()) as Record<string, unknown>;
+      // normalize into a {WORD:1} map (wordbank.json is likely {word: something})
+      const map: Record<string, 1> = {};
+      for (const k of Object.keys(json)) map[onlyLettersUpper(k)] = 1;
+      wordbankCacheRef.current = map;
+      return map;
+    } catch {
+      return null;
+    }
+  }
+
+  async function loadAoaPred(): Promise<Record<string, number> | null> {
+    if (aoaCacheRef.current) return aoaCacheRef.current;
+    try {
+      const res = await fetch("/aoa_pred.json", { cache: "force-cache" });
+      if (!res.ok) return null;
+      const json = (await res.json()) as Record<string, number>;
+      // keys are expected uppercase already, but normalize anyway
+      const map: Record<string, number> = {};
+      for (const [k, v] of Object.entries(json)) {
+        const kk = onlyLettersUpper(k);
+        if (!kk) continue;
+        const vv = Number(v);
+        if (!Number.isFinite(vv)) continue;
+        map[kk] = vv;
+      }
+      aoaCacheRef.current = map;
+      return map;
+    } catch {
+      return null;
+    }
+  }
+
+
+  async function loadZipf(): Promise<Record<string, number> | null> {
+    if (zipfCacheRef.current) return zipfCacheRef.current;
+    try {
+      // Expecting a map like { "THE": 6.17, "YOU": 6.33, ... }
+      // If your file is shaped differently, tell me and I’ll adapt it.
       const res = await fetch("/subtlex-us-zipf.json", { cache: "force-cache" });
       if (!res.ok) return null;
+  
       const json = (await res.json()) as Record<string, number>;
-      dictCacheRef.current = json;
-      return json;
+      const map: Record<string, number> = {};
+  
+      for (const [k, v] of Object.entries(json)) {
+        const kk = onlyLettersUpper(k);
+        const vv = Number(v);
+        if (!kk) continue;
+        if (!Number.isFinite(vv)) continue;
+        map[kk] = vv;
+      }
+  
+      zipfCacheRef.current = map;
+      return map;
     } catch {
       return null;
     }
   }
 
-  async function loadDifficulty(): Promise<Record<string, number> | null> {
-    if (difficultyCacheRef.current) return difficultyCacheRef.current;
-
-    try {
-      const res = await fetch("/bound-difficulty.json", { cache: "force-cache" });
-      if (!res.ok) return null;
-      const json = (await res.json()) as Record<string, number>;
-      difficultyCacheRef.current = json;
-      return json;
-    } catch {
-      return null;
+  const BLEND_AOA_WEIGHT = 0.5; // 0..1 (0.5 = equal weight AoA + frequency)
+  
+  async function ensureCandidateValuesForPattern(): Promise<{
+    aoaValues: number[];
+    zipfValues: number[];
+  } | null> {
+    const key = `v4|${normalizePattern(pattern)}|${len}`;
+    if (candidateCacheRef.current?.key === key) {
+      return {
+        aoaValues: candidateCacheRef.current.aoaValues,
+        zipfValues: candidateCacheRef.current.zipfValues,
+      };
     }
+
+    const wb = await loadWordbank();
+    const aoa = await loadAoaPred();
+    const zipf = await loadZipf();
+
+    
+
+    if (!wb || !aoa || !zipf) return null;
+
+    const aoaValues: number[] = [];
+    const zipfValues: number[] = [];
+
+    const pCompact = normalizePattern(pattern).replace(/\s+/g, "");
+
+    for (const w of Object.keys(wb)) {
+      if (w.length !== pCompact.length) continue;
+      if (!fitsPattern(w, pattern)) continue;
+
+      const aRaw = aoaForWord(aoa, w);
+      const a: number = Number.isFinite(aRaw) ? (aRaw as number) : NaN;
+      const zRaw = zipfForWord(zipf, w);
+      const z: number = Number.isFinite(zRaw) ? (zRaw as number) : NaN;
+      
+      if (!Number.isFinite(a)) continue;
+      if (!Number.isFinite(z)) continue; // skip if we can't resolve a usable zipf
+      
+      aoaValues.push(a);
+      zipfValues.push(z);
+    }
+
+    candidateCacheRef.current = { key, aoaValues, zipfValues };
+    return { aoaValues, zipfValues };
   }
 
-  async function validateWord(slot: "w1" | "w2" | "w3", raw: string) {
+  function validateInstant(raw: string) {
     const w = onlyLettersUpper(raw);
 
-    setErrors((e) => ({ ...e, [slot]: undefined, global: undefined }));
-
-    if (!w) {
-      setErrors((e) => ({ ...e, [slot]: "Required" }));
-      return false;
-    }
-
-    if (!fitsPattern(w, pattern)) {
-      setErrors((e) => ({ ...e, [slot]: "Doesn’t match pattern" }));
-      return false;
-    }
-
-    const dict = await loadDictionary();
-    if (!dict) {
-      setErrors((e) => ({ ...e, [slot]: "Dictionary not loaded" }));
-      return false;
-    }
-
-    if (!(w in dict)) {
-      setErrors((e) => ({ ...e, [slot]: "Not in dictionary" }));
-      return false;
-    }
-
-    return true;
+    if (!revealed) return { ok: false, word: w, msg: "Reveal to start." };
+    if (!w) return { ok: false, word: w, msg: null }; // empty: no red error yet
+    if (w.length !== len) return { ok: false, word: w, msg: `Must be ${len} letters.` };
+    if (!fitsPattern(w, pattern)) return { ok: false, word: w, msg: "Doesn’t match the pattern." };
+    return { ok: true, word: w, msg: null };
   }
+
+  const instant = useMemo(() => validateInstant(word), [word, revealed, len, pattern]);
+
+  useEffect(() => {
+    // “instant red error” behavior
+    setError(instant.msg);
+  }, [instant.msg]);
 
   const canSubmit = useMemo(() => {
     if (!puzzleReady) return false;
+    if (!revealed) return false;
     if (locked) return false;
-    if (words.some((w) => !w)) return false;
-    if (errors.w1 || errors.w2 || errors.w3) return false;
-    if (!uniqueUpperWords(words)) return false;
+    if (!instant.ok) return false;
     return true;
-  }, [puzzleReady, locked, words, errors.w1, errors.w2, errors.w3]);
+  }, [puzzleReady, revealed, locked, instant.ok]);
 
-  async function onSubmit() {
+  function onReveal() {
     if (!puzzleReady) return;
     if (locked) return;
 
-    setShowShare(false);
-    setErrors((e) => ({ ...e, global: undefined }));
-
-    // Ensure validations run even if user didn’t blur the last box
-    const ok1 = await validateWord("w1", w1);
-    const ok2 = await validateWord("w2", w2);
-    const ok3 = await validateWord("w3", w3);
-    if (!(ok1 && ok2 && ok3)) return;
-
-    if (!uniqueUpperWords(words)) {
-      setErrors((e) => ({ ...e, global: "Words must be unique." }));
+    // if already started, don’t overwrite
+    if (startedAtMs) {
+      setRevealed(true);
       return;
     }
 
-    const difficulty = await loadDifficulty();
-    if (!difficulty) {
-      setErrors((e) => ({ ...e, global: "Difficulty map not loaded." }));
-      return;
-    }
+    const ms = Date.now();
+    setRevealed(true);
+    setRevealAnimKey((k) => k + 1);
+    setStartedAtMs(ms);
+    setNowMs(ms);
 
-    // Difficulty points: 1..4, default to 4 if missing
-    const points = words.map((w) => difficulty[w] ?? 4);
-    const tiers = points.map((p) => tierFromPoints(p));
-    const base = points.reduce((acc, p) => acc + p, 0);
-
-    // Hard bonus (not a mode): +1 per word that includes the bonus letter
-    const bonus = onlyLettersUpper(bonusLetter).slice(0, 1);
-    const bonusPoints = words.reduce(
-      (acc, w) => acc + (bonus && w.includes(bonus) ? 1 : 0),
-      0
-    );
-
-    const score = base + bonusPoints;
-
-    const shareText =
-      `Bounds #${puzzleNumber}\n` +
-      `${normalizePattern(pattern)} (${len})\n` +
-      `Score: ${score}\n` +
-      `${tiers.join("")}`;
-
-      const result: ScoreResult = { tiers, score, shareText, bonusPoints };
-
-      setSubmitted(true);
-      setScoreResult(result);
-      
-      // One try per device — store full submission so we can show it later
-      try {
-        const submittedIso = new Date().toISOString();
-      
-        const payload: StoredSubmission = {
-          puzzleNumber,
-          pattern,
-          words: [words[0], words[1], words[2]],
-          scoreResult: result,
-          submittedAt: submittedIso,
-        };
-      
-        localStorage.setItem(submissionKey(puzzleNumber), JSON.stringify(payload));
-      
-        // set React state immediately (so UI updates without refresh)
-        setSubmittedAt(submittedIso);
-      
-      } catch {}
-      
-      setLocked(true);
-  }
-
-  async function onCopyShare() {
-    if (!submitted || !scoreResult?.shareText) return;
     try {
-      await navigator.clipboard.writeText(scoreResult.shareText);
+      localStorage.setItem(startedKey(puzzleNumber), String(ms));
     } catch {
       // ignore
     }
-    setShowShare(true);
   }
+
+  async function onSubmit() {
+    if (!canSubmit) return;
+
+    setShowShare(false);
+
+    const w = onlyLettersUpper(word);
+
+    // server-ish safety: confirm it’s in wordbank + has AoA
+    const wb = await loadWordbank();
+    if (!wb) {
+      setError("Word list not loaded. Refresh and try again.");
+      return;
+    }
+    if (!(w in wb)) {
+      setError("Not a valid word.");
+      return;
+    }
+
+    const aoa = await loadAoaPred();
+    const zipf = await loadZipf();
+    
+    if (!aoa || !zipf) {
+      setError("Difficulty data not loaded. Refresh and try again.");
+      return;
+    }
+    
+    // ✅ safe to log now
+    console.log("[ZIPF CHECK] THE", zipfForWord(zipf, "THE"));
+    console.log("[ZIPF CHECK] AND", zipfForWord(zipf, "AND"));
+    console.log("[ZIPF CHECK] YOU", zipfForWord(zipf, "YOU"));
+    console.log("[ZIPF CHECK] PITCHER", zipfForWord(zipf, "PITCHER"));
+    console.log("[ZIPF CHECK] PITCHERS", zipfForWord(zipf, "PITCHERS"));
+
+    const myAoaRaw = aoaForWord(aoa, w);
+const myAoa: number = Number.isFinite(myAoaRaw) ? (myAoaRaw as number) : 10; // neutral fallback
+
+    const myZipfRaw = zipfForWord(zipf, w);
+    let myZipf: number = Number.isFinite(myZipfRaw) ? (myZipfRaw as number) : 3.8; // neutral fallback
+
+    console.log("[FORMS]", w, "->", candidateForms(w));
+console.log("[AOA candidates]", candidateForms(w).map((k) => [k, aoa[k]]));
+console.log("[ZIPF candidates]", candidateForms(w).map((k) => [k, zipf[k]]));
+    
+    // clamp unrealistic values
+    myZipf = Math.max(2.0, Math.min(6.5, myZipf));
+    console.log(
+      "[BOUND DEBUG]",
+      "word=", w,
+      "aoa=", myAoa,
+      "zipf=", myZipf,
+      "zipfLooksLike=",
+      typeof myZipf === "number"
+        ? myZipf >= 0 && myZipf <= 8
+          ? "ZIPF_OK"
+          : "NOT_ZIPF_SCALE"
+        : "MISSING"
+    );
+
+    // If missing, we still allow play, but treat as hardest/unknown
+    const cand = await ensureCandidateValuesForPattern();
+    if (!cand || !cand.aoaValues.length || !cand.zipfValues.length) {
+      setError("Couldn’t compute today’s difficulty. Refresh and try again.");
+      return;
+    }
+
+    const aoaPct = Number.isFinite(myAoa) ? percentileRank(cand.aoaValues, myAoa) : 100;
+    const zipfPct = Number.isFinite(myZipf) ? percentileRank(cand.zipfValues, myZipf) : 50;
+
+    // Higher = harder
+    // AoA higher => harder
+    // Zipf higher => easier, so invert with (100 - zipfPct)
+    const relativePct = clamp(
+      BLEND_AOA_WEIGHT * aoaPct + (1 - BLEND_AOA_WEIGHT) * (100 - zipfPct),
+      0,
+      100
+    );
+    
+    // absolute “floor” so objectively rare/late words can still be Advanced
+    const absolutePct = absoluteHardnessPct(myAoa, myZipf);
+    
+    // take the harder of the two
+// Absolute should *nudge* difficulty, not hard-cap it.
+const ABS_WEIGHT = 0.25; // 0..1 (try 0.2–0.35)
+const pct = clamp((1 - ABS_WEIGHT) * relativePct + ABS_WEIGHT * absolutePct, 0, 100);
+    let tierEmoji = tierFromPercentile(pct);
+    
+    // SHIPPABLE SAFETY: clamp tier based on absolute frequency
+    tierEmoji = applyZipfCapsOnly(tierEmoji, myZipf);    
+    const tierName = TIER_LABELS[tierEmoji];
+    const points = TIER_POINTS[tierEmoji];
+
+    const bonusPoints = 0;
+
+    const tSec = elapsedSec;
+    const mult = multiplierFromSeconds(tSec);
+
+    const rawScore = (points + bonusPoints) * mult;
+    const finalScore = Math.round(rawScore * 100) / 100;
+
+    // share text: no spoilers (no pattern letters)
+    const shareText =
+    `Bounds #${puzzleNumber}\n` +
+    `Score: ${finalScore}\n` +
+    `${tierEmoji}`;
+
+      const result: ScoreResult = {
+        tierEmoji,
+        tierName,
+        points,
+        percentile: Math.round(pct * 10) / 10,
+      
+        aoaPct: Math.round(aoaPct * 10) / 10,
+        zipfPct: Math.round(zipfPct * 10) / 10,
+        blendPct: Math.round(pct * 10) / 10,
+      
+        bonusPoints,
+        timeSec: tSec,
+        multiplier: Math.round(mult * 100) / 100,
+        finalScore,
+        shareText,
+      };
+
+    const submittedIso = new Date().toISOString();
+
+    setSubmitted(true);
+    setLocked(true);
+    setScoreResult(result);
+    setSubmittedAt(submittedIso);
+    setResultAnimKey((k) => k + 1);
+
+    // persist: one try per device
+    try {
+      const payload: StoredSubmission = {
+        v: 2,
+        puzzleNumber,
+        localDayKey: localDayKeyState,
+        pattern,
+        length: len,
+        startedAtMs: startedAtMs ?? Date.now(),
+        submittedAt: submittedIso,
+        word: w,
+        scoreResult: result,
+      };
+      localStorage.setItem(submissionKey(puzzleNumber), JSON.stringify(payload));
+      // timer resume key no longer needed after submit
+      localStorage.removeItem(startedKey(puzzleNumber));
+    } catch {
+      // ignore
+    }
+  }
+
+  async function onCopyShare() {
+    if (!submitted || !scoreResult) return;
+  
+    const text = buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji);
+  
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowShare(true);
+    } catch {
+      setShowShare(false);
+    }
+  }
+
+  // UI bits
+  const patternTiles = useMemo(() => normalizePattern(pattern).split(" "), [pattern]);
 
   return (
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
-      {/* Top header (TPV vibe) */}
       <div style={{ display: "grid", gap: 10 }}>
         <MetaKicker>TPV Games</MetaKicker>
 
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            gap: 14,
+            flexWrap: "wrap",
+          }}
+        >
           <h1
             style={{
               margin: 0,
@@ -494,41 +902,65 @@ export default function BoundPage() {
               <span style={{ fontWeight: 900, color: "#111827" }}>#{puzzleNumber}</span>
             </Pill>
 
+            <span
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "6px 10px",
+    border: "1px solid #e5e7eb",
+    background: liveMultiplier && liveMultiplier > 1 ? "#f9fafb" : "#fff",
+    color: "#374151",
+    fontSize: 13,
+    borderRadius: 999,
+    whiteSpace: "nowrap",
+    fontWeight: 800,
+  }}
+>
+  <span style={{ color: "#6b7280", fontWeight: 800 }}>Timer</span>
+
+  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
+    <span style={{ fontWeight: 900, color: "#111827" }}>
+      {submitted && scoreResult
+        ? `${scoreResult.timeSec}s`
+        : revealed
+          ? `${elapsedSec}s`
+          : "—"}
+    </span>
+
+    {/* live “feel” line */}
+    {revealed && !submitted && liveMultiplier != null ? (
+      <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 900, letterSpacing: 0.2 }}>
+        {liveSpeedLabel} • {formatMult(liveMultiplier)}
+      </span>
+    ) : null}
+  </span>
+</span>
+
             {submitted && scoreResult ? (
               <Pill>
                 <span style={{ color: "#6b7280", fontWeight: 800 }}>Score</span>
-                <span style={{ fontWeight: 900, color: "#111827" }}>{scoreResult.score}</span>
+                <span style={{ fontWeight: 900, color: "#111827" }}>{scoreResult.finalScore}</span>
               </Pill>
             ) : null}
           </div>
         </div>
 
         <p
-          style={{
-            margin: "2px 0 0",
-            color: "#374151",
-            fontSize: 18,
-            lineHeight: 1.7,
-            maxWidth: 900,
-          }}
-        >
-          Make <strong>3 unique words</strong> that fit the pattern. Harder words score higher.
-          <span style={{ color: "#6b7280" }}>
-            {" "}
-            Bonus letter: <strong style={{ color: "#111827" }}>{bonusLetter}</strong> (+1 per word)
-          </span>
-        </p>
-
-        {locked && !scoreResult ? (
-          <div style={{ color: "#6b7280", fontSize: 15, lineHeight: 1.7 }}>
-            This puzzle has already been submitted on this device.
-          </div>
-        ) : null}
+  style={{
+    margin: "2px 0 0",
+    color: "#374151",
+    fontSize: 18,
+    lineHeight: 1.7,
+    maxWidth: 900,
+  }}
+>
+  Reveal the puzzle, then submit <strong>one word</strong> that fits.
+</p>
 
         <div style={{ borderTop: "1px solid #e5e7eb", margin: "12px 0 4px" }} />
       </div>
 
-      {/* Layout: puzzle + entry */}
       <div
         style={{
           display: "grid",
@@ -538,232 +970,160 @@ export default function BoundPage() {
         }}
         className="boundgrid"
       >
-        {/* Left: pattern + legend */}
-        <section style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>Today’s pattern</div>
-            <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>{len} letters</div>
+        {/* Left */}
+        <section className="boundleft" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>
+              {revealed ? "Today’s pattern" : "Today’s puzzle"}
+            </div>
+            <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>
+            {revealed ? `${len} letters` : "Pattern hidden"}            
+            </div>
           </div>
 
-          {/* Pattern tiles */}
+          {/* Pattern tiles (hidden until reveal; even the start/end letters) */}
           <div
-            style={{
-              marginTop: 14,
-              display: "flex",
-              justifyContent: "flex-start",
-              gap: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            {normalizePattern(pattern).split(" ").map((c, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 46,
-                  height: 50,
-                  border: "1px solid #e5e7eb",
-                  background: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 900,
-                  fontSize: 18,
-                  color: c === "_" ? "#9ca3af" : "#111827",
-                }}
-              >
-                {c}
-              </div>
-            ))}
-          </div>
-
-{/* Bonus Letter */}
-<div
+  key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
+  className={revealed ? "pop" : undefined}
   style={{
     marginTop: 14,
-    padding: "8px 12px",
-    border: "1px solid #e5e7eb",
-    background: "#fff",
     display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    fontSize: 13,
+    justifyContent: "flex-start",
+    gap: 10,
+    flexWrap: "wrap",
   }}
 >
-  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <span
-      style={{
-        fontWeight: 900,
-        letterSpacing: 1.2,
-        textTransform: "uppercase",
-        color: "#6b7280",
-        fontSize: 11,
-      }}
-    >
-      Bonus
-    </span>
-
-    <span
-      style={{
-        fontWeight: 900,
-        color: "#111827",
-      }}
-    >
-      {bonusLetter}
-    </span>
-  </div>
-
-  <span style={{ color: "#6b7280", fontWeight: 700 }}>
-    +1 pt / word
-  </span>
-</div>
-
-          {/* Legend (always visible) */}
-          <div style={{ marginTop: 18, borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-            <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
-              Legend
-            </div>
-
-            <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
-              <LegendRow emoji="🟦" label="Common" points={1} />
-              <LegendRow emoji="🟨" label="Uncommon" points={2} />
-              <LegendRow emoji="🟧" label="Rare" points={3} />
-              <LegendRow emoji="🟥" label="Elite" points={4} />
-            </div>
-
-            <div style={{ marginTop: 12, color: "#6b7280", fontSize: 13, lineHeight: 1.65 }}>
-              Difficulty is based on age-of-acquisition (grade-level tiers). Bonus letter adds +1 per word.
-            </div>
+{(revealed ? patternTiles : new Array(5).fill("?")).map((c, i) => {
+              const shown = revealed ? c : "?";
+              return (
+                <div
+                  key={i}
+                  style={{
+                    width: 46,
+                    height: 50,
+                    border: "1px solid #e5e7eb",
+                    background: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 900,
+                    fontSize: 18,
+                    color: revealed ? (shown === "_" ? "#9ca3af" : "#111827") : "#9ca3af",
+                  }}
+                >
+                  {shown}
+                </div>
+              );
+            })}
           </div>
+
+          {/* Reveal button (starts timer) */}
+          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {!revealed ? (
+              <button
+                onClick={onReveal}
+                disabled={!puzzleReady}
+                style={{
+                  border: "1px solid #111827",
+                  background: "#111827",
+                  color: "#fff",
+                  padding: "10px 12px",
+                  fontWeight: 900,
+                  cursor: puzzleReady ? "pointer" : "not-allowed",
+                  opacity: puzzleReady ? 1 : 0.6,
+                }}
+              >
+                Reveal & start
+              </button>
+            ) : (
+              <Pill>
+                <span style={{ color: "#6b7280", fontWeight: 800 }}>Length</span>
+                <span style={{ fontWeight: 900, color: "#111827" }}>{len}</span>
+              </Pill>
+            )}
+          </div>
+
+          {/* Legend */}
+  
         </section>
 
-        {/* Right: inputs + actions */}
-        <section style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+        {/* Right */}
+        <section className="boundright" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>Your words</div>
+            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>Your word</div>
             <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>
               {locked ? "Locked" : submitted ? "Submitted" : "One try"}
             </div>
           </div>
 
           {submitted && scoreResult ? (
-  <div
-    style={{
-      marginTop: 14,
-      border: "1px solid #e5e7eb",
-      background: "#fff",
-      padding: 14,
-    }}
-  >
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-      <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
-        Your submission
-      </div>
-
-      {formatSubmittedAt(submittedAt) ? (
-        <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 800 }}>
-          {formatSubmittedAt(submittedAt)}
-        </div>
-      ) : null}
-    </div>
-
-    {/* Words */}
-    <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900 }}>1</div>
-        <div style={{ flex: 1, textAlign: "right", fontWeight: 900, letterSpacing: 1.2, color: "#111827" }}>{words[0]}</div>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900 }}>2</div>
-        <div style={{ flex: 1, textAlign: "right", fontWeight: 900, letterSpacing: 1.2, color: "#111827" }}>{words[1]}</div>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
-        <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900 }}>3</div>
-        <div style={{ flex: 1, textAlign: "right", fontWeight: 900, letterSpacing: 1.2, color: "#111827" }}>{words[2]}</div>
-      </div>
-    </div>
-
-    {/* Score line */}
-    <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", paddingTop: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase" }}>
-          Result
-        </div>
-        <div style={{ fontWeight: 900, color: "#111827" }}>
-          {scoreResult.tiers.join("")}
-          <span style={{ color: "#6b7280", fontWeight: 800 }}> • </span>
-          {scoreResult.score}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 6, color: "#6b7280", fontSize: 12, lineHeight: 1.6 }}>
-        Bonus points: <strong style={{ color: "#111827" }}>{scoreResult.bonusPoints}</strong>
-      </div>
-    </div>
-  </div>
-) : null}
-
-          <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
-            <WordInput
-              label="1"
-              value={w1}
-              onChange={(v) => {
-                setW1(v);
-                setErrors((e) => ({ ...e, w1: undefined, global: undefined }));
+            <div
+              style={{
+                marginTop: 14,
+                border: "1px solid #e5e7eb",
+                background: "#fff",
+                padding: 14,
               }}
-              onBlur={() => void validateWord("w1", w1)}
-              disabled={locked}
-              error={errors.w1}
-            />
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
+                  Your submission
+                </div>
 
-            <WordInput
-              label="2"
-              value={w2}
-              onChange={(v) => {
-                setW2(v);
-                setErrors((e) => ({ ...e, w2: undefined, global: undefined }));
-              }}
-              onBlur={() => void validateWord("w2", w2)}
-              disabled={locked}
-              error={errors.w2}
-            />
+                {formatSubmittedAt(submittedAt) ? (
+                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 800 }}>
+                    {formatSubmittedAt(submittedAt)}
+                  </div>
+                ) : null}
+              </div>
 
-            <WordInput
-              label="3"
-              value={w3}
-              onChange={(v) => {
-                setW3(v);
-                setErrors((e) => ({ ...e, w3: undefined, global: undefined }));
-              }}
-              onBlur={() => void validateWord("w3", w3)}
-              disabled={locked}
-              error={errors.w3}
-            />
-          </div>
-
-          {/* Global error */}
-          {errors.global ? (
-            <div style={{ marginTop: 10, color: "#b45309", fontSize: 13, lineHeight: 1.6 }}>
-              {errors.global}
-            </div>
-          ) : null}
-
-          {/* Results */}
-          {submitted && scoreResult ? (
-            <div style={{ marginTop: 14, borderTop: "1px solid #e5e7eb", paddingTop: 14 }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-                <div style={{ color: "#6b7280", fontSize: 13, fontWeight: 800 }}>Tiers</div>
-                <div style={{ fontSize: 18, letterSpacing: 2, fontWeight: 900, color: "#111827" }}>
-                  {scoreResult.tiers.join("")}
+              <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
+                <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900 }}>Word</div>
+                <div style={{ flex: 1, textAlign: "right", fontWeight: 900, letterSpacing: 1.2, color: "#111827" }}>
+                  {onlyLettersUpper(word)}
                 </div>
               </div>
 
-              <div style={{ marginTop: 10, color: "#6b7280", fontSize: 13, lineHeight: 1.65 }}>
-                Bonus points: <strong style={{ color: "#111827" }}>{scoreResult.bonusPoints}</strong>
+              <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", paddingTop: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase" }}>
+                    Result
+                  </div>
+                  <div
+  key={`result-${resultAnimKey}`}
+  className="pop"
+  style={{ fontWeight: 900, color: "#111827" }}
+>
+  {scoreResult.tierEmoji}
+  <span style={{ color: "#6b7280", fontWeight: 800 }}> • </span>
+  {scoreResult.finalScore}
+</div>
+                </div>
+
+                <div style={{ marginTop: 6, color: "#6b7280", fontSize: 12, lineHeight: 1.6 }}>
+                  Tier: <strong style={{ color: "#111827" }}>{scoreResult.tierName}</strong>{" "}
+                  <span style={{ color: "#9ca3af" }}>({formatOrdinal(scoreResult.percentile)} percentile)</span>
+                  <br />
+                  Time: <strong style={{ color: "#111827" }}>{scoreResult.timeSec}s</strong>{" "}
+                  • Score multiplier: <strong style={{ color: "#111827" }}>{scoreResult.multiplier}</strong>
+                </div>
               </div>
             </div>
           ) : null}
+
+          <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+            <WordInput
+              label="1"
+              value={word}
+              onChange={(v) => {
+                setWord(v);
+                setShowShare(false);
+              }}
+              disabled={!revealed || locked}
+              error={error}
+              placeholder={revealed ? "TYPE WORD…" : "REVEAL TO START"}
+            />
+          </div>
 
           {/* Actions */}
           <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
@@ -802,7 +1162,6 @@ export default function BoundPage() {
             )}
           </div>
 
-          {/* Share preview ONLY after Copy share */}
           {showShare && submitted && scoreResult?.shareText ? (
             <div style={{ marginTop: 14, borderTop: "1px solid #e5e7eb", paddingTop: 14 }}>
               <div
@@ -828,20 +1187,77 @@ export default function BoundPage() {
                   padding: 12,
                 }}
               >
-                {scoreResult.shareText}
-              </pre>
+{buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji)}              </pre>
             </div>
           ) : null}
         </section>
+        {/* Legend */}
+<section
+  className="boundlegend"
+  style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}
+>
+  <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
+    Legend
+  </div>
+
+  <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
+    <LegendRow emoji="🟦" label="Common" points={1} />
+    <LegendRow emoji="🟨" label="Uncommon" points={2} />
+    <LegendRow emoji="🟧" label="Rare" points={3} />
+    <LegendRow emoji="🟥" label="Advanced" points={4} />
+  </div>
+
+  <div style={{ marginTop: 12, color: "#6b7280", fontSize: 13, lineHeight: 1.65 }}>
+    Tiers are computed <strong>relative to today’s puzzle</strong> (percentiles). Score is tier points (+bonus) times a decaying time multiplier.
+  </div>
+</section>
       </div>
 
       <style jsx>{`
-        @media (max-width: 980px) {
-          .boundgrid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+  .pop {
+    animation: pop 220ms ease-out both;
+  }
+
+  @keyframes pop {
+    0% {
+      transform: scale(0.97);
+      opacity: 0.7;
+    }
+    60% {
+      transform: scale(1.02);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+.boundlegend {
+  grid-column: 1 / 2; /* keep it under the left column on desktop */
+  margin-top: 18px;
+}
+
+  @media (max-width: 980px) {
+  .boundgrid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Put Right column before Legend on mobile */
+  .boundright {
+    order: 1;
+  }
+
+  /* Keep left content first, but Legend last */
+  .boundleft {
+    order: 0;
+  }
+
+  .boundlegend {
+    order: 2;
+    margin-top: 22px !important;
+  }
+}
+`}</style>
     </main>
   );
 }
@@ -850,17 +1266,18 @@ function WordInput({
   label,
   value,
   onChange,
-  onBlur,
   disabled,
   error,
+  placeholder,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
-  onBlur: () => void;
   disabled: boolean;
-  error?: string;
+  error?: string | null;
+  placeholder: string;
 }) {
+  const hasError = !!error && onlyLettersUpper(value).length > 0;
   return (
     <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", gap: 12, alignItems: "start" }}>
       <div style={{ color: "#9ca3af", fontSize: 13, paddingTop: 12, fontWeight: 900 }}>{label}</div>
@@ -869,12 +1286,11 @@ function WordInput({
         <input
           value={value}
           onChange={(e) => onChange(onlyLettersUpper(e.target.value))}
-          onBlur={onBlur}
-          placeholder="TYPE WORD…"
+          placeholder={placeholder}
           disabled={disabled}
           style={{
             height: 44,
-            border: `1px solid ${error ? "#f59e0b" : "#e5e7eb"}`,
+            border: `1px solid ${hasError ? "#ef4444" : "#e5e7eb"}`,
             padding: "0 12px",
             fontSize: 16,
             fontWeight: 900,
@@ -885,8 +1301,8 @@ function WordInput({
             outline: "none",
           }}
         />
-        <div style={{ minHeight: 16, fontSize: 12, color: error ? "#b45309" : "#9ca3af" }}>
-          {error || " "}
+        <div style={{ minHeight: 16, fontSize: 12, color: hasError ? "#ef4444" : "#9ca3af" }}>
+          {hasError ? error : " "}
         </div>
       </div>
     </div>
@@ -898,25 +1314,14 @@ function LegendRow({
   label,
   points,
 }: {
-  emoji: "🟦" | "🟨" | "🟧" | "🟥";
+  emoji: TierEmoji;
   label: string;
   points: number;
 }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        fontSize: 14,
-      }}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
       <span style={{ fontSize: 16 }}>{emoji}</span>
-
-      <span style={{ color: "#111827", fontWeight: 800 }}>
-        {label}
-      </span>
-
+      <span style={{ color: "#111827", fontWeight: 800 }}>{label}</span>
       <span style={{ color: "#6b7280", fontWeight: 800 }}>
         — {points} {points === 1 ? "pt" : "pts"}
       </span>

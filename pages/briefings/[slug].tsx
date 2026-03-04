@@ -1,5 +1,4 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import Link from "next/link";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -8,6 +7,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { getAllBriefingsMeta, getBriefingBySlug } from "../../lib/briefings";
 import GlobalQuestion from "../../components/GlobalQuestion";
+import ArticleShell from "../../components/ArticleShell";
 
 type BriefingMeta = {
   title: string;
@@ -19,97 +19,188 @@ type BriefingMeta = {
 
 type HtmlParts = { before: string; after: string; hasMarker: boolean };
 
+type TocItem = { id: string; label: string };
+
+const BRIEFING_TOC_ORDER: TocItem[] = [
+  { id: "the-recap", label: "The recap" },
+  { id: "the-significance", label: "The significance" },
+  { id: "the-context", label: "The context" },
+  { id: "the-stakes", label: "The stakes" },
+  { id: "the-next-steps-to-watch-for", label: "The next steps to watch for" },
+  { id: "the-takeaway", label: "The takeaway" },
+];
+
+function extractPresentHeadingIds(html: string): Set<string> {
+  const ids = new Set<string>();
+  const re = /<h[1-6][^>]*\sid="([^"]+)"[^>]*>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    if (m[1]) ids.add(m[1]);
+  }
+  return ids;
+}
+
 export default function BriefingPostPage({
   meta,
   contentHtmlParts,
+  toc,
+  hasPoll,
 }: {
   meta: BriefingMeta;
   contentHtmlParts: HtmlParts;
+  toc: TocItem[];
+  hasPoll: boolean;
 }) {
   return (
-    <main style={{ maxWidth: 760, margin: "0 auto", padding: "42px 24px 72px" }}>
-      <Link
-        href="/briefings"
-        style={{ textDecoration: "none", color: "#6b7280", fontSize: 14 }}
-      >
-        ← Back to Briefings
-      </Link>
+    <ArticleShell
+      type="Briefing"
+      title={meta.title}
+      date={meta.date}
+      readTime={meta.readTime}
+      summary={meta.summary}
+      backHref="/briefings"
+      rightRail={
+        <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 900,
+              letterSpacing: 1.2,
+              color: "#ef4444",
+              textTransform: "uppercase",
+            }}
+          >
+            Jump to
+          </div>
 
-      <h1
-        style={{
-          marginTop: 14,
-          fontSize: 44,
-          fontWeight: 900,
-          letterSpacing: -1.1,
-          lineHeight: 1.05,
-        }}
-      >
-        {meta.title}
-      </h1>
+          <div
+            style={{
+              marginTop: 14,
+              border: "1px solid #e5e7eb",
+              borderRadius: 14,
+              padding: 14,
+              background: "#fff",
+            }}
+          >
+            <div style={{ display: "grid", gap: 10 }}>
+              {toc.map((item) => (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  style={{
+                    textDecoration: "none",
+                    color: "#111827",
+                    fontWeight: 800,
+                    fontSize: 13,
+                    lineHeight: 1.4,
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
+                  <span style={{ color: "#111827" }}>{item.label}</span>
+                  <span style={{ color: "#9ca3af", fontWeight: 900 }}>→</span>
+                </a>
+              ))}
 
-      <div style={{ marginTop: 10, color: "#6b7280", fontSize: 14 }}>
-        Briefing • {meta.date}
-        {meta.readTime ? ` • ${meta.readTime}` : ""}
-      </div>
+              {hasPoll ? (
+                <a
+                  href="#tpv-question"
+                  style={{
+                    marginTop: 4,
+                    paddingTop: 10,
+                    borderTop: "1px solid #e5e7eb",
+                    textDecoration: "none",
+                    color: "#111827",
+                    fontWeight: 900,
+                    fontSize: 13,
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 10,
+                  }}
+                >
+                  <span>Question</span>
+                  <span style={{ color: "#9ca3af", fontWeight: 900 }}>→</span>
+                </a>
+              ) : null}
+            </div>
 
-      <p style={{ marginTop: 14, color: "#6b7280", lineHeight: 1.7, fontSize: 18 }}>
-        {meta.summary}
-      </p>
+            <div style={{ marginTop: 12, fontSize: 12, lineHeight: 1.6, color: "#6b7280" }}>
+              Sections appear only if they exist in this article.
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.before }} />
 
-      {/* before marker */}
-      <article
-        style={{ marginTop: 26, lineHeight: 1.8, fontSize: 17 }}
-        dangerouslySetInnerHTML={{ __html: contentHtmlParts.before }}
-      />
-
-      {/* inject poll at marker */}
-      {contentHtmlParts.hasMarker && meta.questionId ? (
-        <GlobalQuestion questionId={meta.questionId} />
+      {hasPoll ? (
+        <div style={{ marginTop: 16 }}>
+<div id="tpv-question" style={{ height: 1 }} />          <GlobalQuestion questionId={meta.questionId!} />
+        </div>
       ) : null}
 
-      {/* after marker (Sources) */}
-      <article
-        style={{ lineHeight: 1.8, fontSize: 17 }}
-        dangerouslySetInnerHTML={{ __html: contentHtmlParts.after }}
-      />
+      <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.after }} />
 
       <style jsx>{`
-        article :global(h1),
-        article :global(h2),
-        article :global(h3) {
+        .tpv-prose :global(h1),
+        .tpv-prose :global(h2),
+        .tpv-prose :global(h3) {
           margin-top: 22px;
           margin-bottom: 8px;
           letter-spacing: -0.4px;
-        }
+          color: #111827;
+        
+           scroll-margin-top: 120px;
+           }
 
-        article :global(h2) {
+           :global(#tpv-question) {
+  scroll-margin-top: 120px;
+}
+
+        .tpv-prose :global(h2) {
           font-size: 22px;
+          line-height: 1.18;
+          font-weight: 900;
+          letter-spacing: -0.6px;
         }
 
-        article :global(p) {
+        .tpv-prose :global(h2):not(#sources) {
+          padding-top: 18px;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .tpv-prose :global(p) {
           margin: 10px 0;
+          font-size: 16px;
+          line-height: 1.75;
+          color: #374151;
         }
 
-        article :global(ol),
-        article :global(ul) {
+        .tpv-prose :global(ol),
+        .tpv-prose :global(ul) {
           padding-left: 20px;
           margin: 10px 0;
+          line-height: 1.85;
+          font-size: 16px;
+          color: #374151;
         }
 
-        article :global(li) {
+        .tpv-prose :global(li) {
           margin: 6px 0;
         }
 
-        article :global(a) {
+        .tpv-prose :global(a) {
           color: #1f4fbf;
           text-decoration: none;
           font-weight: 600;
         }
-        article :global(a:hover) {
+        .tpv-prose :global(a:hover) {
           text-decoration: underline;
         }
 
-        /* ===== Sources divider + appendix feel ===== */
         article :global(h2#sources) {
           font-size: 16px;
           margin-top: 36px;
@@ -117,11 +208,10 @@ export default function BriefingPostPage({
           letter-spacing: -0.2px;
           color: #374151;
           padding-top: 16px;
-          border-top: 1px solid #e5e7eb; /* faint gray line ABOVE Sources */
+          border-top: 1px solid #e5e7eb;
         }
 
-        /* ===== Footnotes / sources list (small + clean) ===== */
-        article :global(.footnotes) {
+        .tpv-prose :global(.footnotes) {
           margin-top: 0;
           padding-top: 0;
           border-top: none;
@@ -130,44 +220,42 @@ export default function BriefingPostPage({
           color: #6b7280;
         }
 
-        article :global(.footnotes hr) {
+        .tpv-prose :global(.footnotes hr) {
           display: none !important;
         }
 
-        /* Hide auto "Footnotes" heading if it appears */
-        article :global(.footnotes h2) {
+        .tpv-prose :global(.footnotes h2) {
           display: none !important;
         }
 
-        article :global(.footnotes ol) {
+        .tpv-prose :global(.footnotes ol) {
           padding-left: 18px;
           margin: 0;
         }
 
-        article :global(.footnotes li) {
+        .tpv-prose :global(.footnotes li) {
           margin: 4px 0;
         }
 
-        article :global(.footnotes a) {
+        .tpv-prose :global(.footnotes a) {
           font-weight: 400;
           color: #4b5563;
           text-decoration: none;
         }
 
-        article :global(.footnotes a:hover) {
+        .tpv-prose :global(.footnotes a:hover) {
           text-decoration: underline;
         }
 
-        /* Kill backref/return-link icons (the ugly emojis) */
-        article :global(.footnotes a[aria-label="Back to content"]),
-        article :global(.footnotes a.footnote-backref),
-        article :global(.footnotes .footnote-backref),
-        article :global(.footnotes a[data-footnote-backref]),
-        article :global(.footnotes a[href^="#fnref"]) {
+        .tpv-prose :global(.footnotes a[aria-label="Back to content"]),
+        .tpv-prose :global(.footnotes a.footnote-backref),
+        .tpv-prose :global(.footnotes .footnote-backref),
+        .tpv-prose :global(.footnotes a[data-footnote-backref]),
+        .tpv-prose :global(.footnotes a[href^="#fnref"]) {
           display: none !important;
         }
       `}</style>
-    </main>
+    </ArticleShell>
   );
 }
 
@@ -183,39 +271,35 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = String(params?.slug);
   const { meta, content } = getBriefingBySlug(slug);
 
-  // Match any TPV marker (whitespace tolerant)
   const MARKER_RE = /<!--\s*TPV_QUESTION:[\s\S]*?-->/;
-
-  // A marker that WILL survive markdown -> html
   const POLL_DIV = `<div data-tpv-poll="1"></div>`;
 
-  // Also tolerate the old accidental literal token
-  const contentNormalized = content.replace(
-    /\bTPV_QUESTION_TOKEN\b/g,
-    "<!-- TPV_QUESTION:ANY -->"
-  );
-
+  const contentNormalized = content.replace(/\bTPV_QUESTION_TOKEN\b/g, "<!-- TPV_QUESTION:ANY -->");
   const hasMarker = MARKER_RE.test(contentNormalized);
 
   const contentWithDiv = hasMarker ? contentNormalized.replace(MARKER_RE, POLL_DIV) : contentNormalized;
 
   const processed = await remark()
     .use(remarkGfm)
-    .use(remarkRehype, { allowDangerousHtml: true }) // keep raw HTML blocks
+    .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeSlug)
     .use(rehypeAutolinkHeadings, {
       behavior: "append",
       properties: { className: ["heading-anchor"] },
     })
-    .use(rehypeStringify, { allowDangerousHtml: true }) // keep raw HTML blocks
+    .use(rehypeStringify, { allowDangerousHtml: true })
     .process(contentWithDiv);
 
   const html = processed.toString();
 
-  // Split on the HTML div marker
   const splitIndex = html.indexOf(POLL_DIV);
   const before = splitIndex >= 0 ? html.slice(0, splitIndex) : html;
   const after = splitIndex >= 0 ? html.slice(splitIndex + POLL_DIV.length) : "";
+
+  const presentIds = extractPresentHeadingIds(html);
+  const toc = BRIEFING_TOC_ORDER.filter((item) => presentIds.has(item.id));
+
+  const hasPoll2 = splitIndex >= 0 && !!(meta as any).questionId;
 
   return {
     props: {
@@ -225,6 +309,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         after,
         hasMarker: splitIndex >= 0,
       },
+      toc,
+      hasPoll: hasPoll2,
     },
   };
 };

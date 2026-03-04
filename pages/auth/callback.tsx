@@ -6,10 +6,9 @@ export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      await supabase.auth.getSession();
+    supabase.auth.getSession().finally(() => {
       router.replace("/");
-    })();
+    });
   }, [router]);
 
   return null;

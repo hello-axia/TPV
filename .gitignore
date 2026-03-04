@@ -1,8 +1,10 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =========================
+# Dependencies
+# =========================
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
+# Yarn / PnP
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -10,32 +12,55 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
-/coverage
+# =========================
+# Next.js build output
+# =========================
+.next/
+out/
+build/
 
-# next.js
-/.next/
-/out/
+# =========================
+# Environment variables
+# =========================
+.env*
+!.env.example
 
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# =========================
+# Logs
+# =========================
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# =========================
+# Coverage / testing
+# =========================
+coverage/
 
-# vercel
+# =========================
+# Vercel
+# =========================
 .vercel
 
-# typescript
+# =========================
+# Mac / system files
+# =========================
+.DS_Store
+
+# =========================
+# Certificates
+# =========================
+*.pem
+
+# =========================
+# Typescript build cache
+# =========================
 *.tsbuildinfo
 next-env.d.ts
+
+# =========================
+# Python script artifacts
+# =========================
+__pycache__/
+*.pyc

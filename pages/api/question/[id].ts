@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { createClient } from "@supabase/supabase-js";
-import { createServerClient } from "@supabase/auth-helpers-nextjs";
 
 type QuestionRow = {
   id: string;
@@ -15,69 +14,34 @@ type QuestionRow = {
   d_count: number;
 };
 
-// Admin client (server-only) — bypasses RLS for reading the question + counts
+function getBearer(req: NextApiRequest) {
+  const h = req.headers.authorization || "";
+  const m = h.match(/^Bearer\s+(.+)$/i);
+  return m?.[1] || null;
+}
+
+// Admin client (server-only)
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-function parseCookieHeader(header: string) {
-  if (!header) return [];
-  return header.split(";").map((part) => {
-    const [name, ...rest] = part.trim().split("=");
-    return { name, value: decodeURIComponent(rest.join("=") || "") };
-  });
-}
+// Anon client ONLY for validating the bearer token -> user id
+const supabaseAnon = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const id = String(req.query.id || "").trim();
   if (!id) return res.status(400).json({ error: "Missing id" });
 
-  // Auth-aware Supabase client (anon + cookie session)
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return parseCookieHeader(req.headers.cookie ?? "");
-        },
-        setAll(cookies) {
-          const serialized = cookies.map(({ name, value, options }) => {
-            let s = `${name}=${encodeURIComponent(value)}`;
-            s += `; Path=${options?.path ?? "/"}`;
-
-            if (options?.maxAge != null) s += `; Max-Age=${options.maxAge}`;
-            if (options?.expires) s += `; Expires=${options.expires.toUTCString()}`;
-            if (options?.httpOnly) s += `; HttpOnly`;
-            if (options?.secure) s += `; Secure`;
-
-            const sameSite = options?.sameSite;
-            if (sameSite) {
-              // sameSite is usually "lax" | "strict" | "none" in these types
-              const v = String(sameSite);
-              s += `; SameSite=${v[0].toUpperCase()}${v.slice(1)}`;
-            } else {
-              s += `; SameSite=Lax`;
-            }
-
-            return s;
-          });
-
-          const prev = res.getHeader("Set-Cookie");
-          const prevArr = Array.isArray(prev) ? prev : prev ? [String(prev)] : [];
-          res.setHeader("Set-Cookie", [...prevArr, ...serialized]);
-        },
-      },
-    }
-  );
+  res.setHeader("Cache-Control", "no-store");
 
   async function fetchQuestion(): Promise<QuestionRow | null> {
     const { data, error } = await supabaseAdmin
       .from("tpv_questions")
-      .select(
-        "id,prompt,a_text,b_text,c_text,d_text,a_count,b_count,c_count,d_count"
-      )
+      .select("id,prompt,a_text,b_text,c_text,d_text,a_count,b_count,c_count,d_count")
       .eq("id", id)
       .single();
 
@@ -85,49 +49,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return data as QuestionRow;
   }
 
+  async function getUserIdFromBearer(): Promise<string | null> {
+    const token = getBearer(req);
+    if (!token) return null;
+
+    const { data, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !data?.user) return null;
+
+    return data.user.id;
+  }
+
+  // -------- GET ----------
   if (req.method === "GET") {
     const question = await fetchQuestion();
     if (!question) return res.status(404).json({ error: "Question not found" });
 
-    const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-    if (sessionErr) return res.status(500).json({ error: sessionErr.message });
+    const uid = await getUserIdFromBearer();
+    if (!uid) return res.status(200).json({ question, voted: null });
 
-    let voted: string | null = null;
+    const { data: voteRow, error: voteErr } = await supabaseAdmin
+      .from("tpv_question_votes")
+      .select("choice")
+      .eq("question_id", id)
+      .eq("user_id", uid)
+      .maybeSingle();
 
-    const user = sessionData.session?.user;
-    if (user) {
-      const { data: voteRow, error: voteErr } = await supabase
-        .from("tpv_question_votes")
-        .select("choice")
-        .eq("question_id", id)
-        .eq("user_id", user.id)
-        .maybeSingle();
+    if (voteErr) return res.status(500).json({ error: voteErr.message });
 
-      if (voteErr) return res.status(500).json({ error: voteErr.message });
-      voted = (voteRow?.choice as string) ?? null;
-    }
-
-    return res.status(200).json({ question, voted });
+    return res.status(200).json({ question, voted: (voteRow?.choice as any) ?? null });
   }
 
+  // -------- POST ----------
   if (req.method === "POST") {
-    const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-    if (sessionErr) return res.status(500).json({ error: sessionErr.message });
-
-    const user = sessionData.session?.user;
-    if (!user) return res.status(401).json({ error: "Sign in to vote" });
+    const uid = await getUserIdFromBearer();
+    if (!uid) return res.status(401).json({ error: "Sign in to vote" });
 
     const choice = String(req.body?.choice ?? "").toUpperCase();
     if (!["A", "B", "C", "D"].includes(choice)) {
       return res.status(400).json({ error: "Invalid choice" });
     }
 
-    // Block duplicate votes (1 per user)
-    const { data: existing, error: existingErr } = await supabase
+    // If they already voted, return the question + their existing vote
+    const { data: existing, error: existingErr } = await supabaseAdmin
       .from("tpv_question_votes")
       .select("choice")
       .eq("question_id", id)
-      .eq("user_id", user.id)
+      .eq("user_id", uid)
       .maybeSingle();
 
     if (existingErr) return res.status(500).json({ error: existingErr.message });
@@ -138,10 +105,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ question, voted: existing.choice });
     }
 
-    // Your SQL RPC should: insert vote row + increment counts + return updated question row
-    const { data, error } = await supabase.rpc("tpv_vote_question_user", {
+    // Call RPC (now it will NOT throw "already voted")
+    const { data, error } = await supabaseAdmin.rpc("tpv_vote_question_user", {
       qid: id,
       choice,
+      uid,
     });
 
     if (error || !data) {

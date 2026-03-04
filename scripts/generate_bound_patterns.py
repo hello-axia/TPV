@@ -1,148 +1,87 @@
 # scripts/generate_bound_patterns.py
 import json
-import os
 import re
-from collections import Counter
-from datetime import datetime
+from collections import defaultdict
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_DIR = PROJECT_ROOT / "public"
 
-SUBTLEX_PATH = PUBLIC_DIR / "subtlex-us-zipf.json"          # validity wordlist (keys)
+# ✅ Use your actual playable list (same thing the game validates against)
+WORDBANK_PATH = PUBLIC_DIR / "wordbank.json"
 OUT_PATH = PUBLIC_DIR / "bound-patterns.json"
 
+# Match your game constraints
 LEN_MIN = 5
-LEN_MAX = 10
-
-MIN_CANDIDATES = 60     # required-letter candidates
-MIN_BONUS = 1           # at least this many candidates contain the bonus letter
-
-A2Z = [chr(i) for i in range(ord("A"), ord("Z") + 1)]
+LEN_MAX = 12
 
 def only_letters_upper(s: str) -> str:
     return re.sub(r"[^A-Za-z]", "", s or "").upper()
 
-def load_wordlist_from_subtlex(path: Path) -> list[str]:
+def load_wordbank_keys(path: Path) -> list[str]:
+    """
+    Supports any JSON object shaped like:
+      { "WORD": 1, ... } or { "WORD": true, ... } or { "WORD": {...}, ... }
+    We just take keys as the playable words.
+    """
     data = json.loads(path.read_text())
-    # keys are already uppercase words in your current pipeline, but we sanitize anyway
-    words = []
+    if not isinstance(data, dict):
+        raise ValueError("wordbank.json must be a JSON object whose keys are words.")
+    out: list[str] = []
     for k in data.keys():
         w = only_letters_upper(k)
         if w:
-            words.append(w)
-    return words
+            out.append(w)
+    return out
 
-def main():
-    if not SUBTLEX_PATH.exists():
-        raise FileNotFoundError(f"Missing {SUBTLEX_PATH} (expected in /public)")
+# Per-length fairness thresholds (longer words naturally have fewer candidates)
+MIN_BY_LEN = {
+    5: 40,
+    6: 35,
+    7: 30,
+    8: 20,
+    9: 14,
+    10: 10,
+    11: 7,
+    12: 5,
+}
 
-    words = load_wordlist_from_subtlex(SUBTLEX_PATH)
+def main() -> None:
+    if not WORDBANK_PATH.exists():
+        raise FileNotFoundError(f"Missing {WORDBANK_PATH} (expected in /public)")
 
-    # Filter: alpha-only + length window
+    words = load_wordbank_keys(WORDBANK_PATH)
+
+    # Filter to alpha-only + length window
     words = [w for w in words if w.isalpha() and LEN_MIN <= len(w) <= LEN_MAX]
 
-    # Index words by (len, startLetter) and (len, endLetter)
-    start_index: dict[tuple[int, str], list[str]] = {}
-    end_index: dict[tuple[int, str], list[str]] = {}
-
+    # Count candidates for each (len, start, end)
+    counts: dict[tuple[int, str, str], int] = defaultdict(int)
     for w in words:
-        L = len(w)
-        start_index.setdefault((L, w[0]), []).append(w)
-        end_index.setdefault((L, w[-1]), []).append(w)
+        counts[(len(w), w[0], w[-1])] += 1
 
-    total_possible = 0
-    kept = []
+    # Keep patterns that meet candidate threshold (by length)
+    kept: list[dict] = []
+    for (L, start, end), c in counts.items():
+        min_needed = MIN_BY_LEN.get(L, 10)
+        if c < min_needed:
+            continue
+        kept.append({"len": L, "start": start, "end": end, "count": c})
 
-    # For stats
-    candidate_counts_all = []
-    candidate_counts_kept = []
-
-    for L in range(LEN_MIN, LEN_MAX + 1):
-        for side in ["start", "end"]:
-            for bound in A2Z:
-                base = start_index.get((L, bound), []) if side == "start" else end_index.get((L, bound), [])
-                if not base:
-                    # still counts as a possible pattern type even if empty
-                    for required in A2Z:
-                        total_possible += 1
-                        candidate_counts_all.append(0)
-                    continue
-
-                # Precompute for speed: for each required letter, candidates list
-                for required in A2Z:
-                    total_possible += 1
-                    candidates = [w for w in base if required in w]
-                    ccount = len(candidates)
-                    candidate_counts_all.append(ccount)
-
-                    if ccount < MIN_CANDIDATES:
-                        continue
-
-                    # Choose a bonus letter that actually appears in candidates.
-                    # We prefer a bonus letter != required so it’s not trivial.
-                    # We also prefer a bonus letter that appears in the MOST candidates.
-                    counter = Counter()
-                    for w in candidates:
-                        for ch in set(w):  # set to avoid double-counting repeats in one word
-                            counter[ch] += 1
-
-                    # Build ranked list of usable bonus letters
-                    ranked = sorted(
-                        [ch for ch in A2Z if ch != required],
-                        key=lambda ch: counter.get(ch, 0),
-                        reverse=True,
-                    )
-
-                    bonus = None
-                    bonus_count = 0
-                    for ch in ranked:
-                        if counter.get(ch, 0) >= MIN_BONUS:
-                            bonus = ch
-                            bonus_count = counter.get(ch, 0)
-                            break
-
-                    if not bonus:
-                        continue
-
-                    kept.append({
-                        "len": L,
-                        "side": side,          # "start" or "end"
-                        "bound": bound,        # fixed letter at that side
-                        "required": required,  # must appear anywhere
-                        "bonus": bonus,        # optional (+1 per word)
-                        "candidates": ccount,
-                        "bonusCandidates": bonus_count,
-                    })
-                    candidate_counts_kept.append(ccount)
-
-    # Sort so output is stable (makes debugging easier)
-    kept.sort(key=lambda x: (x["len"], x["side"], x["bound"], x["required"], x["bonus"]))
-
+    kept.sort(key=lambda x: (x["len"], x["start"], x["end"]))
+    import random
+    random.shuffle(kept)
     OUT_PATH.write_text(json.dumps(kept, indent=2))
-    print(f"Total possible pattern types (len {LEN_MIN}-{LEN_MAX}, side*bound*required): {total_possible}")
 
-    if candidate_counts_all:
-        candidate_counts_all_sorted = sorted(candidate_counts_all)
-        mid = candidate_counts_all_sorted[len(candidate_counts_all_sorted) // 2]
-        print(
-            f"CandidateCount (all) — min={candidate_counts_all_sorted[0]}, "
-            f"median={mid}, max={candidate_counts_all_sorted[-1]}"
-        )
-
-    if candidate_counts_kept:
-        candidate_counts_kept_sorted = sorted(candidate_counts_kept)
-        midk = candidate_counts_kept_sorted[len(candidate_counts_kept_sorted) // 2]
-        print(f"Kept patterns (minCandidates={MIN_CANDIDATES}, minBonus={MIN_BONUS}): {len(kept)}")
-        print(
-            f"CandidateCount (kept) — min={candidate_counts_kept_sorted[0]}, "
-            f"median={midk}, max={candidate_counts_kept_sorted[-1]}"
-        )
-    else:
-        print("Kept patterns: 0 (try lowering MIN_CANDIDATES)")
-
+    # ✅ diagnostics (INSIDE main)
     print(f"Wrote {len(kept)} patterns to {OUT_PATH}")
-
+    print("Total combos seen:", len(counts))
+    print("Kept patterns:", len(kept))
+    if kept:
+        minc = min(x["count"] for x in kept)
+        maxc = max(x["count"] for x in kept)
+        print("Candidate counts range:", minc, "to", maxc)
+        print(f"LEN {LEN_MIN}-{LEN_MAX} | MIN_BY_LEN={MIN_BY_LEN}")
 
 if __name__ == "__main__":
     main()

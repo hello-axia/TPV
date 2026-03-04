@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "../lib/supabaseClients";
 import type { User } from "@supabase/supabase-js";
 
@@ -22,65 +22,121 @@ type ApiResponse = {
 };
 
 export default function GlobalQuestion({ questionId }: { questionId: string }) {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // first load only
+  const [refreshing, setRefreshing] = useState(false); // silent reloads
   const [submitting, setSubmitting] = useState(false);
-  const [data, setData] = useState<ApiResponse | null>(null);
 
-  // keep "real errors" separate from "needs auth"
+  const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mustSignIn, setMustSignIn] = useState(false);
 
-  // track auth state (so we can hide results + avoid hitting API)
   const [user, setUser] = useState<User | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+const tokenRef = useRef<string | null>(null); // ✅ always-current token (no stale state)
+const firstLoadDone = useRef(false);
+  const [authReady, setAuthReady] = useState(false);
+  
+  function buildHeaders(extra?: Record<string, string>): Headers {
+    const h = new Headers(extra);
+    const t = tokenRef.current;
+    if (t) h.set("Authorization", `Bearer ${t}`);
+    return h;
+  }
 
-  useEffect(() => {
-    let mounted = true;
-
-    (async () => {
-      const { data } = await supabase.auth.getSession();
-      if (!mounted) return;
-      setUser(data.session?.user ?? null);
-    })();
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      // when they sign in/out, clear the banner
-      setMustSignIn(false);
-    });
-
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
-  }, []);
-
-  async function load() {
+  async function load({ silent = false } = {}) {
     try {
       setError(null);
-      setLoading(true);
+      if (silent) setRefreshing(true);
+      else setLoading(true);
 
-      const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`);
-      const json = (await res.json()) as ApiResponse;
+      const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
+        method: "GET",
+        headers: buildHeaders(),
+        cache: "no-store",
+        credentials: "same-origin",
+      });
 
-      if (!res.ok) throw new Error((json as any)?.error || "Failed to load");
+      const text = await res.text();
+
+      // Helps debug when Next returns an HTML error page
+      if (text.trim().startsWith("<")) {
+        throw new Error(
+          "Poll error: API returned HTML (not JSON). Check /pages/api/question/[id].ts default export."
+        );
+      }
+
+      const json = JSON.parse(text) as ApiResponse;
+
+      if (!res.ok) throw new Error((json as any)?.error || "Failed to load poll");
+
       setData(json);
     } catch (e: any) {
-      setError(e?.message || "Failed to load");
+      setError(e?.message || "Failed to load poll");
     } finally {
+      firstLoadDone.current = true;
       setLoading(false);
+      setRefreshing(false);
     }
   }
 
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId]);
+// Load AFTER auth is known (even if signed out)
+useEffect(() => {
+  if (!authReady) return;
 
-  async function vote(choice: "A" | "B" | "C" | "D") {
-    if (submitting) return;
+  // If signed in, wait until we actually have a token before loading,
+  // otherwise the GET will return voted:null and you'll show buttons incorrectly.
+  if (user && !accessToken) return;
 
-    // Treat "not signed in" as normal UI state (no alert, no scary error)
-    if (!user) {
+  firstLoadDone.current = false;
+  load({ silent: false });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [questionId, authReady, user, accessToken]);
+
+// auth tracking + refresh after auth is ready
+useEffect(() => {
+  let mounted = true;
+
+  (async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!mounted) return;
+
+    setUser(data.session?.user ?? null);
+
+    const tok = data.session?.access_token ?? null;
+    setAccessToken(tok);
+    tokenRef.current = tok; // ✅ sync
+    
+    setAuthReady(true);
+  })();
+
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+
+    const tok = session?.access_token ?? null;
+    setAccessToken(tok);
+    tokenRef.current = tok; // ✅ sync (so load uses it immediately)
+    
+    setMustSignIn(false);
+    setAuthReady(true);
+    
+    // ✅ now this GET will include Authorization (if signed in)
+    load({ silent: true });
+  });
+
+  return () => {
+    mounted = false;
+    sub.subscription.unsubscribe();
+  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
+
+async function vote(choice: "A" | "B" | "C" | "D") {
+  if (submitting) return;
+
+  // ✅ if we already know they voted, don't even POST
+if (data?.voted) return;
+
+  if (!user || !accessToken) {
       setMustSignIn(true);
       setError(null);
       return;
@@ -93,14 +149,22 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
 
       const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: buildHeaders({ "Content-Type": "application/json" }),
+        cache: "no-store",
+        credentials: "same-origin",
         body: JSON.stringify({ choice }),
       });
 
-      const json = (await res.json()) as ApiResponse;
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        throw new Error(
+          "Poll error: API returned HTML (not JSON). Check /pages/api/question/[id].ts default export."
+        );
+      }
+
+      const json = JSON.parse(text) as ApiResponse;
 
       if (res.status === 401) {
-        // in case server says they're signed out
         setMustSignIn(true);
         setError(null);
         return;
@@ -116,8 +180,8 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     }
   }
 
-  const q = data?.question;
-  const voted = data?.voted;
+  const q = data?.question ?? null;
+  const voted = data?.voted ?? null;
 
   const totals = useMemo(() => {
     if (!q) return { total: 0, A: 0, B: 0, C: 0, D: 0 };
@@ -129,8 +193,11 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     return { total, A, B, C, D };
   }, [q]);
 
-  const pct = (n: number) => (totals.total ? Math.round((n / totals.total) * 100) : 0);
+  const pct = (n: number) =>
+    totals.total ? Math.round((n / totals.total) * 100) : 0;
 
+  // results visible after a user has voted (and is signed in)
+  const canSeeResults = !!user && !!voted;
   const SignInBanner = () => (
     <div
       style={{
@@ -146,7 +213,14 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     >
       <div style={{ color: "#111827", fontWeight: 700 }}>
         Sign in to vote, and to see results!
-        <div style={{ color: "#6b7280", fontWeight: 500, fontSize: 13, marginTop: 2 }}>
+        <div
+          style={{
+            color: "#6b7280",
+            fontWeight: 500,
+            fontSize: 13,
+            marginTop: 2,
+          }}
+        >
           One vote per account.
         </div>
       </div>
@@ -178,17 +252,19 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
   }) => (
     <button
       onClick={() => vote(letter)}
-      disabled={submitting}
+      disabled={submitting || !!voted}
       style={{
         width: "100%",
         textAlign: "left",
         border: "1px solid #e5e7eb",
         background: "#fff",
+        borderRadius: 12,
         padding: "12px 12px",
         display: "flex",
         gap: 12,
         alignItems: "center",
         cursor: submitting ? "not-allowed" : "pointer",
+        opacity: submitting ? 0.7 : 1,
       }}
     >
       <div
@@ -202,7 +278,9 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
       >
         {letter}
       </div>
-      <div style={{ fontSize: 14, color: "#111827" }}>{text}</div>
+      <div style={{ fontSize: 14, color: "#111827", fontWeight: 700 }}>
+        {text}
+      </div>
     </button>
   );
 
@@ -220,23 +298,32 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
 
     return (
       <div style={{ display: "grid", gap: 6 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+        <div
+          style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
+        >
           <div style={{ fontSize: 14, color: "#111827" }}>
-            <span style={{ fontWeight: 800 }}>{letter}</span>{" "}
-            <span style={{ color: "#6b7280" }}>{text}</span>
+            <span style={{ fontWeight: 900 }}>{letter}</span>{" "}
+            <span style={{ color: "#6b7280", fontWeight: 600 }}>{text}</span>
             {isMine ? (
-              <span style={{ marginLeft: 8, color: "#111827", fontWeight: 700 }}>
+              <span style={{ marginLeft: 8, color: "#111827", fontWeight: 800 }}>
                 • You
               </span>
             ) : null}
           </div>
 
-          <div style={{ fontSize: 12, color: "#6b7280" }}>
+          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>
             {percent}% • {count}
           </div>
         </div>
 
-        <div style={{ height: 8, border: "1px solid #e5e7eb", background: "#fff" }}>
+        <div
+          style={{
+            height: 8,
+            borderRadius: 999,
+            border: "1px solid #e5e7eb",
+            background: "#fff",
+          }}
+        >
           <div
             style={{
               height: "100%",
@@ -244,6 +331,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
               background: "#111827",
               transition: "width 600ms ease",
               opacity: isMine ? 1 : 0.25,
+              borderRadius: 999,
             }}
           />
         </div>
@@ -251,31 +339,49 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     );
   };
 
-  if (loading) return null;
-  if (!q) return null;
+// Don't render until auth is known. Otherwise you can briefly show vote buttons
+// before we learn voted status.
+if (!authReady) return null;
 
-  const canSeeResults = !!user && !!voted;
+if (loading && !q) return null;
+if (!q) return null;
 
   return (
     <section style={{ marginTop: 14 }}>
-      {/* thin line UNDER the article’s prompt */}
       <div style={{ borderTop: "1px solid #e5e7eb", marginBottom: 14 }} />
 
-      {/* real errors only */}
       {error ? (
-        <div style={{ color: "#b91c1c", fontSize: 14, marginBottom: 10 }}>
+        <div
+          style={{
+            color: "#b91c1c",
+            fontSize: 14,
+            marginBottom: 10,
+            fontWeight: 700,
+          }}
+        >
           {error}
         </div>
       ) : null}
 
-      {/* inline sign-in prompt */}
-      {(!user || mustSignIn) && (
-        <div style={{ marginBottom: 10 }}>
-          <SignInBanner />
-        </div>
-      )}
+{(!user && !voted) && (
+  <div style={{ marginBottom: 10 }}>
+    <SignInBanner />
+  </div>
+)}
 
-      {/* integrated block */}
+      {refreshing ? (
+        <div
+          style={{
+            fontSize: 12,
+            color: "#9ca3af",
+            marginBottom: 8,
+            fontWeight: 700,
+          }}
+        >
+          Updating…
+        </div>
+      ) : null}
+
       <div style={{ display: "grid", gap: 8 }}>
         {!canSeeResults ? (
           <>

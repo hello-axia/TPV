@@ -217,15 +217,16 @@ export default function HomePage({
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
       {/* Masthead */}
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1.2fr",
-          gap: 32,
-          alignItems: "center",
-        }}
-      >
-        {/* Left */}
-        <div>
+  className="masthead"
+  style={{
+    display: "grid",
+    gridTemplateColumns: "1fr 1.2fr",
+    gap: 32,
+    alignItems: "center",
+  }}
+>
+                {/* Left */}
+                <div>
           <div
             style={{
               fontSize: 12,
@@ -245,6 +246,7 @@ export default function HomePage({
               fontWeight: 900,
               letterSpacing: -1.2,
               margin: "10px 0 0",
+              color: "#111827",
             }}
           >
             News, structured
@@ -260,12 +262,41 @@ export default function HomePage({
               maxWidth: 900,
             }}
           >
-
+            {/* News, structured — built for interpretation, not outrage. */}
           </p>
+
+          <div
+            className="commitment-mobile"
+            style={{
+              marginTop: 12,
+              paddingTop: 12,
+              borderTop: "1px solid #e5e7eb",
+              color: "#4b5563",
+              fontSize: 14,
+              lineHeight: 1.7,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
+                color: "#6b7280",
+                fontWeight: 900,
+                marginBottom: 6,
+              }}
+            >
+              Publishing Commitment
+            </div>
+            Two structured analyses weekly — <strong>Briefing</strong> (Tue) and{" "}
+            <strong>Verdict</strong> (Fri). Coverage is limited to developments of
+            structural or national significance; TPV is not a breaking-news service.
+          </div>
         </div>
 
         {/* Right */}
         <div
+          className="commitment-desktop"
           style={{
             borderLeft: "1px solid #e5e7eb",
             paddingLeft: 24,
@@ -367,6 +398,19 @@ export default function HomePage({
             grid-template-columns: 1fr !important;
           }
         }
+
+.commitment-mobile {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .commitment-desktop {
+    display: none !important;
+  }
+  .commitment-mobile {
+    display: block !important;
+  }
+}
 
         @media (max-width: 900px) {
           main {

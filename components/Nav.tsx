@@ -105,6 +105,7 @@ export default function Nav() {
   return (
     <>
       <header
+      data-mobile-open={mobileOpen ? "1" : "0"}
         style={{
           position: "sticky",
           top: 0,
@@ -283,6 +284,17 @@ export default function Nav() {
               justify-content: center;
             }
           }
+            /* Expose a global "header offset" used by article anchors */
+header {
+  --tpv-header-offset: 120px;
+}
+
+/* On mobile, when the dropdown is open, header is taller */
+@media (max-width: 768px) {
+  header[data-mobile-open="1"] {
+    --tpv-header-offset: 220px;
+  }
+}
         `}</style>
       </header>
 
