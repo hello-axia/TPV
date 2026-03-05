@@ -1,0 +1,5846 @@
+[
+  {
+    "len": 5,
+    "start": "S",
+    "end": "S",
+    "count": 210
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "S",
+    "count": 160
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "S",
+    "count": 152
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "S",
+    "count": 149
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "S",
+    "count": 140
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "S",
+    "count": 128
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "S",
+    "count": 123
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "S",
+    "count": 120
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "S",
+    "count": 119
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "E",
+    "count": 119
+  },
+  {
+    "len": 5,
+    "start": "G",
+    "end": "S",
+    "count": 114
+  },
+  {
+    "len": 5,
+    "start": "H",
+    "end": "S",
+    "count": 103
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "S",
+    "count": 99
+  },
+  {
+    "len": 5,
+    "start": "W",
+    "end": "S",
+    "count": 86
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "E",
+    "count": 71
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "S",
+    "count": 70
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "E",
+    "count": 68
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "Y",
+    "count": 68
+  },
+  {
+    "len": 5,
+    "start": "K",
+    "end": "S",
+    "count": 65
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "E",
+    "count": 64
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "Y",
+    "count": 64
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "Y",
+    "count": 62
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "T",
+    "count": 62
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "E",
+    "count": 60
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "Y",
+    "count": 58
+  },
+  {
+    "len": 5,
+    "start": "N",
+    "end": "S",
+    "count": 57
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "E",
+    "count": 56
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "Y",
+    "count": 53
+  },
+  {
+    "len": 5,
+    "start": "G",
+    "end": "E",
+    "count": 51
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "E",
+    "count": 47
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "K",
+    "count": 47
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "R",
+    "count": 47
+  },
+  {
+    "len": 5,
+    "start": "G",
+    "end": "Y",
+    "count": 46
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "L",
+    "count": 46
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "Y",
+    "count": 45
+  },
+  {
+    "len": 5,
+    "start": "V",
+    "end": "S",
+    "count": 45
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "N",
+    "count": 44
+  },
+  {
+    "len": 5,
+    "start": "H",
+    "end": "Y",
+    "count": 44
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "A",
+    "count": 44
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "E",
+    "count": 43
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "Y",
+    "count": 43
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "Y",
+    "count": 42
+  },
+  {
+    "len": 5,
+    "start": "O",
+    "end": "S",
+    "count": 41
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "D",
+    "count": 40
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "Y",
+    "count": 40
+  },
+  {
+    "len": 5,
+    "start": "J",
+    "end": "S",
+    "count": 39
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "P",
+    "count": 39
+  },
+  {
+    "len": 5,
+    "start": "E",
+    "end": "S",
+    "count": 38
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "R",
+    "count": 37
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "E",
+    "count": 37
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "N",
+    "count": 37
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "T",
+    "count": 36
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "A",
+    "count": 36
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "N",
+    "count": 36
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "A",
+    "count": 35
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "R",
+    "count": 35
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "D",
+    "count": 35
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "A",
+    "count": 34
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "T",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "D",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "K",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "E",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "E",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "N",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "R",
+    "count": 33
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "N",
+    "count": 32
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "Y",
+    "count": 32
+  },
+  {
+    "len": 5,
+    "start": "W",
+    "end": "Y",
+    "count": 32
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "D",
+    "count": 31
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "T",
+    "count": 31
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "D",
+    "count": 31
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "R",
+    "count": 31
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "A",
+    "count": 30
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "O",
+    "count": 30
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "A",
+    "count": 29
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "O",
+    "count": 29
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "A",
+    "count": 29
+  },
+  {
+    "len": 5,
+    "start": "C",
+    "end": "N",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "R",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "D",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "R",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "D",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "Y",
+    "end": "S",
+    "count": 28
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "R",
+    "count": 27
+  },
+  {
+    "len": 5,
+    "start": "E",
+    "end": "T",
+    "count": 26
+  },
+  {
+    "len": 5,
+    "start": "G",
+    "end": "T",
+    "count": 26
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "R",
+    "count": 26
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "D",
+    "count": 26
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "T",
+    "count": 26
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "Y",
+    "count": 25
+  },
+  {
+    "len": 5,
+    "start": "S",
+    "end": "H",
+    "count": 25
+  },
+  {
+    "len": 5,
+    "start": "W",
+    "end": "E",
+    "count": 25
+  },
+  {
+    "len": 5,
+    "start": "A",
+    "end": "L",
+    "count": 24
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "H",
+    "count": 24
+  },
+  {
+    "len": 5,
+    "start": "H",
+    "end": "D",
+    "count": 24
+  },
+  {
+    "len": 5,
+    "start": "N",
+    "end": "Y",
+    "count": 24
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "D",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "E",
+    "end": "E",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "H",
+    "end": "A",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "O",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "A",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "N",
+    "count": 23
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "N",
+    "count": 22
+  },
+  {
+    "len": 5,
+    "start": "F",
+    "end": "T",
+    "count": 22
+  },
+  {
+    "len": 5,
+    "start": "H",
+    "end": "E",
+    "count": 22
+  },
+  {
+    "len": 5,
+    "start": "I",
+    "end": "S",
+    "count": 22
+  },
+  {
+    "len": 5,
+    "start": "R",
+    "end": "T",
+    "count": 22
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "L",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "G",
+    "end": "A",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "L",
+    "end": "D",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "N",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "N",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "V",
+    "end": "A",
+    "count": 21
+  },
+  {
+    "len": 5,
+    "start": "B",
+    "end": "O",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "D",
+    "end": "T",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "E",
+    "end": "R",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "M",
+    "end": "D",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "P",
+    "end": "T",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "T",
+    "end": "L",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "W",
+    "end": "D",
+    "count": 20
+  },
+  {
+    "len": 5,
+    "start": "Z",
+    "end": "S",
+    "count": 20
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "S",
+    "count": 442
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "S",
+    "count": 306
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "S",
+    "count": 236
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "S",
+    "count": 206
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "S",
+    "count": 204
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "S",
+    "count": 195
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "S",
+    "count": 158
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "Y",
+    "count": 157
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "S",
+    "count": 155
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "S",
+    "count": 149
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "S",
+    "count": 149
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "S",
+    "count": 148
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "E",
+    "count": 140
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "D",
+    "count": 132
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "R",
+    "count": 122
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "S",
+    "count": 120
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "D",
+    "count": 118
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "E",
+    "count": 113
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "E",
+    "count": 111
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "E",
+    "count": 109
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "D",
+    "count": 106
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "D",
+    "count": 106
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "R",
+    "count": 100
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "E",
+    "count": 97
+  },
+  {
+    "len": 6,
+    "start": "E",
+    "end": "S",
+    "count": 97
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "Y",
+    "count": 96
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "R",
+    "count": 96
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "D",
+    "count": 94
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "R",
+    "count": 94
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "S",
+    "count": 94
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "E",
+    "count": 92
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "S",
+    "count": 86
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "E",
+    "count": 85
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "R",
+    "count": 83
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "E",
+    "count": 83
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "E",
+    "count": 83
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "R",
+    "count": 78
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "D",
+    "count": 77
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "D",
+    "count": 76
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "R",
+    "count": 76
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "A",
+    "count": 75
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "D",
+    "count": 75
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "N",
+    "count": 74
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "R",
+    "count": 74
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "R",
+    "count": 74
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "N",
+    "count": 72
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "D",
+    "count": 71
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "Y",
+    "count": 71
+  },
+  {
+    "len": 6,
+    "start": "K",
+    "end": "S",
+    "count": 70
+  },
+  {
+    "len": 6,
+    "start": "O",
+    "end": "S",
+    "count": 70
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "D",
+    "count": 69
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "N",
+    "count": 69
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "Y",
+    "count": 68
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "D",
+    "count": 67
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "R",
+    "count": 67
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "T",
+    "count": 67
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "N",
+    "count": 66
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "D",
+    "count": 65
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "R",
+    "count": 63
+  },
+  {
+    "len": 6,
+    "start": "N",
+    "end": "S",
+    "count": 62
+  },
+  {
+    "len": 6,
+    "start": "V",
+    "end": "S",
+    "count": 62
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "R",
+    "count": 61
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "T",
+    "count": 60
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "T",
+    "count": 60
+  },
+  {
+    "len": 6,
+    "start": "E",
+    "end": "E",
+    "count": 59
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "E",
+    "count": 59
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "N",
+    "count": 59
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "N",
+    "count": 59
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "R",
+    "count": 59
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "Y",
+    "count": 58
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "Y",
+    "count": 58
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "N",
+    "count": 57
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "Y",
+    "count": 57
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "Y",
+    "count": 56
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "D",
+    "count": 56
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "E",
+    "count": 53
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "A",
+    "count": 53
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "N",
+    "count": 52
+  },
+  {
+    "len": 6,
+    "start": "I",
+    "end": "E",
+    "count": 52
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "N",
+    "count": 51
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "E",
+    "count": 50
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "N",
+    "count": 50
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "N",
+    "count": 50
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "E",
+    "count": 49
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "H",
+    "count": 49
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "Y",
+    "count": 49
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "A",
+    "count": 48
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "A",
+    "count": 48
+  },
+  {
+    "len": 6,
+    "start": "U",
+    "end": "S",
+    "count": 48
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "T",
+    "count": 47
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "N",
+    "count": 47
+  },
+  {
+    "len": 6,
+    "start": "I",
+    "end": "S",
+    "count": 46
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "T",
+    "count": 45
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "D",
+    "count": 44
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "T",
+    "count": 43
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "T",
+    "count": 43
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "T",
+    "count": 43
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "A",
+    "count": 42
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "L",
+    "count": 42
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "Y",
+    "count": 41
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "L",
+    "count": 41
+  },
+  {
+    "len": 6,
+    "start": "J",
+    "end": "S",
+    "count": 40
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "Y",
+    "count": 40
+  },
+  {
+    "len": 6,
+    "start": "E",
+    "end": "D",
+    "count": 39
+  },
+  {
+    "len": 6,
+    "start": "N",
+    "end": "E",
+    "count": 39
+  },
+  {
+    "len": 6,
+    "start": "O",
+    "end": "E",
+    "count": 38
+  },
+  {
+    "len": 6,
+    "start": "U",
+    "end": "E",
+    "count": 38
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "L",
+    "count": 36
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "L",
+    "count": 35
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "Y",
+    "count": 35
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "R",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "Y",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "A",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "A",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "T",
+    "end": "L",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "N",
+    "count": 34
+  },
+  {
+    "len": 6,
+    "start": "R",
+    "end": "L",
+    "count": 33
+  },
+  {
+    "len": 6,
+    "start": "U",
+    "end": "D",
+    "count": 33
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "N",
+    "count": 32
+  },
+  {
+    "len": 6,
+    "start": "I",
+    "end": "T",
+    "count": 32
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "L",
+    "count": 32
+  },
+  {
+    "len": 6,
+    "start": "M",
+    "end": "T",
+    "count": 32
+  },
+  {
+    "len": 6,
+    "start": "E",
+    "end": "T",
+    "count": 31
+  },
+  {
+    "len": 6,
+    "start": "K",
+    "end": "R",
+    "count": 31
+  },
+  {
+    "len": 6,
+    "start": "V",
+    "end": "E",
+    "count": 31
+  },
+  {
+    "len": 6,
+    "start": "J",
+    "end": "D",
+    "count": 30
+  },
+  {
+    "len": 6,
+    "start": "Q",
+    "end": "S",
+    "count": 30
+  },
+  {
+    "len": 6,
+    "start": "S",
+    "end": "G",
+    "count": 30
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "L",
+    "count": 29
+  },
+  {
+    "len": 6,
+    "start": "C",
+    "end": "O",
+    "count": 29
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "T",
+    "count": 28
+  },
+  {
+    "len": 6,
+    "start": "N",
+    "end": "D",
+    "count": 28
+  },
+  {
+    "len": 6,
+    "start": "W",
+    "end": "E",
+    "count": 28
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "L",
+    "count": 27
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "L",
+    "count": 27
+  },
+  {
+    "len": 6,
+    "start": "O",
+    "end": "D",
+    "count": 27
+  },
+  {
+    "len": 6,
+    "start": "O",
+    "end": "N",
+    "count": 27
+  },
+  {
+    "len": 6,
+    "start": "O",
+    "end": "T",
+    "count": 27
+  },
+  {
+    "len": 6,
+    "start": "B",
+    "end": "G",
+    "count": 26
+  },
+  {
+    "len": 6,
+    "start": "F",
+    "end": "T",
+    "count": 26
+  },
+  {
+    "len": 6,
+    "start": "G",
+    "end": "A",
+    "count": 26
+  },
+  {
+    "len": 6,
+    "start": "H",
+    "end": "Y",
+    "count": 26
+  },
+  {
+    "len": 6,
+    "start": "J",
+    "end": "R",
+    "count": 26
+  },
+  {
+    "len": 6,
+    "start": "A",
+    "end": "C",
+    "count": 25
+  },
+  {
+    "len": 6,
+    "start": "D",
+    "end": "G",
+    "count": 25
+  },
+  {
+    "len": 6,
+    "start": "J",
+    "end": "E",
+    "count": 25
+  },
+  {
+    "len": 6,
+    "start": "L",
+    "end": "G",
+    "count": 25
+  },
+  {
+    "len": 6,
+    "start": "P",
+    "end": "G",
+    "count": 25
+  },
+  {
+    "len": 6,
+    "start": "U",
+    "end": "T",
+    "count": 25
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "S",
+    "count": 509
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "S",
+    "count": 414
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "S",
+    "count": 396
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "S",
+    "count": 380
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "S",
+    "count": 366
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "S",
+    "count": 333
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "S",
+    "count": 327
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "S",
+    "count": 317
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "D",
+    "count": 285
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "S",
+    "count": 279
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "R",
+    "count": 269
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "S",
+    "count": 231
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "S",
+    "count": 223
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "S",
+    "count": 213
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "E",
+    "count": 201
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "S",
+    "count": 199
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "E",
+    "count": 199
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "D",
+    "count": 180
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "E",
+    "count": 165
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "S",
+    "count": 161
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "S",
+    "count": 158
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "R",
+    "count": 146
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "E",
+    "count": 136
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "Y",
+    "count": 136
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "S",
+    "count": 130
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "D",
+    "count": 128
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "D",
+    "count": 127
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "D",
+    "count": 127
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "G",
+    "count": 125
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "R",
+    "count": 123
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "E",
+    "count": 119
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "S",
+    "count": 117
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "N",
+    "count": 115
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "S",
+    "count": 115
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "G",
+    "count": 113
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "E",
+    "count": 111
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "D",
+    "count": 109
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "T",
+    "count": 107
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "R",
+    "count": 107
+  },
+  {
+    "len": 7,
+    "start": "K",
+    "end": "S",
+    "count": 106
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "E",
+    "count": 105
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "E",
+    "count": 102
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "N",
+    "count": 100
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "D",
+    "count": 99
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "N",
+    "count": 97
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "E",
+    "count": 96
+  },
+  {
+    "len": 7,
+    "start": "U",
+    "end": "S",
+    "count": 95
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "E",
+    "count": 94
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "G",
+    "count": 94
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "R",
+    "count": 94
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "D",
+    "count": 92
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "G",
+    "count": 88
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "R",
+    "count": 88
+  },
+  {
+    "len": 7,
+    "start": "J",
+    "end": "S",
+    "count": 87
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "Y",
+    "count": 86
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "T",
+    "count": 84
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "T",
+    "count": 83
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "G",
+    "count": 82
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "D",
+    "count": 81
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "D",
+    "count": 81
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "E",
+    "count": 80
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "R",
+    "count": 79
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "G",
+    "count": 79
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "R",
+    "count": 79
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "E",
+    "count": 78
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "R",
+    "count": 78
+  },
+  {
+    "len": 7,
+    "start": "V",
+    "end": "S",
+    "count": 78
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "D",
+    "count": 77
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "G",
+    "count": 75
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "A",
+    "count": 74
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "G",
+    "count": 73
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "D",
+    "count": 73
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "L",
+    "count": 72
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "T",
+    "count": 71
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "N",
+    "count": 71
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "Y",
+    "count": 70
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "G",
+    "count": 69
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "G",
+    "count": 69
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "T",
+    "count": 68
+  },
+  {
+    "len": 7,
+    "start": "U",
+    "end": "D",
+    "count": 68
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "A",
+    "count": 67
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "E",
+    "count": 66
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "Y",
+    "count": 65
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "G",
+    "count": 65
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "N",
+    "count": 65
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "Y",
+    "count": 65
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "N",
+    "count": 64
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "T",
+    "count": 63
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "E",
+    "count": 63
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "A",
+    "count": 62
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "G",
+    "count": 62
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "R",
+    "count": 62
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "A",
+    "count": 61
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "R",
+    "count": 61
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "T",
+    "count": 59
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "R",
+    "count": 59
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "N",
+    "count": 58
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "T",
+    "count": 58
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "D",
+    "count": 58
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "D",
+    "count": 58
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "R",
+    "count": 55
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "D",
+    "count": 55
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "T",
+    "count": 55
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "E",
+    "count": 54
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "G",
+    "count": 53
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "L",
+    "count": 53
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "R",
+    "count": 52
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "Y",
+    "count": 52
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "Y",
+    "count": 52
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "Y",
+    "count": 52
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "N",
+    "count": 52
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "Y",
+    "count": 51
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "E",
+    "count": 51
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "N",
+    "count": 50
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "N",
+    "count": 49
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "N",
+    "count": 49
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "N",
+    "count": 49
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "C",
+    "count": 48
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "T",
+    "count": 48
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "Y",
+    "count": 47
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "E",
+    "count": 47
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "N",
+    "count": 44
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "L",
+    "count": 44
+  },
+  {
+    "len": 7,
+    "start": "V",
+    "end": "E",
+    "count": 44
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "D",
+    "count": 43
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "Y",
+    "count": 43
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "Y",
+    "count": 42
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "T",
+    "count": 41
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "A",
+    "count": 41
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "T",
+    "count": 39
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "N",
+    "count": 38
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "Y",
+    "count": 38
+  },
+  {
+    "len": 7,
+    "start": "U",
+    "end": "E",
+    "count": 38
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "L",
+    "count": 37
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "E",
+    "count": 37
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "L",
+    "count": 37
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "A",
+    "count": 35
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "L",
+    "count": 34
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "T",
+    "count": 34
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "L",
+    "count": 34
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "T",
+    "count": 34
+  },
+  {
+    "len": 7,
+    "start": "Z",
+    "end": "S",
+    "count": 34
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "A",
+    "count": 33
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "T",
+    "count": 33
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "N",
+    "count": 32
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "Y",
+    "count": 32
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "R",
+    "count": 31
+  },
+  {
+    "len": 7,
+    "start": "K",
+    "end": "N",
+    "count": 31
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "T",
+    "count": 31
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "A",
+    "count": 30
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "D",
+    "count": 30
+  },
+  {
+    "len": 7,
+    "start": "Q",
+    "end": "S",
+    "count": 30
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "R",
+    "count": 29
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "O",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "L",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "Y",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "Y",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "H",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "M",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "N",
+    "count": 28
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "H",
+    "count": 27
+  },
+  {
+    "len": 7,
+    "start": "J",
+    "end": "G",
+    "count": 27
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "A",
+    "count": 26
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "L",
+    "count": 26
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "G",
+    "count": 26
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "C",
+    "count": 26
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "K",
+    "count": 26
+  },
+  {
+    "len": 7,
+    "start": "F",
+    "end": "L",
+    "count": 25
+  },
+  {
+    "len": 7,
+    "start": "G",
+    "end": "T",
+    "count": 25
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "L",
+    "count": 25
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "O",
+    "count": 25
+  },
+  {
+    "len": 7,
+    "start": "K",
+    "end": "E",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "K",
+    "end": "G",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "R",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "L",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "V",
+    "end": "D",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "Y",
+    "end": "S",
+    "count": 24
+  },
+  {
+    "len": 7,
+    "start": "J",
+    "end": "R",
+    "count": 23
+  },
+  {
+    "len": 7,
+    "start": "K",
+    "end": "R",
+    "count": 23
+  },
+  {
+    "len": 7,
+    "start": "M",
+    "end": "H",
+    "count": 23
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "D",
+    "count": 23
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "R",
+    "count": 23
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "G",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "A",
+    "end": "O",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "B",
+    "end": "K",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "G",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "L",
+    "end": "L",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "N",
+    "end": "A",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "U",
+    "end": "T",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "V",
+    "end": "Y",
+    "count": 22
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "H",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "Y",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "H",
+    "end": "L",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "I",
+    "end": "N",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "J",
+    "end": "D",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "C",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "R",
+    "end": "A",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "W",
+    "end": "A",
+    "count": 21
+  },
+  {
+    "len": 7,
+    "start": "C",
+    "end": "C",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "D",
+    "end": "A",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "E",
+    "end": "L",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "J",
+    "end": "N",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "O",
+    "end": "A",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "P",
+    "end": "M",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "S",
+    "end": "O",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "T",
+    "end": "O",
+    "count": 20
+  },
+  {
+    "len": 7,
+    "start": "V",
+    "end": "T",
+    "count": 20
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "S",
+    "count": 791
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "S",
+    "count": 702
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "S",
+    "count": 532
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "S",
+    "count": 429
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "S",
+    "count": 371
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "S",
+    "count": 359
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "S",
+    "count": 342
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "S",
+    "count": 339
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "S",
+    "count": 332
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "G",
+    "count": 280
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "S",
+    "count": 267
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "S",
+    "count": 253
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "S",
+    "count": 248
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "S",
+    "count": 246
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "D",
+    "count": 238
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "E",
+    "count": 228
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "S",
+    "count": 217
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "R",
+    "count": 214
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "E",
+    "count": 207
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "D",
+    "count": 207
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "E",
+    "count": 188
+  },
+  {
+    "len": 8,
+    "start": "U",
+    "end": "D",
+    "count": 186
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "S",
+    "count": 182
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "E",
+    "count": 179
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "S",
+    "count": 177
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "D",
+    "count": 170
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "S",
+    "count": 158
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "G",
+    "count": 154
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "Y",
+    "count": 150
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "E",
+    "count": 148
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "D",
+    "count": 148
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "T",
+    "count": 148
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "E",
+    "count": 146
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "E",
+    "count": 143
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "D",
+    "count": 139
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "R",
+    "count": 136
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "D",
+    "count": 133
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "E",
+    "count": 125
+  },
+  {
+    "len": 8,
+    "start": "N",
+    "end": "S",
+    "count": 122
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "E",
+    "count": 121
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "N",
+    "count": 120
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "G",
+    "count": 117
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "E",
+    "count": 112
+  },
+  {
+    "len": 8,
+    "start": "V",
+    "end": "S",
+    "count": 109
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "G",
+    "count": 108
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "E",
+    "count": 106
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "D",
+    "count": 105
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "N",
+    "count": 104
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "R",
+    "count": 104
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "E",
+    "count": 99
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "Y",
+    "count": 95
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "T",
+    "count": 94
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "G",
+    "count": 90
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "N",
+    "count": 89
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "R",
+    "count": 89
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "T",
+    "count": 89
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "T",
+    "count": 88
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "G",
+    "count": 86
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "D",
+    "count": 86
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "D",
+    "count": 86
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "G",
+    "count": 86
+  },
+  {
+    "len": 8,
+    "start": "U",
+    "end": "S",
+    "count": 85
+  },
+  {
+    "len": 8,
+    "start": "K",
+    "end": "S",
+    "count": 84
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "T",
+    "count": 84
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "N",
+    "count": 81
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "R",
+    "count": 81
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "D",
+    "count": 81
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "G",
+    "count": 80
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "D",
+    "count": 78
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "E",
+    "count": 78
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "Y",
+    "count": 76
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "T",
+    "count": 75
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "D",
+    "count": 75
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "T",
+    "count": 72
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "T",
+    "count": 72
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "D",
+    "count": 72
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "D",
+    "count": 72
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "N",
+    "count": 71
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "G",
+    "count": 71
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "E",
+    "count": 70
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "N",
+    "count": 70
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "T",
+    "count": 69
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "E",
+    "count": 69
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "Y",
+    "count": 67
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "Y",
+    "count": 67
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "G",
+    "count": 66
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "A",
+    "count": 66
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "L",
+    "count": 66
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "L",
+    "count": 65
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "G",
+    "count": 65
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "R",
+    "count": 64
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "E",
+    "count": 64
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "R",
+    "count": 63
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "D",
+    "count": 63
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "T",
+    "count": 63
+  },
+  {
+    "len": 8,
+    "start": "J",
+    "end": "S",
+    "count": 62
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "L",
+    "count": 62
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "A",
+    "count": 60
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "R",
+    "count": 60
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "N",
+    "count": 60
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "N",
+    "count": 60
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "R",
+    "count": 60
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "R",
+    "count": 59
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "Y",
+    "count": 59
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "D",
+    "count": 58
+  },
+  {
+    "len": 8,
+    "start": "N",
+    "end": "E",
+    "count": 58
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "Y",
+    "count": 57
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "Y",
+    "count": 56
+  },
+  {
+    "len": 8,
+    "start": "T",
+    "end": "T",
+    "count": 55
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "T",
+    "count": 54
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "L",
+    "count": 54
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "D",
+    "count": 53
+  },
+  {
+    "len": 8,
+    "start": "B",
+    "end": "L",
+    "count": 52
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "N",
+    "count": 52
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "N",
+    "count": 52
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "R",
+    "count": 52
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "T",
+    "count": 51
+  },
+  {
+    "len": 8,
+    "start": "V",
+    "end": "E",
+    "count": 51
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "H",
+    "count": 50
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "E",
+    "count": 50
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "G",
+    "count": 49
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "Y",
+    "count": 47
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "R",
+    "count": 47
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "Y",
+    "count": 47
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "G",
+    "count": 47
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "N",
+    "count": 47
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "C",
+    "count": 46
+  },
+  {
+    "len": 8,
+    "start": "M",
+    "end": "A",
+    "count": 46
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "A",
+    "count": 45
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "R",
+    "count": 44
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "T",
+    "count": 44
+  },
+  {
+    "len": 8,
+    "start": "U",
+    "end": "E",
+    "count": 44
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "N",
+    "count": 43
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "N",
+    "count": 42
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "G",
+    "count": 42
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "L",
+    "count": 41
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "R",
+    "count": 41
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "T",
+    "count": 41
+  },
+  {
+    "len": 8,
+    "start": "R",
+    "end": "Y",
+    "count": 41
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "R",
+    "count": 41
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "Y",
+    "count": 40
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "M",
+    "count": 40
+  },
+  {
+    "len": 8,
+    "start": "A",
+    "end": "M",
+    "count": 39
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "Y",
+    "count": 39
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "C",
+    "count": 39
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "C",
+    "count": 38
+  },
+  {
+    "len": 8,
+    "start": "G",
+    "end": "N",
+    "count": 37
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "A",
+    "count": 37
+  },
+  {
+    "len": 8,
+    "start": "U",
+    "end": "G",
+    "count": 37
+  },
+  {
+    "len": 8,
+    "start": "C",
+    "end": "C",
+    "count": 36
+  },
+  {
+    "len": 8,
+    "start": "L",
+    "end": "G",
+    "count": 36
+  },
+  {
+    "len": 8,
+    "start": "Q",
+    "end": "S",
+    "count": 35
+  },
+  {
+    "len": 8,
+    "start": "U",
+    "end": "Y",
+    "count": 35
+  },
+  {
+    "len": 8,
+    "start": "V",
+    "end": "Y",
+    "count": 35
+  },
+  {
+    "len": 8,
+    "start": "W",
+    "end": "T",
+    "count": 35
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "Y",
+    "count": 34
+  },
+  {
+    "len": 8,
+    "start": "P",
+    "end": "M",
+    "count": 34
+  },
+  {
+    "len": 8,
+    "start": "F",
+    "end": "L",
+    "count": 33
+  },
+  {
+    "len": 8,
+    "start": "I",
+    "end": "G",
+    "count": 33
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "K",
+    "count": 32
+  },
+  {
+    "len": 8,
+    "start": "D",
+    "end": "C",
+    "count": 31
+  },
+  {
+    "len": 8,
+    "start": "E",
+    "end": "T",
+    "count": 31
+  },
+  {
+    "len": 8,
+    "start": "H",
+    "end": "L",
+    "count": 31
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "N",
+    "count": 31
+  },
+  {
+    "len": 8,
+    "start": "O",
+    "end": "R",
+    "count": 31
+  },
+  {
+    "len": 8,
+    "start": "S",
+    "end": "C",
+    "count": 30
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "S",
+    "count": 775
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "S",
+    "count": 623
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "S",
+    "count": 546
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "S",
+    "count": 475
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "S",
+    "count": 420
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "S",
+    "count": 411
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "S",
+    "count": 395
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "S",
+    "count": 369
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "S",
+    "count": 368
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "S",
+    "count": 305
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "S",
+    "count": 273
+  },
+  {
+    "len": 9,
+    "start": "H",
+    "end": "S",
+    "count": 267
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "E",
+    "count": 230
+  },
+  {
+    "len": 9,
+    "start": "L",
+    "end": "S",
+    "count": 225
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "D",
+    "count": 218
+  },
+  {
+    "len": 9,
+    "start": "O",
+    "end": "S",
+    "count": 215
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "E",
+    "count": 205
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "E",
+    "count": 204
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "G",
+    "count": 202
+  },
+  {
+    "len": 9,
+    "start": "G",
+    "end": "S",
+    "count": 201
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "S",
+    "count": 191
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "D",
+    "count": 188
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "G",
+    "count": 177
+  },
+  {
+    "len": 9,
+    "start": "U",
+    "end": "D",
+    "count": 177
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "E",
+    "count": 168
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "T",
+    "count": 166
+  },
+  {
+    "len": 9,
+    "start": "N",
+    "end": "S",
+    "count": 160
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "R",
+    "count": 160
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "D",
+    "count": 153
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "E",
+    "count": 142
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "D",
+    "count": 137
+  },
+  {
+    "len": 9,
+    "start": "W",
+    "end": "S",
+    "count": 137
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "D",
+    "count": 135
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "E",
+    "count": 133
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "E",
+    "count": 131
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "R",
+    "count": 127
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "E",
+    "count": 121
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "Y",
+    "count": 121
+  },
+  {
+    "len": 9,
+    "start": "V",
+    "end": "S",
+    "count": 120
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "D",
+    "count": 119
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "E",
+    "count": 119
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "G",
+    "count": 117
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "N",
+    "count": 115
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "N",
+    "count": 113
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "E",
+    "count": 113
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "G",
+    "count": 112
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "E",
+    "count": 111
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "T",
+    "count": 109
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "Y",
+    "count": 103
+  },
+  {
+    "len": 9,
+    "start": "U",
+    "end": "S",
+    "count": 102
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "G",
+    "count": 96
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "G",
+    "count": 92
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "E",
+    "count": 91
+  },
+  {
+    "len": 9,
+    "start": "G",
+    "end": "E",
+    "count": 89
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "Y",
+    "count": 88
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "R",
+    "count": 88
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "G",
+    "count": 87
+  },
+  {
+    "len": 9,
+    "start": "H",
+    "end": "E",
+    "count": 86
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "D",
+    "count": 85
+  },
+  {
+    "len": 9,
+    "start": "U",
+    "end": "G",
+    "count": 84
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "G",
+    "count": 79
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "D",
+    "count": 79
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "N",
+    "count": 79
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "N",
+    "count": 78
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "D",
+    "count": 77
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "R",
+    "count": 76
+  },
+  {
+    "len": 9,
+    "start": "L",
+    "end": "E",
+    "count": 74
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "Y",
+    "count": 73
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "D",
+    "count": 73
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "T",
+    "count": 72
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "Y",
+    "count": 71
+  },
+  {
+    "len": 9,
+    "start": "O",
+    "end": "D",
+    "count": 69
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "T",
+    "count": 68
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "T",
+    "count": 67
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "T",
+    "count": 65
+  },
+  {
+    "len": 9,
+    "start": "K",
+    "end": "S",
+    "count": 65
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "D",
+    "count": 65
+  },
+  {
+    "len": 9,
+    "start": "S",
+    "end": "L",
+    "count": 64
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "N",
+    "count": 63
+  },
+  {
+    "len": 9,
+    "start": "O",
+    "end": "E",
+    "count": 63
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "G",
+    "count": 62
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "G",
+    "count": 61
+  },
+  {
+    "len": 9,
+    "start": "H",
+    "end": "D",
+    "count": 60
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "T",
+    "count": 60
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "R",
+    "count": 59
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "Y",
+    "count": 58
+  },
+  {
+    "len": 9,
+    "start": "D",
+    "end": "N",
+    "count": 57
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "C",
+    "count": 57
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "N",
+    "count": 56
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "T",
+    "count": 56
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "Y",
+    "count": 56
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "T",
+    "count": 55
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "G",
+    "count": 53
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "G",
+    "count": 53
+  },
+  {
+    "len": 9,
+    "start": "P",
+    "end": "L",
+    "count": 53
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "R",
+    "count": 53
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "Y",
+    "count": 53
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "L",
+    "count": 52
+  },
+  {
+    "len": 9,
+    "start": "W",
+    "end": "E",
+    "count": 52
+  },
+  {
+    "len": 9,
+    "start": "A",
+    "end": "C",
+    "count": 51
+  },
+  {
+    "len": 9,
+    "start": "J",
+    "end": "S",
+    "count": 51
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "R",
+    "count": 51
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "T",
+    "count": 51
+  },
+  {
+    "len": 9,
+    "start": "B",
+    "end": "R",
+    "count": 50
+  },
+  {
+    "len": 9,
+    "start": "C",
+    "end": "M",
+    "count": 50
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "D",
+    "count": 49
+  },
+  {
+    "len": 9,
+    "start": "G",
+    "end": "D",
+    "count": 48
+  },
+  {
+    "len": 9,
+    "start": "U",
+    "end": "E",
+    "count": 48
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "Y",
+    "count": 47
+  },
+  {
+    "len": 9,
+    "start": "H",
+    "end": "N",
+    "count": 47
+  },
+  {
+    "len": 9,
+    "start": "O",
+    "end": "G",
+    "count": 47
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "R",
+    "count": 46
+  },
+  {
+    "len": 9,
+    "start": "H",
+    "end": "Y",
+    "count": 46
+  },
+  {
+    "len": 9,
+    "start": "R",
+    "end": "N",
+    "count": 46
+  },
+  {
+    "len": 9,
+    "start": "V",
+    "end": "E",
+    "count": 46
+  },
+  {
+    "len": 9,
+    "start": "G",
+    "end": "N",
+    "count": 44
+  },
+  {
+    "len": 9,
+    "start": "G",
+    "end": "T",
+    "count": 44
+  },
+  {
+    "len": 9,
+    "start": "M",
+    "end": "M",
+    "count": 44
+  },
+  {
+    "len": 9,
+    "start": "N",
+    "end": "E",
+    "count": 44
+  },
+  {
+    "len": 9,
+    "start": "F",
+    "end": "R",
+    "count": 43
+  },
+  {
+    "len": 9,
+    "start": "I",
+    "end": "N",
+    "count": 43
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "T",
+    "count": 43
+  },
+  {
+    "len": 9,
+    "start": "L",
+    "end": "G",
+    "count": 42
+  },
+  {
+    "len": 9,
+    "start": "W",
+    "end": "D",
+    "count": 42
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "N",
+    "count": 41
+  },
+  {
+    "len": 9,
+    "start": "E",
+    "end": "T",
+    "count": 41
+  },
+  {
+    "len": 9,
+    "start": "W",
+    "end": "G",
+    "count": 41
+  },
+  {
+    "len": 9,
+    "start": "L",
+    "end": "Y",
+    "count": 40
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "N",
+    "count": 40
+  },
+  {
+    "len": 9,
+    "start": "T",
+    "end": "R",
+    "count": 40
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "S",
+    "count": 731
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "S",
+    "count": 643
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "S",
+    "count": 522
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "S",
+    "count": 420
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "S",
+    "count": 371
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "S",
+    "count": 349
+  },
+  {
+    "len": 10,
+    "start": "B",
+    "end": "S",
+    "count": 337
+  },
+  {
+    "len": 10,
+    "start": "R",
+    "end": "S",
+    "count": 295
+  },
+  {
+    "len": 10,
+    "start": "T",
+    "end": "S",
+    "count": 284
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "S",
+    "count": 265
+  },
+  {
+    "len": 10,
+    "start": "H",
+    "end": "S",
+    "count": 262
+  },
+  {
+    "len": 10,
+    "start": "F",
+    "end": "S",
+    "count": 252
+  },
+  {
+    "len": 10,
+    "start": "I",
+    "end": "S",
+    "count": 221
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "E",
+    "count": 201
+  },
+  {
+    "len": 10,
+    "start": "G",
+    "end": "S",
+    "count": 197
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "E",
+    "count": 182
+  },
+  {
+    "len": 10,
+    "start": "O",
+    "end": "S",
+    "count": 180
+  },
+  {
+    "len": 10,
+    "start": "U",
+    "end": "D",
+    "count": 162
+  },
+  {
+    "len": 10,
+    "start": "L",
+    "end": "S",
+    "count": 160
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "E",
+    "count": 155
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "E",
+    "count": 151
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "G",
+    "count": 148
+  },
+  {
+    "len": 10,
+    "start": "W",
+    "end": "S",
+    "count": 148
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "G",
+    "count": 146
+  },
+  {
+    "len": 10,
+    "start": "N",
+    "end": "S",
+    "count": 143
+  },
+  {
+    "len": 10,
+    "start": "R",
+    "end": "E",
+    "count": 142
+  },
+  {
+    "len": 10,
+    "start": "I",
+    "end": "E",
+    "count": 140
+  },
+  {
+    "len": 10,
+    "start": "R",
+    "end": "G",
+    "count": 138
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "D",
+    "count": 128
+  },
+  {
+    "len": 10,
+    "start": "R",
+    "end": "D",
+    "count": 126
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "Y",
+    "count": 119
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "E",
+    "count": 118
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "G",
+    "count": 116
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "D",
+    "count": 114
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "Y",
+    "count": 111
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "G",
+    "count": 110
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "D",
+    "count": 108
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "T",
+    "count": 105
+  },
+  {
+    "len": 10,
+    "start": "V",
+    "end": "S",
+    "count": 105
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "Y",
+    "count": 104
+  },
+  {
+    "len": 10,
+    "start": "U",
+    "end": "S",
+    "count": 101
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "E",
+    "count": 100
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "N",
+    "count": 99
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "E",
+    "count": 97
+  },
+  {
+    "len": 10,
+    "start": "I",
+    "end": "Y",
+    "count": 94
+  },
+  {
+    "len": 10,
+    "start": "O",
+    "end": "D",
+    "count": 92
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "R",
+    "count": 92
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "D",
+    "count": 90
+  },
+  {
+    "len": 10,
+    "start": "B",
+    "end": "E",
+    "count": 89
+  },
+  {
+    "len": 10,
+    "start": "U",
+    "end": "G",
+    "count": 85
+  },
+  {
+    "len": 10,
+    "start": "B",
+    "end": "D",
+    "count": 84
+  },
+  {
+    "len": 10,
+    "start": "O",
+    "end": "G",
+    "count": 80
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "N",
+    "count": 77
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "D",
+    "count": 76
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "Y",
+    "count": 75
+  },
+  {
+    "len": 10,
+    "start": "T",
+    "end": "E",
+    "count": 75
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "G",
+    "count": 71
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "N",
+    "count": 70
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "N",
+    "count": 69
+  },
+  {
+    "len": 10,
+    "start": "B",
+    "end": "G",
+    "count": 69
+  },
+  {
+    "len": 10,
+    "start": "D",
+    "end": "N",
+    "count": 68
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "R",
+    "count": 68
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "R",
+    "count": 67
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "L",
+    "count": 67
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "Y",
+    "count": 65
+  },
+  {
+    "len": 10,
+    "start": "C",
+    "end": "T",
+    "count": 64
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "D",
+    "count": 63
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "G",
+    "count": 62
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "T",
+    "count": 62
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "G",
+    "count": 61
+  },
+  {
+    "len": 10,
+    "start": "U",
+    "end": "E",
+    "count": 61
+  },
+  {
+    "len": 10,
+    "start": "H",
+    "end": "E",
+    "count": 58
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "C",
+    "count": 57
+  },
+  {
+    "len": 10,
+    "start": "B",
+    "end": "R",
+    "count": 56
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "Y",
+    "count": 56
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "D",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "F",
+    "end": "D",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "F",
+    "end": "E",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "N",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "R",
+    "end": "Y",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "T",
+    "end": "R",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "T",
+    "end": "Y",
+    "count": 55
+  },
+  {
+    "len": 10,
+    "start": "P",
+    "end": "C",
+    "count": 54
+  },
+  {
+    "len": 10,
+    "start": "A",
+    "end": "T",
+    "count": 53
+  },
+  {
+    "len": 10,
+    "start": "S",
+    "end": "L",
+    "count": 52
+  },
+  {
+    "len": 10,
+    "start": "E",
+    "end": "N",
+    "count": 51
+  },
+  {
+    "len": 10,
+    "start": "M",
+    "end": "Y",
+    "count": 51
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "S",
+    "count": 582
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "S",
+    "count": 489
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "S",
+    "count": 450
+  },
+  {
+    "len": 11,
+    "start": "A",
+    "end": "S",
+    "count": 361
+  },
+  {
+    "len": 11,
+    "start": "M",
+    "end": "S",
+    "count": 289
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "S",
+    "count": 280
+  },
+  {
+    "len": 11,
+    "start": "B",
+    "end": "S",
+    "count": 256
+  },
+  {
+    "len": 11,
+    "start": "T",
+    "end": "S",
+    "count": 245
+  },
+  {
+    "len": 11,
+    "start": "R",
+    "end": "S",
+    "count": 228
+  },
+  {
+    "len": 11,
+    "start": "I",
+    "end": "S",
+    "count": 216
+  },
+  {
+    "len": 11,
+    "start": "E",
+    "end": "S",
+    "count": 210
+  },
+  {
+    "len": 11,
+    "start": "F",
+    "end": "S",
+    "count": 196
+  },
+  {
+    "len": 11,
+    "start": "H",
+    "end": "S",
+    "count": 176
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "E",
+    "count": 171
+  },
+  {
+    "len": 11,
+    "start": "G",
+    "end": "S",
+    "count": 142
+  },
+  {
+    "len": 11,
+    "start": "L",
+    "end": "S",
+    "count": 129
+  },
+  {
+    "len": 11,
+    "start": "U",
+    "end": "D",
+    "count": 126
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "E",
+    "count": 124
+  },
+  {
+    "len": 11,
+    "start": "N",
+    "end": "S",
+    "count": 120
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "E",
+    "count": 120
+  },
+  {
+    "len": 11,
+    "start": "R",
+    "end": "G",
+    "count": 117
+  },
+  {
+    "len": 11,
+    "start": "I",
+    "end": "E",
+    "count": 115
+  },
+  {
+    "len": 11,
+    "start": "O",
+    "end": "S",
+    "count": 114
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "Y",
+    "count": 110
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "Y",
+    "count": 108
+  },
+  {
+    "len": 11,
+    "start": "W",
+    "end": "S",
+    "count": 107
+  },
+  {
+    "len": 11,
+    "start": "O",
+    "end": "G",
+    "count": 104
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "G",
+    "count": 103
+  },
+  {
+    "len": 11,
+    "start": "I",
+    "end": "Y",
+    "count": 102
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "E",
+    "count": 100
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "Y",
+    "count": 99
+  },
+  {
+    "len": 11,
+    "start": "M",
+    "end": "E",
+    "count": 94
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "G",
+    "count": 94
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "N",
+    "count": 92
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "D",
+    "count": 89
+  },
+  {
+    "len": 11,
+    "start": "A",
+    "end": "E",
+    "count": 86
+  },
+  {
+    "len": 11,
+    "start": "R",
+    "end": "E",
+    "count": 84
+  },
+  {
+    "len": 11,
+    "start": "A",
+    "end": "Y",
+    "count": 83
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "D",
+    "count": 83
+  },
+  {
+    "len": 11,
+    "start": "R",
+    "end": "D",
+    "count": 82
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "G",
+    "count": 80
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "G",
+    "count": 76
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "Y",
+    "count": 76
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "R",
+    "count": 75
+  },
+  {
+    "len": 11,
+    "start": "U",
+    "end": "S",
+    "count": 70
+  },
+  {
+    "len": 11,
+    "start": "V",
+    "end": "S",
+    "count": 65
+  },
+  {
+    "len": 11,
+    "start": "E",
+    "end": "Y",
+    "count": 64
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "D",
+    "count": 60
+  },
+  {
+    "len": 11,
+    "start": "E",
+    "end": "E",
+    "count": 60
+  },
+  {
+    "len": 11,
+    "start": "U",
+    "end": "E",
+    "count": 60
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "R",
+    "count": 59
+  },
+  {
+    "len": 11,
+    "start": "M",
+    "end": "G",
+    "count": 59
+  },
+  {
+    "len": 11,
+    "start": "D",
+    "end": "N",
+    "count": 58
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "T",
+    "count": 58
+  },
+  {
+    "len": 11,
+    "start": "B",
+    "end": "G",
+    "count": 56
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "D",
+    "count": 56
+  },
+  {
+    "len": 11,
+    "start": "R",
+    "end": "Y",
+    "count": 56
+  },
+  {
+    "len": 11,
+    "start": "T",
+    "end": "E",
+    "count": 55
+  },
+  {
+    "len": 11,
+    "start": "A",
+    "end": "N",
+    "count": 54
+  },
+  {
+    "len": 11,
+    "start": "E",
+    "end": "G",
+    "count": 54
+  },
+  {
+    "len": 11,
+    "start": "S",
+    "end": "N",
+    "count": 54
+  },
+  {
+    "len": 11,
+    "start": "B",
+    "end": "E",
+    "count": 52
+  },
+  {
+    "len": 11,
+    "start": "F",
+    "end": "G",
+    "count": 52
+  },
+  {
+    "len": 11,
+    "start": "U",
+    "end": "G",
+    "count": 52
+  },
+  {
+    "len": 11,
+    "start": "B",
+    "end": "D",
+    "count": 50
+  },
+  {
+    "len": 11,
+    "start": "C",
+    "end": "T",
+    "count": 50
+  },
+  {
+    "len": 11,
+    "start": "I",
+    "end": "D",
+    "count": 50
+  },
+  {
+    "len": 11,
+    "start": "O",
+    "end": "D",
+    "count": 50
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "C",
+    "count": 50
+  },
+  {
+    "len": 11,
+    "start": "P",
+    "end": "N",
+    "count": 50
+  },
+  {
+    "len": 12,
+    "start": "S",
+    "end": "S",
+    "count": 443
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "S",
+    "count": 436
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "S",
+    "count": 337
+  },
+  {
+    "len": 12,
+    "start": "A",
+    "end": "S",
+    "count": 246
+  },
+  {
+    "len": 12,
+    "start": "D",
+    "end": "S",
+    "count": 214
+  },
+  {
+    "len": 12,
+    "start": "M",
+    "end": "S",
+    "count": 210
+  },
+  {
+    "len": 12,
+    "start": "R",
+    "end": "S",
+    "count": 186
+  },
+  {
+    "len": 12,
+    "start": "E",
+    "end": "S",
+    "count": 185
+  },
+  {
+    "len": 12,
+    "start": "I",
+    "end": "S",
+    "count": 181
+  },
+  {
+    "len": 12,
+    "start": "T",
+    "end": "S",
+    "count": 172
+  },
+  {
+    "len": 12,
+    "start": "B",
+    "end": "S",
+    "count": 161
+  },
+  {
+    "len": 12,
+    "start": "H",
+    "end": "S",
+    "count": 151
+  },
+  {
+    "len": 12,
+    "start": "F",
+    "end": "S",
+    "count": 127
+  },
+  {
+    "len": 12,
+    "start": "L",
+    "end": "S",
+    "count": 112
+  },
+  {
+    "len": 12,
+    "start": "O",
+    "end": "S",
+    "count": 111
+  },
+  {
+    "len": 12,
+    "start": "G",
+    "end": "S",
+    "count": 102
+  },
+  {
+    "len": 12,
+    "start": "I",
+    "end": "Y",
+    "count": 102
+  },
+  {
+    "len": 12,
+    "start": "N",
+    "end": "S",
+    "count": 99
+  },
+  {
+    "len": 12,
+    "start": "I",
+    "end": "E",
+    "count": 98
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "Y",
+    "count": 97
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "Y",
+    "count": 89
+  },
+  {
+    "len": 12,
+    "start": "U",
+    "end": "D",
+    "count": 85
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "E",
+    "count": 82
+  },
+  {
+    "len": 12,
+    "start": "S",
+    "end": "Y",
+    "count": 81
+  },
+  {
+    "len": 12,
+    "start": "S",
+    "end": "E",
+    "count": 78
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "N",
+    "count": 76
+  },
+  {
+    "len": 12,
+    "start": "R",
+    "end": "G",
+    "count": 74
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "G",
+    "count": 73
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "E",
+    "count": 66
+  },
+  {
+    "len": 12,
+    "start": "S",
+    "end": "G",
+    "count": 66
+  },
+  {
+    "len": 12,
+    "start": "U",
+    "end": "S",
+    "count": 64
+  },
+  {
+    "len": 12,
+    "start": "A",
+    "end": "Y",
+    "count": 63
+  },
+  {
+    "len": 12,
+    "start": "U",
+    "end": "E",
+    "count": 62
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "G",
+    "count": 61
+  },
+  {
+    "len": 12,
+    "start": "D",
+    "end": "E",
+    "count": 58
+  },
+  {
+    "len": 12,
+    "start": "D",
+    "end": "D",
+    "count": 55
+  },
+  {
+    "len": 12,
+    "start": "C",
+    "end": "D",
+    "count": 53
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "C",
+    "count": 53
+  },
+  {
+    "len": 12,
+    "start": "D",
+    "end": "G",
+    "count": 52
+  },
+  {
+    "len": 12,
+    "start": "D",
+    "end": "Y",
+    "count": 52
+  },
+  {
+    "len": 12,
+    "start": "M",
+    "end": "Y",
+    "count": 52
+  },
+  {
+    "len": 12,
+    "start": "R",
+    "end": "D",
+    "count": 52
+  },
+  {
+    "len": 12,
+    "start": "M",
+    "end": "E",
+    "count": 50
+  },
+  {
+    "len": 12,
+    "start": "P",
+    "end": "N",
+    "count": 50
+  }
+]

@@ -155,16 +155,14 @@ function fitsPattern(word: string, pattern: string) {
   return true;
 }
 
-type BoundPatternEntry = {
-  len: number;
-  start: string; // "A".."Z"
-  end: string; // "A".."Z"
-  count: number;
-};
+type BoundPatternEntry =
+  | { len: number; kind: "both"; start: string; end: string; count: number }
+  | { len: number; kind: "start"; start: string; count: number }
+  | { len: number; kind: "end"; end: string; count: number };
 
 // CHANGE THIS if you want puzzle #1 to start on your actual launch date.
 // Format: "YYYY-MM-DD" (local date)
-const PUZZLE_START_LOCAL_DATE = "2026-03-03";
+const PUZZLE_START_LOCAL_DATE = "2026-03-04";
 
 function localDateKey(d = new Date()) {
   const yyyy = d.getFullYear();
@@ -183,7 +181,7 @@ function puzzleNumberFromLocalDate(todayKey: string) {
   const msPerDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.floor((today.getTime() - start.getTime()) / msPerDay);
 
-  return Math.max(1, diffDays + 1);
+  return Math.max(0, diffDays);
 }
 
 function hashStringToInt(s: string) {
@@ -195,10 +193,20 @@ function hashStringToInt(s: string) {
   return h >>> 0;
 }
 
-function buildPattern(len: number, start: string, end: string) {
-  if (len < 2) return start;
-  const middle = Array.from({ length: len - 2 }, () => "_").join(" ");
-  return `${start} ${middle} ${end}`.trim();
+function buildPatternFromEntry(p: BoundPatternEntry) {
+  const L = Math.max(2, p.len);
+  const tiles = Array.from({ length: L }, () => "_");
+
+  if (p.kind === "both") {
+    tiles[0] = p.start;
+    tiles[L - 1] = p.end;
+  } else if (p.kind === "start") {
+    tiles[0] = p.start;
+  } else {
+    tiles[L - 1] = p.end;
+  }
+
+  return tiles.join(" ");
 }
 
 function bonusLetterForDay(localDayKey: string) {
@@ -429,7 +437,7 @@ export default function BoundPage() {
   const pattern = useMemo(() => {
 
 
-    if (!patternBank?.length) return "A _ A";
+    if (!patternBank?.length) return "_ _ _ _ _"; // safe 5-len placeholder
   
     const seed = hashStringToInt(`BOUND:${puzzleNumber}`);
     let idx = seed % patternBank.length;
@@ -437,7 +445,7 @@ export default function BoundPage() {
     let p = patternBank[idx];
   
     // Prevent same length as yesterday
-    if (puzzleNumber > 1) {
+    if (puzzleNumber > 0) {
       const prevSeed = hashStringToInt(`BOUND:${puzzleNumber - 1}`);
       const prevIdx = prevSeed % patternBank.length;
       const prev = patternBank[prevIdx];
@@ -448,7 +456,7 @@ export default function BoundPage() {
       }
     }
   
-    return buildPattern(p.len, p.start, p.end);
+    return buildPatternFromEntry(p);
   }, [patternBank, puzzleNumber]);
 
   const len = useMemo(() => patternLength(pattern), [pattern]);
@@ -604,9 +612,9 @@ const candidateCacheRef = useRef<{
   async function loadAoaPred(): Promise<Record<string, number> | null> {
     if (aoaCacheRef.current) return aoaCacheRef.current;
     try {
-      const AOA_VERSION = "2026-03-03b"; // bump when you regenerate aoa_pred.json
-const res = await fetch(`/aoa_pred.json?v=${AOA_VERSION}`, { cache: "no-store" });
-      if (!res.ok) return null;
+      const AOA_VERSION = "2026-03-04b";
+      const res = await fetch(`/aoa_pred_full.json?v=${AOA_VERSION}`, { cache: "no-store" });
+if (!res.ok) return null;
       const json = (await res.json()) as Record<string, number>;
       // keys are expected uppercase already, but normalize anyway
       const map: Record<string, number> = {};
@@ -667,38 +675,35 @@ const res = await fetch(`/aoa_pred.json?v=${AOA_VERSION}`, { cache: "no-store" }
 
     const wb = await loadWordbank();
     const aoa = await loadAoaPred();
-    const zipf = await loadZipf();
-
+    const zipf = await loadZipf(); // optional backup
     
-
-    if (!wb || !aoa || !zipf) return null;
-
+    if (!wb || !aoa) return null;
+    
     const aoaValues: number[] = [];
     const zipfValues: number[] = [];
-
+    
     const pCompact = normalizePattern(pattern).replace(/\s+/g, "");
-
+    
     for (const w of Object.keys(wb)) {
       if (w.length !== pCompact.length) continue;
       if (!fitsPattern(w, pattern)) continue;
-
+    
       const aRaw = aoaForWord(aoa, w);
-      const a: number = Number.isFinite(aRaw) ? (aRaw as number) : NaN;
-      const zRaw = zipfForWord(zipf, w);
-      const z: number = Number.isFinite(zRaw) ? (zRaw as number) : NaN;
-      
-      if (!Number.isFinite(a)) continue;
-      if (!Number.isFinite(z)) continue; // skip if we can't resolve a usable zipf
-      
-      aoaValues.push(a);
-      zipfValues.push(z);
+      const a = Number.isFinite(aRaw) ? (aRaw as number) : NaN;
+      if (Number.isFinite(a)) aoaValues.push(a);
+    
+      if (zipf) {
+        const zRaw = zipfForWord(zipf, w);
+        const z = Number.isFinite(zRaw) ? (zRaw as number) : NaN;
+        if (Number.isFinite(z)) zipfValues.push(z);
+      }
     }
-
+    
     candidateCacheRef.current = { key, aoaValues, zipfValues };
-    return { aoaValues, zipfValues };
-  }
+return { aoaValues, zipfValues };
+} // ✅ CLOSE ensureCandidateValuesForPattern
 
-  function validateInstant(raw: string) {
+function validateInstant(raw: string) {
     const w = onlyLettersUpper(raw);
 
     if (!revealed) return { ok: false, word: w, msg: "Reveal to start." };
@@ -765,32 +770,21 @@ const res = await fetch(`/aoa_pred.json?v=${AOA_VERSION}`, { cache: "no-store" }
     }
 
     const aoa = await loadAoaPred();
-    const zipf = await loadZipf();
+    const zipf = await loadZipf(); // optional backup
     
-    if (!aoa || !zipf) {
+    if (!aoa) {
       setError("Difficulty data not loaded. Refresh and try again.");
       return;
     }
     
-    // ✅ safe to log now
-    console.log("[ZIPF CHECK] THE", zipfForWord(zipf, "THE"));
-    console.log("[ZIPF CHECK] AND", zipfForWord(zipf, "AND"));
-    console.log("[ZIPF CHECK] YOU", zipfForWord(zipf, "YOU"));
-    console.log("[ZIPF CHECK] PITCHER", zipfForWord(zipf, "PITCHER"));
-    console.log("[ZIPF CHECK] PITCHERS", zipfForWord(zipf, "PITCHERS"));
-    console.log("[AOA RAW LOOKUP] INSECT =", aoa["INSECT"]);
-console.log("[AOA FORMS] INSECT forms =", candidateForms("INSECT"));
-console.log("[AOA FORMS LOOKUP] =", candidateForms("INSECT").map(k => [k, aoa[k]]));
-
-const myAoaRaw = aoaForWord(aoa, w);
+    const myAoaRaw = aoaForWord(aoa, w);
 const hasAoa = Number.isFinite(myAoaRaw);
 const myAoa: number = hasAoa ? (myAoaRaw as number) : NaN;
-    const myZipfRaw = zipfForWord(zipf, w);
-    let myZipf: number = Number.isFinite(myZipfRaw) ? (myZipfRaw as number) : 3.8; // neutral fallback
 
-    console.log("[FORMS]", w, "->", candidateForms(w));
-console.log("[AOA candidates]", candidateForms(w).map((k) => [k, aoa[k]]));
-console.log("[ZIPF candidates]", candidateForms(w).map((k) => [k, zipf[k]]));
+const myZipfRaw = zipf ? zipfForWord(zipf, w) : undefined;
+let myZipf: number = Number.isFinite(myZipfRaw as number) ? (myZipfRaw as number) : 3.8; // fallback
+myZipf = Math.max(2.0, Math.min(6.5, myZipf));
+
     
     // clamp unrealistic values
     myZipf = Math.max(2.0, Math.min(6.5, myZipf));
@@ -809,13 +803,19 @@ console.log("[ZIPF candidates]", candidateForms(w).map((k) => [k, zipf[k]]));
 
     // If missing, we still allow play, but treat as hardest/unknown
     const cand = await ensureCandidateValuesForPattern();
-    if (!cand || !cand.aoaValues.length || !cand.zipfValues.length) {
-      setError("Couldn’t compute today’s difficulty. Refresh and try again.");
-      return;
-    }
+// never hard-fail; we can still score with sensible defaults
+const aoaValues = cand?.aoaValues ?? [];
+const zipfValues = cand?.zipfValues ?? [];
 
-    const aoaPct = Number.isFinite(myAoa) ? percentileRank(cand.aoaValues, myAoa) : 100;
-    const zipfPct = Number.isFinite(myZipf) ? percentileRank(cand.zipfValues, myZipf) : 50;
+    const aoaPct =
+    Number.isFinite(myAoa) && aoaValues.length
+    ? percentileRank(aoaValues, myAoa)
+      : 100;
+  
+  const zipfPct =
+  Number.isFinite(myZipf) && zipfValues.length
+    ? percentileRank(zipfValues, myZipf)
+      : 50;
 
     // Higher = harder
     // AoA higher => harder
@@ -857,10 +857,12 @@ if (hasAoa && myAoa <= 5.0) {
     const finalScore = Math.round(rawScore * 100) / 100;
 
     // share text: no spoilers (no pattern letters)
-    const shareText =
-    `Bounds #${puzzleNumber}\n` +
-    `Score: ${finalScore}\n` +
-    `${tierEmoji}`;
+    const shareText = buildShareText(
+      puzzleNumber,
+      finalScore,
+      tierEmoji,
+      Math.round(pct * 10) / 10
+    );
 
       const result: ScoreResult = {
         tierEmoji,
@@ -968,7 +970,7 @@ if (hasAoa && myAoa <= 5.0) {
     gap: 10,
     padding: "6px 10px",
     border: "1px solid #e5e7eb",
-    background: liveMultiplier && liveMultiplier > 1 ? "#f9fafb" : "#fff",
+    background: (liveMultiplier ?? 1) > 1 ? "#f9fafb" : "#fff",    
     color: "#374151",
     fontSize: 13,
     borderRadius: 999,
@@ -990,7 +992,7 @@ if (hasAoa && myAoa <= 5.0) {
     {/* live “feel” line */}
     {revealed && !submitted && liveMultiplier != null ? (
       <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 900, letterSpacing: 0.2 }}>
-        {liveSpeedLabel} • {formatMult(liveMultiplier)}
+        {liveSpeedLabel} • {formatMult(liveMultiplier ?? 1)}
       </span>
     ) : null}
   </span>
