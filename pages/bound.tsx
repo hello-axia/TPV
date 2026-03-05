@@ -498,7 +498,7 @@ const candidateCacheRef = useRef<{
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/bound-patterns.json?v=2026-03-04", { cache: "no-store" });
+        const res = await fetch("/bound-patterns.json?v=2026-03-04", { cache: "force-cache" });
         if (!res.ok) return;
         const json = (await res.json()) as BoundPatternEntry[];
         if (alive) setPatternBank(json);
