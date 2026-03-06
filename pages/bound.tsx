@@ -209,12 +209,6 @@ function buildPatternFromEntry(p: BoundPatternEntry) {
   return tiles.join(" ");
 }
 
-function bonusLetterForDay(localDayKey: string) {
-  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const idx = hashStringToInt(`BONUS:${localDayKey}`) % letters.length;
-  return letters[idx];
-}
-
 function formatSubmittedAt(iso: string | null) {
   if (!iso) return null;
   const d = new Date(iso);
@@ -317,30 +311,6 @@ function tierFromPercentile(pct: number): TierEmoji {
 
 // Zipf scale (SUBTLEX) is usually ~1 (very rare) to ~7 (very common).
 // Lower Zipf = rarer/harder. Higher AoA = learned later/harder.
-function absoluteHardnessPct(aoaValue: number | undefined, zipfValue: number | undefined) {
-  const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : 10;
-  const zipf = Number.isFinite(zipfValue as number) ? (zipfValue as number) : 2.5;
-  // Map Zipf to 0..100 hardness:
-  // zipf 5.5+ => ~0 (super common)
-  // zipf 4.5  => ~25
-  // zipf 3.5  => ~60
-  // zipf 3.0  => ~75
-  // zipf 2.5- => ~90-100
-// Smooth curve: still penalizes rare words, but avoids "everything near 2.2 = 100"
-const k = 2.2;   // steepness (try 1.8–2.8)
-const mid = 3.4; // midpoint where hardness ~50 (try 3.2–3.6)
-const zipfHard = clamp(100 / (1 + Math.exp(k * (zipf - mid))), 0, 100);
-  // Map AoA to 0..100 hardness:
-  // aoa 6 => 0 (early)
-  // aoa 9 => 40
-  // aoa 11 => 70
-  // aoa 13+ => 100
-  let aoaHard = clamp(((aoa - 6) / (13 - 6)) * 100, 0, 100);
-  // predicted AoA can be noisy; don't let it fully dominate
-  aoaHard = Math.min(aoaHard, 85);
-  // Combine: frequency usually tracks “feels hard” more than AoA, so weight Zipf a bit more
-  return clamp(0.65 * zipfHard + 0.35 * aoaHard, 0, 100);
-}
 
 function aoaHardnessPct(aoaValue: number | undefined) {
   // "Lower AoA = easier". This returns 0..100 hardness.
@@ -432,6 +402,7 @@ export default function BoundPage() {
 
   // pattern bank
   const [patternBank, setPatternBank] = useState<BoundPatternEntry[] | null>(null);
+  const [patternLoadError, setPatternLoadError] = useState(false);
 
   // NOTE: we keep this derived, and we only use the pattern once bank is ready
   const pattern = useMemo(() => {
@@ -503,7 +474,7 @@ const candidateCacheRef = useRef<{
         const json = (await res.json()) as BoundPatternEntry[];
         if (alive) setPatternBank(json);
       } catch {
-        // ignore
+        if (alive) setPatternLoadError(true);
       }
     })();
     return () => {
@@ -548,26 +519,33 @@ const candidateCacheRef = useRef<{
     return speedLabelFromSeconds(elapsedSec);
   }, [liveMultiplier, elapsedSec]);
 
-  // reset for new puzzle + restore persisted state (safe, no flashing old state)
-  useEffect(() => {
-    // hard reset UI
-    setRevealed(false);
-    setStartedAtMs(null);
-    setWord("");
-    setError(null);
-    setLocked(false);
-    setSubmitted(false);
-    setSubmittedAt(null);
-    setScoreResult(null);
-    setShowShare(false);
-    if (typeof window === "undefined") return;
+// reset for new puzzle + restore persisted state (safe, no flashing old state)
+useEffect(() => {
+  // hard reset UI
+  setRevealed(false);
+  setStartedAtMs(null);
+  setWord("");
+  setError(null);
+  setLocked(false);
+  setSubmitted(false);
+  setSubmittedAt(null);
+  setScoreResult(null);
+  setShowShare(false);
+  if (typeof window === "undefined") return;
+
+  // clean up timer key from any previous puzzle
+  try {
+    for (let i = 0; i < puzzleNumber; i++) {
+      localStorage.removeItem(startedKey(i));
+    }
+  } catch { /* ignore */ }
 
     // restore submission if already submitted
     try {
       const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
       if (rawSub) {
         const parsed = JSON.parse(rawSub) as StoredSubmission;
-        if (parsed && parsed.v === 2 && parsed.puzzleNumber === puzzleNumber) {
+        if (parsed && parsed.v === 2 && parsed.puzzleNumber === puzzleNumber && parsed.localDayKey === localDayKeyState) {
           setRevealed(true);
           setStartedAtMs(parsed.startedAtMs ?? null);
           setWord(parsed.word ?? "");
@@ -658,8 +636,6 @@ if (!res.ok) return null;
       return null;
     }
   }
-
-  const BLEND_AOA_WEIGHT = 0.5; // 0..1 (0.5 = equal weight AoA + frequency)
   
   async function ensureCandidateValuesForPattern(): Promise<{
     aoaValues: number[];
@@ -704,12 +680,12 @@ return { aoaValues, zipfValues };
 } // ✅ CLOSE ensureCandidateValuesForPattern
 
 function validateInstant(raw: string) {
-    const w = onlyLettersUpper(raw);
+  const w = onlyLettersUpper(raw);
 
     if (!revealed) return { ok: false, word: w, msg: "Reveal to start." };
-    if (!w) return { ok: false, word: w, msg: null }; // empty: no red error yet
-    if (w.length !== len) return { ok: false, word: w, msg: `Must be ${len} letters.` };
-    if (!fitsPattern(w, pattern)) return { ok: false, word: w, msg: "Doesn’t match the pattern." };
+    if (!w) return { ok: false, word: w, msg: null };
+    if (w.length !== len) return { ok: false, word: w, msg: null }; // still typing, no red error
+    if (!fitsPattern(w, pattern)) return { ok: false, word: w, msg: "Doesn't match the pattern." };
     return { ok: true, word: w, msg: null };
   }
 
@@ -757,7 +733,6 @@ function validateInstant(raw: string) {
     setShowShare(false);
 
     const w = onlyLettersUpper(word);
-
     // server-ish safety: confirm it’s in wordbank + has AoA
     const wb = await loadWordbank();
     if (!wb) {
@@ -786,8 +761,6 @@ let myZipf: number = Number.isFinite(myZipfRaw as number) ? (myZipfRaw as number
 myZipf = Math.max(2.0, Math.min(6.5, myZipf));
 
     
-    // clamp unrealistic values
-    myZipf = Math.max(2.0, Math.min(6.5, myZipf));
     console.log(
       "[BOUND DEBUG]",
       "word=", w,
@@ -927,8 +900,6 @@ if (hasAoa && myAoa <= 5.0) {
     }
   }
 
-  // UI bits
-  const patternTiles = useMemo(() => normalizePattern(pattern).split(" "), [pattern]);
 
   return (
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
@@ -1042,40 +1013,36 @@ if (hasAoa && myAoa <= 5.0) {
             </div>
           </div>
 
-          {/* Pattern tiles (hidden until reveal; even the start/end letters) */}
-          <div
-  key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
-  className={revealed ? "pop" : undefined}
-  style={{
-    marginTop: 14,
-    display: "flex",
-    justifyContent: "flex-start",
-    gap: 10,
-    flexWrap: "wrap",
-  }}
->
-{(revealed ? patternTiles : new Array(5).fill("?")).map((c, i) => {
-              const shown = revealed ? c : "?";
-              return (
-                <div
-                  key={i}
-                  style={{
-                    width: 46,
-                    height: 50,
-                    border: "1px solid #e5e7eb",
-                    background: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 900,
-                    fontSize: 18,
-                    color: revealed ? (shown === "_" ? "#9ca3af" : "#111827") : "#9ca3af",
-                  }}
-                >
-                  {shown}
-                </div>
-              );
-            })}
+         {/* Pattern tiles — hidden before reveal, become interactive WordInput after */}
+         <div
+            key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
+            className={revealed ? "pop" : undefined}
+            style={{ marginTop: 14 }}
+          >
+            {revealed ? (
+              <WordInput
+                label="1"
+                value={word}
+                onChange={(v) => {
+                  setWord(v);
+                  setShowShare(false);
+                }}
+                disabled={locked}
+                error={error}
+                placeholder="TYPE WORD…"
+                pattern={pattern}
+              />
+            ) : (
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                {new Array(5).fill("?").map((_, i) => (
+                  <div key={i} style={{
+                    width: 46, height: 50, border: "1px solid #e5e7eb", background: "#fff",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    fontWeight: 900, fontSize: 18, color: "#9ca3af",
+                  }}>?</div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Reveal button (starts timer) */}
@@ -1104,14 +1071,19 @@ if (hasAoa && myAoa <= 5.0) {
             )}
           </div>
 
+          {patternLoadError && (
+              <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 800, marginTop: 8 }}>
+                Failed to load puzzle. Please refresh.
+              </div>
+            )}
+
           {/* Legend */}
   
         </section>
 
-        {/* Right */}
-        <section className="boundright" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>Your word</div>
+       {/* Right */}
+       <section className="boundright" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "flex-end", gap: 12 }}>
             <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>
               {locked ? "Locked" : submitted ? "Submitted" : "One try"}
             </div>
@@ -1172,19 +1144,6 @@ if (hasAoa && myAoa <= 5.0) {
             </div>
           ) : null}
 
-          <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-            <WordInput
-              label="1"
-              value={word}
-              onChange={(v) => {
-                setWord(v);
-                setShowShare(false);
-              }}
-              disabled={!revealed || locked}
-              error={error}
-              placeholder={revealed ? "TYPE WORD…" : "REVEAL TO START"}
-            />
-          </div>
 
           {/* Actions */}
           <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
@@ -1330,12 +1289,11 @@ if (hasAoa && myAoa <= 5.0) {
 }
 
 function WordInput({
-  label,
   value,
   onChange,
   disabled,
   error,
-  placeholder,
+  pattern,
 }: {
   label: string;
   value: string;
@@ -1343,34 +1301,134 @@ function WordInput({
   disabled: boolean;
   error?: string | null;
   placeholder: string;
+  pattern: string;
 }) {
-  const hasError = !!error && onlyLettersUpper(value).length > 0;
-  return (
-    <div style={{ display: "grid", gridTemplateColumns: "28px 1fr", gap: 12, alignItems: "start" }}>
-      <div style={{ color: "#9ca3af", fontSize: 13, paddingTop: 12, fontWeight: 900 }}>{label}</div>
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const pc = (pattern || "").replace(/\s/g, "").toUpperCase();
+  const totalLen = pc.length;
 
-      <div style={{ display: "grid", gap: 6 }}>
-        <input
-          value={value}
-          onChange={(e) => onChange(onlyLettersUpper(e.target.value))}
-          placeholder={placeholder}
-          disabled={disabled}
-          style={{
-            height: 44,
-            border: `1px solid ${hasError ? "#ef4444" : "#e5e7eb"}`,
-            padding: "0 12px",
-            fontSize: 16,
-            fontWeight: 900,
-            letterSpacing: 1.2,
-            textTransform: "uppercase",
-            background: disabled ? "#f9fafb" : "#fff",
-            color: disabled ? "#9ca3af" : "#111827",
-            outline: "none",
-          }}
-        />
-        <div style={{ minHeight: 16, fontSize: 12, color: hasError ? "#ef4444" : "#9ca3af" }}>
-          {hasError ? error : " "}
-        </div>
+  const fixedAt = (i: number) => pc[i] !== "_";
+
+  const freeIdxs: number[] = [];
+  for (let i = 0; i < totalLen; i++) {
+    if (!fixedAt(i)) freeIdxs.push(i);
+  }
+
+  // Build display: fixed positions show pattern letter, free positions show what user typed
+  // value is always the full word (length = totalLen), with "" for untyped free positions
+  function getDisplay(): string[] {
+    const d: string[] = [];
+    for (let i = 0; i < totalLen; i++) {
+      if (fixedAt(i)) {
+        d.push(pc[i]);
+      } else {
+        const v = (value || "").padEnd(totalLen, " ");
+        const ch = v[i] ?? " ";
+        d.push(/[A-Z]/i.test(ch) ? ch.toUpperCase() : "");
+      }
+    }
+    return d;
+  }
+
+  function withChange(fullIdx: number, ch: string): string {
+    // Pad value to full length so positional indexing works
+    const v = (value || "").padEnd(totalLen, " ");
+    const chars = Array.from({ length: totalLen }, (_, i) => {
+      if (fixedAt(i)) return pc[i];
+      if (i === fullIdx) return ch === "" ? " " : ch;
+      const existing = v[i] ?? " ";
+      return /[A-Z]/i.test(existing) ? existing.toUpperCase() : " ";
+    });
+    return chars.join("");
+  }
+
+  function focusNextFree(from: number) {
+    for (let i = from + 1; i < totalLen; i++) {
+      if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; }
+    }
+  }
+  function focusPrevFree(from: number) {
+    for (let i = from - 1; i >= 0; i--) {
+      if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; }
+    }
+  }
+
+  function handleChange(fullIdx: number, e: React.ChangeEvent<HTMLInputElement>) {
+    if (disabled) return;
+    const raw = (e.target.value || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
+    if (!raw) return;
+    const ch = raw[raw.length - 1];
+    onChange(withChange(fullIdx, ch));
+    focusNextFree(fullIdx);
+  }
+
+  function handleKeyDown(fullIdx: number, e: React.KeyboardEvent<HTMLInputElement>) {
+    if (disabled) return;
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const v = (value || "").padEnd(totalLen, " ");
+      const cur = v[fullIdx] ?? " ";
+      if (/[A-Z]/i.test(cur)) {
+        onChange(withChange(fullIdx, ""));
+      } else {
+        focusPrevFree(fullIdx);
+        const prevFree = freeIdxs[freeIdxs.indexOf(fullIdx) - 1];
+        if (prevFree !== undefined) {
+          onChange(withChange(prevFree, ""));
+        }
+      }
+    } else if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      focusPrevFree(fullIdx);
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      focusNextFree(fullIdx);
+    }
+  }
+
+  const display = getDisplay();
+  const v = (value || "").padEnd(totalLen, " ");
+  const hasError = !!error && freeIdxs.some(i => /[A-Z]/i.test(v[i] ?? " "));
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        {Array.from({ length: totalLen }, (_, i) => {
+          const fixed = fixedAt(i);
+          const letter = display[i];
+          const borderColor = hasError ? "#ef4444" : fixed ? "#d1d5db" : "#111827";
+          return (
+            <input
+              key={i}
+              ref={el => { inputRefs.current[i] = el; }}
+              value={letter}
+              readOnly={fixed || disabled}
+              disabled={disabled && !fixed}
+              onChange={(e) => handleChange(i, e)}
+              onKeyDown={(e) => handleKeyDown(i, e)}
+              maxLength={2}
+              inputMode="text"
+              autoCapitalize="characters"
+              style={{
+                width: 46,
+                height: 50,
+                border: `1.5px solid ${borderColor}`,
+                background: fixed ? "#f3f4f6" : disabled ? "#f9fafb" : "#fff",
+                color: fixed ? "#6b7280" : "#111827",
+                fontSize: 20,
+                fontWeight: 900,
+                textAlign: "center",
+                textTransform: "uppercase",
+                outline: "none",
+                caretColor: "transparent",
+                letterSpacing: 0,
+              }}
+            />
+          );
+        })}
+      </div>
+      <div style={{ minHeight: 16, fontSize: 12, marginTop: 6, color: hasError ? "#ef4444" : "#9ca3af" }}>
+        {hasError ? error : " "}
       </div>
     </div>
   );
