@@ -290,7 +290,7 @@ export default function HomePage({
           {/* What each type means */}
           <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem" }}>
             {[
-              { label: "Verdict", desc: "Deep issue breakdowns using the IDU framework — values, facts, forecasts, and where you land." },
+              { label: "Verdict", desc: "Deep issue breakdowns a consistent framework — values, facts, forecasts, and where you land." },
               { label: "Briefing", desc: "Quick context on trending claims — what's real, what's noise, and why it matters." },
             ].map((item) => (
               <div key={item.label} style={{

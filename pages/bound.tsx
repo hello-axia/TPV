@@ -738,7 +738,7 @@ export default function BoundPage() {
               <WordInput
                 label="1"
                 value={word}
-                onChange={(v) => { setWord(v); setShowShare(false); }}
+                onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
                 disabled={locked}
                 error={error}
                 placeholder="TYPE WORD…"

@@ -98,7 +98,7 @@ export default function VerdictsPage({ items }: { items: VerdictMeta[] }) {
           color: "var(--text-dim)",
           marginTop: "1rem",
         }}>
-          Deep issue breakdowns using the IDU framework — values, facts, forecasts,
+          Deep issue breakdowns a consistent framework — values, facts, forecasts,
           and the structure you need to form your own view.
         </p>
       </div>

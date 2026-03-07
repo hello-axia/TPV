@@ -201,6 +201,9 @@ export default function ArticleShell({
             .article-header {
               margin-bottom: 1.5rem !important;
             }
+            .tpv-article aside {
+              order: -1;
+            }
           }
         `}</style>
       </main>
