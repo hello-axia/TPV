@@ -6,30 +6,52 @@ export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   return (
-    <main style={{ maxWidth: 720, margin: "0 auto", padding: "42px 24px 72px" }}>
-      <h1 style={{ fontSize: 46, fontWeight: 900, letterSpacing: -1.2, margin: 0 }}>
-        Contact
+    <main style={{
+      maxWidth: 720,
+      margin: "0 auto",
+      padding: "2.5rem 1.25rem 5rem",
+    }}>
+      <div className="eyebrow" style={{ marginBottom: "0.75rem" }}>Contact</div>
+      <h1 style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "clamp(2rem, 5vw, 3rem)",
+        fontWeight: 400,
+        letterSpacing: "-0.03em",
+        color: "var(--text)",
+        lineHeight: 1.05,
+        margin: 0,
+      }}>
+        Get in touch
       </h1>
-
-      <p style={{ marginTop: 12, color: "#6b7280", fontSize: 18, lineHeight: 1.6 }}>
-        Send a note. We’ll read it.
+      <p style={{
+        marginTop: "0.75rem",
+        color: "var(--text-dim)",
+        fontSize: "1rem",
+        lineHeight: 1.6,
+        fontFamily: "var(--font-body)",
+      }}>
+        Send a note. We'll read it.
       </p>
 
-      <div style={{ marginTop: 24, border: "1px solid #e5e7eb", borderRadius: 0, background: "#fff", padding: 18 }}>
+      <div style={{ borderTop: "1px solid var(--border)", margin: "1.5rem 0 2rem" }} />
+
+      <div style={{
+        border: "1px solid var(--border-light)",
+        borderRadius: 4,
+        background: "var(--bg2)",
+        padding: "1.5rem",
+      }}>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             setStatus("sending");
-
             try {
               const r = await fetch("/api/contact", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, message }),
               });
-
               if (!r.ok) throw new Error("Bad response");
-
               setStatus("sent");
               setEmail("");
               setMessage("");
@@ -37,36 +59,66 @@ export default function ContactPage() {
               setStatus("error");
             }
           }}
-          style={{ display: "grid", gap: 12 }}
+          style={{ display: "grid", gap: "1rem" }}
         >
-          <label style={{ display: "grid", gap: 6 }}>
-            <span style={{ fontSize: 13, color: "#6b7280" }}>Your email</span>
+          <label style={{ display: "grid", gap: "0.4rem" }}>
+            <span style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-faint)",
+            }}>
+              Your email
+            </span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              style={{ border: "1px solid #e5e7eb", borderRadius: 0, padding: "10px 12px", fontSize: 15, outline: "none" }}
+              style={{
+                border: "1px solid var(--border-light)",
+                borderRadius: 3,
+                padding: "0.7rem 0.9rem",
+                fontSize: "0.95rem",
+                outline: "none",
+                background: "var(--bg3)",
+                color: "var(--text)",
+                fontFamily: "var(--font-body)",
+              }}
             />
           </label>
 
-          <label style={{ display: "grid", gap: 6 }}>
-            <span style={{ fontSize: 13, color: "#6b7280" }}>Message</span>
+          <label style={{ display: "grid", gap: "0.4rem" }}>
+            <span style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-faint)",
+            }}>
+              Message
+            </span>
             <textarea
               required
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="What’s on your mind?"
+              placeholder="What's on your mind?"
               rows={6}
               style={{
-                border: "1px solid #e5e7eb",
-                borderRadius: 0,
-                padding: "10px 12px",
-                fontSize: 15,
+                border: "1px solid var(--border-light)",
+                borderRadius: 3,
+                padding: "0.7rem 0.9rem",
+                fontSize: "0.95rem",
                 outline: "none",
                 resize: "vertical",
                 lineHeight: 1.6,
+                background: "var(--bg3)",
+                color: "var(--text)",
+                fontFamily: "var(--font-body)",
               }}
             />
           </label>
@@ -75,25 +127,53 @@ export default function ContactPage() {
             type="submit"
             disabled={status === "sending"}
             style={{
-              marginTop: 6,
-              border: "1px solid #e5e7eb",
-              background: status === "sending" ? "#f3f4f6" : "#f9fafb",
-              borderRadius: 0,
-              padding: "10px 12px",
-              fontSize: 15,
+              marginTop: "0.25rem",
+              padding: "0.85rem",
+              background: status === "sending" ? "var(--bg3)" : "var(--gold)",
+              color: status === "sending" ? "var(--text-faint)" : "var(--bg)",
+              border: "none",
+              borderRadius: 3,
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
               fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
               cursor: status === "sending" ? "default" : "pointer",
+              transition: "opacity 0.15s ease",
             }}
           >
-            {status === "sending" ? "Sending..." : "Send"}
+            {status === "sending" ? "Sending…" : "Send message"}
           </button>
 
-          {status === "sent" ? <div style={{ marginTop: 6, color: "#065f46", fontSize: 13 }}>Sent. Thank you.</div> : null}
-          {status === "error" ? <div style={{ marginTop: 6, color: "#991b1b", fontSize: 13 }}>Something went wrong. Try again.</div> : null}
+          {status === "sent" && (
+            <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "var(--gold)" }}>
+              Sent. Thank you.
+            </div>
+          )}
+          {status === "error" && (
+            <div style={{ fontFamily: "var(--font-body)", fontSize: "0.85rem", color: "#ef4444" }}>
+              Something went wrong. Try again.
+            </div>
+          )}
         </form>
 
-        <div style={{ marginTop: 12, color: "#6b7280", fontSize: 13, lineHeight: 1.5 }}>
-          Prefer email? <span style={{ color: "#111827", fontWeight: 600 }}>ello.axia@gmail.com</span>
+        <div style={{
+          marginTop: "1.25rem",
+          paddingTop: "1rem",
+          borderTop: "1px solid var(--border)",
+          fontFamily: "var(--font-body)",
+          fontSize: "0.82rem",
+          color: "var(--text-faint)",
+          lineHeight: 1.5,
+        }}>
+          Prefer email?{" "}
+          <a href="mailto:ello.axia@gmail.com" style={{
+            color: "var(--gold)",
+            textDecoration: "none",
+            fontWeight: 500,
+          }}>
+            ello.axia@gmail.com
+          </a>
         </div>
       </div>
     </main>

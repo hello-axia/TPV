@@ -12,21 +12,12 @@ const TIER_LABELS: Record<TierEmoji, TierName> = {
   "🟥": "Advanced",
 };
 
-// Relative-per-puzzle percentile buckets (adjust anytime)
-// 0..35 common, 35..50 uncommon, 50..80 rare, 80..100 advanced
 const PCT_COMMON_MAX = 35;
 const PCT_UNCOMMON_MAX = 50;
 const PCT_RARE_MAX = 80;
 
-// Time multiplier (minute buckets):
-// - 0–60s: 2.0x (insanely fast)
-// - 60–120s: 1.7x
-// - 120–180s: 1.45x
-// - 180–240s: 1.25x
-// - 240s+: 1.0x (no boost)
 function multiplierFromSeconds(timeSec: number) {
   const t = Math.max(0, timeSec);
-
   if (t < 60) return 2.0;
   if (t < 120) return 1.7;
   if (t < 180) return 1.45;
@@ -35,7 +26,6 @@ function multiplierFromSeconds(timeSec: number) {
 }
 
 function formatMult(mult: number) {
-  // show 2.0x, 1.7x, 1.45x, etc.
   const s = String(Math.round(mult * 100) / 100);
   return `${s}x`;
 }
@@ -56,79 +46,63 @@ function onlyLettersUpper(s: string) {
 function candidateForms(rawWord: string): string[] {
   const W = onlyLettersUpper(rawWord);
   if (!W) return [];
-
   const forms: string[] = [];
   const add = (s: string) => {
     const k = onlyLettersUpper(s);
     if (!k) return;
     if (!forms.includes(k)) forms.push(k);
   };
-
   add(W);
-
-  // plurals / nouns
   if (W.endsWith("IES") && W.length > 3) add(W.slice(0, -3) + "Y");
   if (W.endsWith("ES") && W.length > 2) add(W.slice(0, -2));
   if (W.endsWith("S") && W.length > 1) add(W.slice(0, -1));
-
-  // -ING
   if (W.endsWith("ING") && W.length > 4) {
     const stem = W.slice(0, -3);
     add(stem);
-    if (stem.length > 1) add(stem.slice(0, -1)); // doubled consonant
-    add(stem + "E"); // silent-e
+    if (stem.length > 1) add(stem.slice(0, -1));
+    add(stem + "E");
   }
-
-  // -ED
   if (W.endsWith("ED") && W.length > 3) {
     const stem = W.slice(0, -2);
     add(stem);
     if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
-    if (stem.length > 1) add(stem.slice(0, -1)); // doubled consonant
-    add(stem + "E"); // silent-e
+    if (stem.length > 1) add(stem.slice(0, -1));
+    add(stem + "E");
   }
-
-  // -ER / -EST
   if (W.endsWith("ER") && W.length > 3) {
     const stem = W.slice(0, -2);
     add(stem);
     if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
     add(stem + "E");
   }
-
   if (W.endsWith("EST") && W.length > 4) {
     const stem = W.slice(0, -3);
     add(stem);
     if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
     add(stem + "E");
   }
-
   return forms;
 }
 
 function zipfForWord(zipf: Record<string, number>, rawWord: string): number | undefined {
   const forms = candidateForms(rawWord);
   let best: number | undefined = undefined;
-
   for (const k of forms) {
     const v = zipf[k];
     if (!Number.isFinite(v)) continue;
-    if (best == null || (v as number) > best) best = v as number; // MAX zipf = most common
+    if (best == null || (v as number) > best) best = v as number;
   }
-
   return best;
 }
 
 function aoaForWord(aoa: Record<string, number>, rawWord: string): number | undefined {
   const forms = candidateForms(rawWord);
   let best: number | undefined = undefined;
-
   for (const k of forms) {
     const v = aoa[k];
     if (!Number.isFinite(v)) continue;
-    if (best == null || (v as number) < best) best = v as number; // MIN aoa = simplest/earliest
+    if (best == null || (v as number) < best) best = v as number;
   }
-
   return best;
 }
 
@@ -160,8 +134,6 @@ type BoundPatternEntry =
   | { len: number; kind: "start"; start: string; count: number }
   | { len: number; kind: "end"; end: string; count: number };
 
-// CHANGE THIS if you want puzzle #1 to start on your actual launch date.
-// Format: "YYYY-MM-DD" (local date)
 const PUZZLE_START_LOCAL_DATE = "2026-03-04";
 
 function localDateKey(d = new Date()) {
@@ -174,13 +146,10 @@ function localDateKey(d = new Date()) {
 function puzzleNumberFromLocalDate(todayKey: string) {
   const [y0, m0, d0] = PUZZLE_START_LOCAL_DATE.split("-").map(Number);
   const [y1, m1, d1] = todayKey.split("-").map(Number);
-
   const start = new Date(y0, (m0 || 1) - 1, d0 || 1);
   const today = new Date(y1, (m1 || 1) - 1, d1 || 1);
-
   const msPerDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.floor((today.getTime() - start.getTime()) / msPerDay);
-
   return Math.max(0, diffDays);
 }
 
@@ -196,7 +165,6 @@ function hashStringToInt(s: string) {
 function buildPatternFromEntry(p: BoundPatternEntry) {
   const L = Math.max(2, p.len);
   const tiles = Array.from({ length: L }, () => "_");
-
   if (p.kind === "both") {
     tiles[0] = p.start;
     tiles[L - 1] = p.end;
@@ -205,7 +173,6 @@ function buildPatternFromEntry(p: BoundPatternEntry) {
   } else {
     tiles[L - 1] = p.end;
   }
-
   return tiles.join(" ");
 }
 
@@ -224,15 +191,7 @@ function formatSubmittedAt(iso: string | null) {
 
 function MetaKicker({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      style={{
-        fontSize: 12,
-        fontWeight: 900,
-        letterSpacing: 1.2,
-        color: "#ef4444",
-        textTransform: "uppercase",
-      }}
-    >
+    <div className="eyebrow">
       {children}
     </div>
   );
@@ -246,13 +205,14 @@ function Pill({ children }: { children: React.ReactNode }) {
         alignItems: "center",
         gap: 8,
         padding: "6px 10px",
-        border: "1px solid #e5e7eb",
-        background: "#fff",
-        color: "#374151",
+        border: "1px solid var(--border-light)",
+        background: "var(--bg2)",
+        color: "var(--text-dim)",
         fontSize: 13,
         borderRadius: 999,
         whiteSpace: "nowrap",
-        fontWeight: 800,
+        fontWeight: 700,
+        fontFamily: "var(--font-body)",
       }}
     >
       {children}
@@ -263,17 +223,15 @@ function Pill({ children }: { children: React.ReactNode }) {
 type ScoreResult = {
   tierEmoji: TierEmoji;
   tierName: TierName;
-  points: number; // 1..4
-  percentile: number; // 0..100
-
-  aoaPct: number;   // 0..100
-  zipfPct: number;  // 0..100
-  blendPct: number; // 0..100
-
-  bonusPoints: number; // 0..1
+  points: number;
+  percentile: number;
+  aoaPct: number;
+  zipfPct: number;
+  blendPct: number;
+  bonusPoints: number;
   timeSec: number;
   multiplier: number;
-  finalScore: number; // rounded
+  finalScore: number;
   shareText: string;
 };
 
@@ -284,7 +242,7 @@ type StoredSubmission = {
   pattern: string;
   length: number;
   startedAtMs: number;
-  submittedAt: string; // ISO
+  submittedAt: string;
   word: string;
   scoreResult: ScoreResult;
 };
@@ -308,26 +266,15 @@ function tierFromPercentile(pct: number): TierEmoji {
   return "🟥";
 }
 
-
-// Zipf scale (SUBTLEX) is usually ~1 (very rare) to ~7 (very common).
-// Lower Zipf = rarer/harder. Higher AoA = learned later/harder.
-
 function aoaHardnessPct(aoaValue: number | undefined) {
-  // "Lower AoA = easier". This returns 0..100 hardness.
-  // Tune these two numbers to match your dataset’s scale.
-  // Good defaults if your AoA values look like ~3–12:
-  const EASY = 5.5;  // learned by ~K/1st
-  const HARD = 10.5; // learned later
-
+  const EASY = 5.5;
+  const HARD = 10.5;
   const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : NaN;
   if (!Number.isFinite(aoa)) return 0;
-
   return clamp(((aoa - EASY) / (HARD - EASY)) * 100, 0, 100);
 }
 
 function percentileRank(values: number[], x: number) {
-  // returns 0..100, where higher means "harder" (higher AoA)
-  // uses rank among sorted values (ties handled by <=)
   if (!values.length) return 50;
   const sorted = values.slice().sort((a, b) => a - b);
   let count = 0;
@@ -340,19 +287,9 @@ function percentileRank(values: number[], x: number) {
   return clamp(rank01 * 100, 0, 100);
 }
 
-function buildShareText(
-  puzzleNumber: number,
-  finalScore: number,
-  tierEmoji: string,
-  percentile: number
-) {
+function buildShareText(puzzleNumber: number, finalScore: number, tierEmoji: string, percentile: number) {
   const pct = Math.round(percentile * 10) / 10;
-  return (
-    `Bounds #${puzzleNumber}\n` +
-    `Score: ${finalScore}\n` +
-    `Percentile: ${pct}\n` +
-    `${tierEmoji}`
-  );
+  return `Bounds #${puzzleNumber}\nScore: ${finalScore}\nPercentile: ${pct}\n${tierEmoji}`;
 }
 
 function tierIndexFromEmoji(t: TierEmoji) {
@@ -368,12 +305,10 @@ function tierEmojiFromIndex(i: number): TierEmoji {
 function applyZipfCapsOnly(baseTier: TierEmoji, zipfValue: number | undefined) {
   if (!Number.isFinite(zipfValue as number)) return baseTier;
   const z = zipfValue as number;
-
   let capIdx: number | null = null;
   if (z >= 5.1) capIdx = 0;
   else if (z >= 4.7) capIdx = 1;
   else if (z >= 4.2) capIdx = 2;
-
   let idx = tierIndexFromEmoji(baseTier);
   if (capIdx != null) idx = Math.min(idx, capIdx);
   return tierEmojiFromIndex(idx);
@@ -393,78 +328,50 @@ function formatOrdinal(n: number) {
 
 
 export default function BoundPage() {
-  // daily puzzle (local midnight)
   const [localDayKeyState, setLocalDayKeyState] = useState(() => localDateKey());
-  const puzzleNumber = useMemo(
-    () => puzzleNumberFromLocalDate(localDayKeyState),
-    [localDayKeyState]
-  );
+  const puzzleNumber = useMemo(() => puzzleNumberFromLocalDate(localDayKeyState), [localDayKeyState]);
 
-  // pattern bank
   const [patternBank, setPatternBank] = useState<BoundPatternEntry[] | null>(null);
   const [patternLoadError, setPatternLoadError] = useState(false);
 
-  // NOTE: we keep this derived, and we only use the pattern once bank is ready
   const pattern = useMemo(() => {
-
-
-    if (!patternBank?.length) return "_ _ _ _ _"; // safe 5-len placeholder
-  
+    if (!patternBank?.length) return "_ _ _ _ _";
     const seed = hashStringToInt(`BOUND:${puzzleNumber}`);
     let idx = seed % patternBank.length;
-  
     let p = patternBank[idx];
-  
-    // Prevent same length as yesterday
     if (puzzleNumber > 0) {
       const prevSeed = hashStringToInt(`BOUND:${puzzleNumber - 1}`);
       const prevIdx = prevSeed % patternBank.length;
       const prev = patternBank[prevIdx];
-  
       if (prev && p.len === prev.len) {
         idx = (idx + 1) % patternBank.length;
         p = patternBank[idx];
       }
     }
-  
     return buildPatternFromEntry(p);
   }, [patternBank, puzzleNumber]);
 
   const len = useMemo(() => patternLength(pattern), [pattern]);
-
   const puzzleReady = !!patternBank?.length;
 
-  // gameplay state
   const [revealed, setRevealed] = useState(false);
   const [startedAtMs, setStartedAtMs] = useState<number | null>(null);
   const [nowMs, setNowMs] = useState<number>(() => Date.now());
-
   const [word, setWord] = useState("");
   const [locked, setLocked] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
   const [showShare, setShowShare] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
-
-  // animation triggers (we bump these to re-run CSS keyframe pops)
   const [revealAnimKey, setRevealAnimKey] = useState(0);
   const [resultAnimKey, setResultAnimKey] = useState(0);
 
-// caches
-const wordbankCacheRef = useRef<Record<string, 1> | null>(null); // validity
-const aoaCacheRef = useRef<Record<string, number> | null>(null); // AoA
-const zipfCacheRef = useRef<Record<string, number> | null>(null); // SUBTLEX Zipf
+  const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
+  const aoaCacheRef = useRef<Record<string, number> | null>(null);
+  const zipfCacheRef = useRef<Record<string, number> | null>(null);
+  const candidateCacheRef = useRef<{ key: string; aoaValues: number[]; zipfValues: number[] } | null>(null);
 
-const candidateCacheRef = useRef<{
-  key: string;
-  aoaValues: number[];
-  zipfValues: number[];
-} | null>(null);
-
-
-  // load patterns once
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -477,25 +384,17 @@ const candidateCacheRef = useRef<{
         if (alive) setPatternLoadError(true);
       }
     })();
-    return () => {
-      alive = false;
-    };
+    return () => { alive = false; };
   }, []);
 
-  // auto-rollover at local midnight
   useEffect(() => {
     const now = new Date();
     const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
     const ms = nextMidnight.getTime() - now.getTime() + 50;
-
-    const t = window.setTimeout(() => {
-      setLocalDayKeyState(localDateKey());
-    }, ms);
-
+    const t = window.setTimeout(() => { setLocalDayKeyState(localDateKey()); }, ms);
     return () => window.clearTimeout(t);
   }, [localDayKeyState]);
 
-  // tick timer only when started + not locked
   useEffect(() => {
     if (!startedAtMs) return;
     if (locked) return;
@@ -519,28 +418,20 @@ const candidateCacheRef = useRef<{
     return speedLabelFromSeconds(elapsedSec);
   }, [liveMultiplier, elapsedSec]);
 
-// reset for new puzzle + restore persisted state (safe, no flashing old state)
-useEffect(() => {
-  // hard reset UI
-  setRevealed(false);
-  setStartedAtMs(null);
-  setWord("");
-  setError(null);
-  setLocked(false);
-  setSubmitted(false);
-  setSubmittedAt(null);
-  setScoreResult(null);
-  setShowShare(false);
-  if (typeof window === "undefined") return;
-
-  // clean up timer key from any previous puzzle
-  try {
-    for (let i = 0; i < puzzleNumber; i++) {
-      localStorage.removeItem(startedKey(i));
-    }
-  } catch { /* ignore */ }
-
-    // restore submission if already submitted
+  useEffect(() => {
+    setRevealed(false);
+    setStartedAtMs(null);
+    setWord("");
+    setError(null);
+    setLocked(false);
+    setSubmitted(false);
+    setSubmittedAt(null);
+    setScoreResult(null);
+    setShowShare(false);
+    if (typeof window === "undefined") return;
+    try {
+      for (let i = 0; i < puzzleNumber; i++) { localStorage.removeItem(startedKey(i)); }
+    } catch { /* ignore */ }
     try {
       const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
       if (rawSub) {
@@ -556,8 +447,6 @@ useEffect(() => {
           return;
         }
       }
-
-      // restore startedAt (timer resumes) if they revealed but didn’t submit
       const rawStarted = localStorage.getItem(startedKey(puzzleNumber));
       if (rawStarted) {
         const ms = Number(rawStarted);
@@ -566,9 +455,7 @@ useEffect(() => {
           setStartedAtMs(ms);
         }
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, [puzzleNumber]);
 
   async function loadWordbank(): Promise<Record<string, 1> | null> {
@@ -577,14 +464,11 @@ useEffect(() => {
       const res = await fetch("/wordbank.json", { cache: "force-cache" });
       if (!res.ok) return null;
       const json = (await res.json()) as Record<string, unknown>;
-      // normalize into a {WORD:1} map (wordbank.json is likely {word: something})
       const map: Record<string, 1> = {};
       for (const k of Object.keys(json)) map[onlyLettersUpper(k)] = 1;
       wordbankCacheRef.current = map;
       return map;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
 
   async function loadAoaPred(): Promise<Record<string, number> | null> {
@@ -592,9 +476,8 @@ useEffect(() => {
     try {
       const AOA_VERSION = "2026-03-04b";
       const res = await fetch(`/aoa_pred_full.json?v=${AOA_VERSION}`, { cache: "no-store" });
-if (!res.ok) return null;
+      if (!res.ok) return null;
       const json = (await res.json()) as Record<string, number>;
-      // keys are expected uppercase already, but normalize anyway
       const map: Record<string, number> = {};
       for (const [k, v] of Object.entries(json)) {
         const kk = onlyLettersUpper(k);
@@ -605,23 +488,16 @@ if (!res.ok) return null;
       }
       aoaCacheRef.current = map;
       return map;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
-
 
   async function loadZipf(): Promise<Record<string, number> | null> {
     if (zipfCacheRef.current) return zipfCacheRef.current;
     try {
-      // Expecting a map like { "THE": 6.17, "YOU": 6.33, ... }
-      // If your file is shaped differently, tell me and I’ll adapt it.
       const res = await fetch("/subtlex-us-zipf.json", { cache: "force-cache" });
       if (!res.ok) return null;
-  
       const json = (await res.json()) as Record<string, number>;
       const map: Record<string, number> = {};
-  
       for (const [k, v] of Object.entries(json)) {
         const kk = onlyLettersUpper(k);
         const vv = Number(v);
@@ -629,72 +505,50 @@ if (!res.ok) return null;
         if (!Number.isFinite(vv)) continue;
         map[kk] = vv;
       }
-  
       zipfCacheRef.current = map;
       return map;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
-  
-  async function ensureCandidateValuesForPattern(): Promise<{
-    aoaValues: number[];
-    zipfValues: number[];
-  } | null> {
+
+  async function ensureCandidateValuesForPattern(): Promise<{ aoaValues: number[]; zipfValues: number[] } | null> {
     const key = `v4|${normalizePattern(pattern)}|${len}`;
     if (candidateCacheRef.current?.key === key) {
-      return {
-        aoaValues: candidateCacheRef.current.aoaValues,
-        zipfValues: candidateCacheRef.current.zipfValues,
-      };
+      return { aoaValues: candidateCacheRef.current.aoaValues, zipfValues: candidateCacheRef.current.zipfValues };
     }
-
     const wb = await loadWordbank();
     const aoa = await loadAoaPred();
-    const zipf = await loadZipf(); // optional backup
-    
+    const zipf = await loadZipf();
     if (!wb || !aoa) return null;
-    
     const aoaValues: number[] = [];
     const zipfValues: number[] = [];
-    
     const pCompact = normalizePattern(pattern).replace(/\s+/g, "");
-    
     for (const w of Object.keys(wb)) {
       if (w.length !== pCompact.length) continue;
       if (!fitsPattern(w, pattern)) continue;
-    
       const aRaw = aoaForWord(aoa, w);
       const a = Number.isFinite(aRaw) ? (aRaw as number) : NaN;
       if (Number.isFinite(a)) aoaValues.push(a);
-    
       if (zipf) {
         const zRaw = zipfForWord(zipf, w);
         const z = Number.isFinite(zRaw) ? (zRaw as number) : NaN;
         if (Number.isFinite(z)) zipfValues.push(z);
       }
     }
-    
     candidateCacheRef.current = { key, aoaValues, zipfValues };
-return { aoaValues, zipfValues };
-} // ✅ CLOSE ensureCandidateValuesForPattern
+    return { aoaValues, zipfValues };
+  }
 
-function validateInstant(raw: string) {
-  const w = onlyLettersUpper(raw);
-
+  function validateInstant(raw: string) {
+    const w = onlyLettersUpper(raw);
     if (!revealed) return { ok: false, word: w, msg: "Reveal to start." };
     if (!w) return { ok: false, word: w, msg: null };
-    if (w.length !== len) return { ok: false, word: w, msg: null }; // still typing, no red error
+    if (w.length !== len) return { ok: false, word: w, msg: null };
     if (!fitsPattern(w, pattern)) return { ok: false, word: w, msg: "Doesn't match the pattern." };
     return { ok: true, word: w, msg: null };
   }
 
   const instant = useMemo(() => validateInstant(word), [word, revealed, len, pattern]);
-
-  useEffect(() => {
-    // “instant red error” behavior
-    setError(instant.msg);
-  }, [instant.msg]);
+  useEffect(() => { setError(instant.msg); }, [instant.msg]);
 
   const canSubmit = useMemo(() => {
     if (!puzzleReady) return false;
@@ -707,314 +561,175 @@ function validateInstant(raw: string) {
   function onReveal() {
     if (!puzzleReady) return;
     if (locked) return;
-
-    // if already started, don’t overwrite
-    if (startedAtMs) {
-      setRevealed(true);
-      return;
-    }
-
+    if (startedAtMs) { setRevealed(true); return; }
     const ms = Date.now();
     setRevealed(true);
     setRevealAnimKey((k) => k + 1);
     setStartedAtMs(ms);
     setNowMs(ms);
-
-    try {
-      localStorage.setItem(startedKey(puzzleNumber), String(ms));
-    } catch {
-      // ignore
-    }
+    try { localStorage.setItem(startedKey(puzzleNumber), String(ms)); } catch { /* ignore */ }
   }
 
   async function onSubmit() {
     if (!canSubmit) return;
-
     setShowShare(false);
-
     const w = onlyLettersUpper(word);
-    // server-ish safety: confirm it’s in wordbank + has AoA
     const wb = await loadWordbank();
-    if (!wb) {
-      setError("Word list not loaded. Refresh and try again.");
-      return;
-    }
-    if (!(w in wb)) {
-      setError("Not a valid word.");
-      return;
-    }
-
+    if (!wb) { setError("Word list not loaded. Refresh and try again."); return; }
+    if (!(w in wb)) { setError("Not a valid word."); return; }
     const aoa = await loadAoaPred();
-    const zipf = await loadZipf(); // optional backup
-    
-    if (!aoa) {
-      setError("Difficulty data not loaded. Refresh and try again.");
-      return;
-    }
-    
+    const zipf = await loadZipf();
+    if (!aoa) { setError("Difficulty data not loaded. Refresh and try again."); return; }
     const myAoaRaw = aoaForWord(aoa, w);
-const hasAoa = Number.isFinite(myAoaRaw);
-const myAoa: number = hasAoa ? (myAoaRaw as number) : NaN;
-
-const myZipfRaw = zipf ? zipfForWord(zipf, w) : undefined;
-let myZipf: number = Number.isFinite(myZipfRaw as number) ? (myZipfRaw as number) : 3.8; // fallback
-myZipf = Math.max(2.0, Math.min(6.5, myZipf));
-
-    
-    console.log(
-      "[BOUND DEBUG]",
-      "word=", w,
-      "aoa=", myAoa,
-      "zipf=", myZipf,
-      "zipfLooksLike=",
-      typeof myZipf === "number"
-        ? myZipf >= 0 && myZipf <= 8
-          ? "ZIPF_OK"
-          : "NOT_ZIPF_SCALE"
-        : "MISSING"
-    );
-
-    // If missing, we still allow play, but treat as hardest/unknown
+    const hasAoa = Number.isFinite(myAoaRaw);
+    const myAoa: number = hasAoa ? (myAoaRaw as number) : NaN;
+    const myZipfRaw = zipf ? zipfForWord(zipf, w) : undefined;
+    let myZipf: number = Number.isFinite(myZipfRaw as number) ? (myZipfRaw as number) : 3.8;
+    myZipf = Math.max(2.0, Math.min(6.5, myZipf));
+    console.log("[BOUND DEBUG]", "word=", w, "aoa=", myAoa, "zipf=", myZipf, "zipfLooksLike=", typeof myZipf === "number" ? myZipf >= 0 && myZipf <= 8 ? "ZIPF_OK" : "NOT_ZIPF_SCALE" : "MISSING");
     const cand = await ensureCandidateValuesForPattern();
-// never hard-fail; we can still score with sensible defaults
-const aoaValues = cand?.aoaValues ?? [];
-const zipfValues = cand?.zipfValues ?? [];
-
-    const aoaPct =
-    Number.isFinite(myAoa) && aoaValues.length
-    ? percentileRank(aoaValues, myAoa)
-      : 100;
-  
-  const zipfPct =
-  Number.isFinite(myZipf) && zipfValues.length
-    ? percentileRank(zipfValues, myZipf)
-      : 50;
-
-    // Higher = harder
-    // AoA higher => harder
-    // Zipf higher => easier, so invert with (100 - zipfPct)
-// Zipf: higher zipf => easier, so invert percentile (100 - zipfPct) = harder
-const zipfHardRel = clamp(100 - zipfPct, 0, 100);
-
-// Absolute AoA hardness (what you actually care about for “should never be rare”)
-const aoaHardAbs = aoaHardnessPct(myAoa);
-
-// If AoA is available, let it dominate.
-// If AoA missing, fall back to Zipf-relative only.
-
-
-const pct = hasAoa
-  ? clamp(0.85 * aoaHardAbs + 0.15 * zipfHardRel, 0, 100)
-  : clamp(zipfHardRel, 0, 100);
+    const aoaValues = cand?.aoaValues ?? [];
+    const zipfValues = cand?.zipfValues ?? [];
+    const aoaPct = Number.isFinite(myAoa) && aoaValues.length ? percentileRank(aoaValues, myAoa) : 100;
+    const zipfPct = Number.isFinite(myZipf) && zipfValues.length ? percentileRank(zipfValues, myZipf) : 50;
+    const zipfHardRel = clamp(100 - zipfPct, 0, 100);
+    const aoaHardAbs = aoaHardnessPct(myAoa);
+    const pct = hasAoa ? clamp(0.85 * aoaHardAbs + 0.15 * zipfHardRel, 0, 100) : clamp(Math.max(zipfHardRel, 80), 0, 100);
     let tierEmoji = tierFromPercentile(pct);
-    
-    // SHIPPABLE SAFETY: clamp tier based on absolute frequency
-    tierEmoji = applyZipfCapsOnly(tierEmoji, myZipf);    
-
-// Hard cap: if learned early, never show as Rare/Advanced
-if (hasAoa && myAoa <= 6.0) {
-  if (tierEmoji === "🟧" || tierEmoji === "🟥") tierEmoji = "🟨";
-}
-if (hasAoa && myAoa <= 5.0) {
-  tierEmoji = "🟦";
-}
+    tierEmoji = applyZipfCapsOnly(tierEmoji, myZipf);
+    if (hasAoa && myAoa <= 6.0) { if (tierEmoji === "🟧" || tierEmoji === "🟥") tierEmoji = "🟨"; }
+    if (hasAoa && myAoa <= 5.0) { tierEmoji = "🟦"; }
     const tierName = TIER_LABELS[tierEmoji];
     const points = TIER_POINTS[tierEmoji];
-
     const bonusPoints = 0;
-
     const tSec = elapsedSec;
     const mult = multiplierFromSeconds(tSec);
-
     const rawScore = (points + bonusPoints) * mult;
     const finalScore = Math.round(rawScore * 100) / 100;
-
-    // share text: no spoilers (no pattern letters)
-    const shareText = buildShareText(
-      puzzleNumber,
-      finalScore,
-      tierEmoji,
-      Math.round(pct * 10) / 10
-    );
-
-      const result: ScoreResult = {
-        tierEmoji,
-        tierName,
-        points,
-        percentile: Math.round(pct * 10) / 10,
-      
-        aoaPct: Math.round(aoaPct * 10) / 10,
-        zipfPct: Math.round(zipfPct * 10) / 10,
-        blendPct: Math.round(pct * 10) / 10,
-      
-        bonusPoints,
-        timeSec: tSec,
-        multiplier: Math.round(mult * 100) / 100,
-        finalScore,
-        shareText,
-      };
-
+    const shareText = buildShareText(puzzleNumber, finalScore, tierEmoji, Math.round(pct * 10) / 10);
+    const result: ScoreResult = {
+      tierEmoji, tierName, points,
+      percentile: Math.round(pct * 10) / 10,
+      aoaPct: Math.round(aoaPct * 10) / 10,
+      zipfPct: Math.round(zipfPct * 10) / 10,
+      blendPct: Math.round(pct * 10) / 10,
+      bonusPoints, timeSec: tSec,
+      multiplier: Math.round(mult * 100) / 100,
+      finalScore, shareText,
+    };
     const submittedIso = new Date().toISOString();
-
     setSubmitted(true);
     setLocked(true);
     setScoreResult(result);
     setSubmittedAt(submittedIso);
     setResultAnimKey((k) => k + 1);
-
-    // persist: one try per device
     try {
       const payload: StoredSubmission = {
-        v: 2,
-        puzzleNumber,
-        localDayKey: localDayKeyState,
-        pattern,
-        length: len,
-        startedAtMs: startedAtMs ?? Date.now(),
-        submittedAt: submittedIso,
-        word: w,
-        scoreResult: result,
+        v: 2, puzzleNumber, localDayKey: localDayKeyState, pattern, length: len,
+        startedAtMs: startedAtMs ?? Date.now(), submittedAt: submittedIso, word: w, scoreResult: result,
       };
       localStorage.setItem(submissionKey(puzzleNumber), JSON.stringify(payload));
-      // timer resume key no longer needed after submit
       localStorage.removeItem(startedKey(puzzleNumber));
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }
 
   async function onCopyShare() {
     if (!submitted || !scoreResult) return;
-  
-    const text = buildShareText(
-      puzzleNumber,
-      scoreResult.finalScore,
-      scoreResult.tierEmoji,
-      scoreResult.percentile
-    );  
-    try {
-      await navigator.clipboard.writeText(text);
-      setShowShare(true);
-    } catch {
-      setShowShare(false);
-    }
+    const text = buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji, scoreResult.percentile);
+    try { await navigator.clipboard.writeText(text); setShowShare(true); }
+    catch { setShowShare(false); }
   }
 
-
   return (
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
+    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
       <div style={{ display: "grid", gap: 10 }}>
         <MetaKicker>TPV Games</MetaKicker>
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            gap: 14,
-            flexWrap: "wrap",
-          }}
-        >
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 56,
-              lineHeight: 1.02,
-              fontWeight: 900,
-              letterSpacing: -1.2,
-              color: "#111827",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+          <h1 style={{
+            margin: 0,
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(2.2rem, 6vw, 3.5rem)",
+            fontWeight: 400,
+            letterSpacing: "-0.03em",
+            color: "var(--text)",
+            lineHeight: 1.05,
+          }}>
             Bound
           </h1>
 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Pill>
-              <span style={{ color: "#6b7280", fontWeight: 800 }}>Puzzle</span>
-              <span style={{ fontWeight: 900, color: "#111827" }}>#{puzzleNumber}</span>
+              <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Puzzle</span>
+              <span style={{ fontWeight: 700, color: "var(--text)" }}>#{puzzleNumber}</span>
             </Pill>
 
-            <span
-  style={{
-    display: "inline-flex",
-    alignItems: "center",
-    gap: 10,
-    padding: "6px 10px",
-    border: "1px solid #e5e7eb",
-    background: (liveMultiplier ?? 1) > 1 ? "#f9fafb" : "#fff",    
-    color: "#374151",
-    fontSize: 13,
-    borderRadius: 999,
-    whiteSpace: "nowrap",
-    fontWeight: 800,
-  }}
->
-  <span style={{ color: "#6b7280", fontWeight: 800 }}>Timer</span>
-
-  <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
-    <span style={{ fontWeight: 900, color: "#111827" }}>
-      {submitted && scoreResult
-        ? `${scoreResult.timeSec}s`
-        : revealed
-          ? `${elapsedSec}s`
-          : "—"}
-    </span>
-
-    {/* live “feel” line */}
-    {revealed && !submitted && liveMultiplier != null ? (
-      <span style={{ fontSize: 11, color: "#6b7280", fontWeight: 900, letterSpacing: 0.2 }}>
-        {liveSpeedLabel} • {formatMult(liveMultiplier ?? 1)}
-      </span>
-    ) : null}
-  </span>
-</span>
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "6px 10px",
+              border: "1px solid var(--border-light)",
+              background: (liveMultiplier ?? 1) > 1 ? "var(--bg3)" : "var(--bg2)",
+              color: "var(--text-dim)",
+              fontSize: 13,
+              borderRadius: 999,
+              whiteSpace: "nowrap",
+              fontWeight: 700,
+              fontFamily: "var(--font-body)",
+            }}>
+              <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Timer</span>
+              <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
+                <span style={{ fontWeight: 700, color: "var(--text)" }}>
+                  {submitted && scoreResult ? `${scoreResult.timeSec}s` : revealed ? `${elapsedSec}s` : "—"}
+                </span>
+                {revealed && !submitted && liveMultiplier != null ? (
+                  <span style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, letterSpacing: 0.2 }}>
+                    {liveSpeedLabel} • {formatMult(liveMultiplier ?? 1)}
+                  </span>
+                ) : null}
+              </span>
+            </span>
 
             {submitted && scoreResult ? (
               <Pill>
-                <span style={{ color: "#6b7280", fontWeight: 800 }}>Score</span>
-                <span style={{ fontWeight: 900, color: "#111827" }}>{scoreResult.finalScore}</span>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Score</span>
+                <span style={{ fontWeight: 700, color: "var(--gold)" }}>{scoreResult.finalScore}</span>
               </Pill>
             ) : null}
           </div>
         </div>
 
-        <p
-  style={{
-    margin: "2px 0 0",
-    color: "#374151",
-    fontSize: 18,
-    lineHeight: 1.7,
-    maxWidth: 900,
-  }}
->
-  Reveal the puzzle, then submit <strong>one word</strong> that fits.
-</p>
+        <p style={{
+          margin: "2px 0 0",
+          color: "var(--text-dim)",
+          fontSize: "1rem",
+          lineHeight: 1.7,
+          maxWidth: 900,
+          fontFamily: "var(--font-body)",
+        }}>
+          Reveal the puzzle, then submit <strong style={{ color: "var(--text)" }}>one word</strong> that fits.
+        </p>
 
-        <div style={{ borderTop: "1px solid #e5e7eb", margin: "12px 0 4px" }} />
+        <div style={{ borderTop: "1px solid var(--border)", margin: "12px 0 4px" }} />
       </div>
 
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.1fr 0.9fr",
-          gap: 18,
-          alignItems: "start",
-        }}
+        style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 18, alignItems: "start" }}
         className="boundgrid"
       >
         {/* Left */}
-        <section className="boundleft" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-  <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>
-              {revealed ? "Today’s pattern" : "Today’s puzzle"}
+        <section className="boundleft" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-body)" }}>
+              {revealed ? "Today's pattern" : "Today's puzzle"}
             </div>
-            <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>
-            {revealed ? `${len} letters` : "Pattern hidden"}            
+            <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
+              {revealed ? `${len} letters` : "Pattern hidden"}
             </div>
           </div>
 
-         {/* Pattern tiles — hidden before reveal, become interactive WordInput after */}
-         <div
+          <div
             key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
             className={revealed ? "pop" : undefined}
             style={{ marginTop: 14 }}
@@ -1023,10 +738,7 @@ if (hasAoa && myAoa <= 5.0) {
               <WordInput
                 label="1"
                 value={word}
-                onChange={(v) => {
-                  setWord(v);
-                  setShowShare(false);
-                }}
+                onChange={(v) => { setWord(v); setShowShare(false); }}
                 disabled={locked}
                 error={error}
                 placeholder="TYPE WORD…"
@@ -1036,129 +748,153 @@ if (hasAoa && myAoa <= 5.0) {
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {new Array(5).fill("?").map((_, i) => (
                   <div key={i} style={{
-                    width: 46, height: 50, border: "1px solid #e5e7eb", background: "#fff",
+                    width: 46, height: 50,
+                    border: "1px solid var(--border-light)",
+                    background: "var(--bg2)",
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 900, fontSize: 18, color: "#9ca3af",
+                    fontWeight: 700, fontSize: 18, color: "var(--text-faint)",
+                    fontFamily: "var(--font-body)",
                   }}>?</div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Reveal button (starts timer) */}
           <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
             {!revealed ? (
               <button
                 onClick={onReveal}
                 disabled={!puzzleReady}
                 style={{
-                  border: "1px solid #111827",
-                  background: "#111827",
-                  color: "#fff",
-                  padding: "10px 12px",
-                  fontWeight: 900,
+                  border: "none",
+                  background: "var(--gold)",
+                  color: "var(--bg)",
+                  padding: "10px 16px",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
                   cursor: puzzleReady ? "pointer" : "not-allowed",
-                  opacity: puzzleReady ? 1 : 0.6,
+                  opacity: puzzleReady ? 1 : 0.5,
+                  borderRadius: 3,
+                  transition: "opacity 0.15s ease",
                 }}
               >
-                Reveal & start
+                Reveal &amp; start
               </button>
             ) : (
               <Pill>
-                <span style={{ color: "#6b7280", fontWeight: 800 }}>Length</span>
-                <span style={{ fontWeight: 900, color: "#111827" }}>{len}</span>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Length</span>
+                <span style={{ fontWeight: 700, color: "var(--text)" }}>{len}</span>
               </Pill>
             )}
           </div>
 
           {patternLoadError && (
-              <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 800, marginTop: 8 }}>
-                Failed to load puzzle. Please refresh.
-              </div>
-            )}
-
-          {/* Legend */}
-  
+            <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 700, marginTop: 8, fontFamily: "var(--font-body)" }}>
+              Failed to load puzzle. Please refresh.
+            </div>
+          )}
         </section>
 
-       {/* Right */}
-       <section className="boundright" style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
+        {/* Right */}
+        <section className="boundright" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "flex-end", gap: 12 }}>
-            <div style={{ fontSize: 13, color: "#6b7280", fontWeight: 800 }}>
+            <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
               {locked ? "Locked" : submitted ? "Submitted" : "One try"}
             </div>
           </div>
 
           {submitted && scoreResult ? (
-            <div
-              style={{
-                marginTop: 14,
-                border: "1px solid #e5e7eb",
-                background: "#fff",
-                padding: 14,
-              }}
-            >
+            <div style={{
+              marginTop: 14,
+              border: "1px solid var(--border-light)",
+              background: "var(--bg2)",
+              padding: 14,
+              borderRadius: 4,
+            }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-                <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
+                <div style={{
+                  fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+                  color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
+                }}>
                   Your submission
                 </div>
-
                 {formatSubmittedAt(submittedAt) ? (
-                  <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 800 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
                     {formatSubmittedAt(submittedAt)}
                   </div>
                 ) : null}
               </div>
 
               <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900 }}>Word</div>
-                <div style={{ flex: 1, textAlign: "right", fontWeight: 900, letterSpacing: 1.2, color: "#111827" }}>
+                <div style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Word</div>
+                <div style={{
+                  flex: 1, textAlign: "right", fontWeight: 700, letterSpacing: "0.1em",
+                  color: "var(--text)", fontFamily: "var(--font-body)",
+                }}>
                   {onlyLettersUpper(word)}
                 </div>
               </div>
 
-              <div style={{ marginTop: 12, borderTop: "1px solid #e5e7eb", paddingTop: 12 }}>
+              <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
-                  <div style={{ color: "#6b7280", fontSize: 12, fontWeight: 900, letterSpacing: 1.2, textTransform: "uppercase" }}>
+                  <div style={{
+                    color: "var(--text-faint)", fontSize: "0.65rem", fontWeight: 700,
+                    letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-body)",
+                  }}>
                     Result
                   </div>
                   <div
-  key={`result-${resultAnimKey}`}
-  className="pop"
-  style={{ fontWeight: 900, color: "#111827" }}
->
-  {scoreResult.tierEmoji}
-  <span style={{ color: "#6b7280", fontWeight: 800 }}> • </span>
-  {scoreResult.finalScore}
-</div>
+                    key={`result-${resultAnimKey}`}
+                    className="pop"
+                    style={{ fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}
+                  >
+                    <span style={{
+  display: "inline-block",
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  background: scoreResult.tierEmoji === "🟦" ? "#7aa8c7" : scoreResult.tierEmoji === "🟨" ? "#c9b87a" : scoreResult.tierEmoji === "🟧" ? "#c49060" : "#b06060",
+  verticalAlign: "middle",
+  marginRight: 4,
+}} />
+                    <span style={{ color: "var(--text-faint)", fontWeight: 700 }}> • </span>
+                    {scoreResult.finalScore}
+                  </div>
                 </div>
 
-                <div style={{ marginTop: 6, color: "#6b7280", fontSize: 12, lineHeight: 1.6 }}>
-                  Tier: <strong style={{ color: "#111827" }}>{scoreResult.tierName}</strong>{" "}
-                  <span style={{ color: "#9ca3af" }}>({formatOrdinal(scoreResult.percentile)} percentile)</span>
+                <div style={{ marginTop: 6, color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6, fontFamily: "var(--font-body)" }}>
+                  Tier: <strong style={{ color: "var(--text)" }}>{scoreResult.tierName}</strong>{" "}
+                  <span style={{ color: "var(--text-faint)" }}>({formatOrdinal(scoreResult.percentile)} percentile)</span>
                   <br />
-                  Time: <strong style={{ color: "#111827" }}>{scoreResult.timeSec}s</strong>{" "}
-                  • Score multiplier: <strong style={{ color: "#111827" }}>{scoreResult.multiplier}</strong>
+                  Time: <strong style={{ color: "var(--text)" }}>{scoreResult.timeSec}s</strong>{" "}
+                  • Score multiplier: <strong style={{ color: "var(--text)" }}>{scoreResult.multiplier}</strong>
                 </div>
               </div>
             </div>
           ) : null}
 
-
-          {/* Actions */}
           <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
             {!submitted ? (
               <button
                 onClick={onSubmit}
                 disabled={!canSubmit}
                 style={{
-                  border: "1px solid #111827",
-                  background: "#111827",
-                  color: "#fff",
-                  padding: "10px 12px",
-                  fontWeight: 900,
+                  border: "none",
+                  background: canSubmit ? "var(--gold)" : "var(--bg3)",
+                  color: canSubmit ? "var(--bg)" : "var(--text-faint)",
+                  padding: "10px 16px",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
                   cursor: canSubmit ? "pointer" : "not-allowed",
                   opacity: canSubmit ? 1 : 0.5,
+                  borderRadius: 3,
+                  transition: "opacity 0.15s ease",
                 }}
               >
                 Submit
@@ -1168,13 +904,18 @@ if (hasAoa && myAoa <= 5.0) {
                 onClick={onCopyShare}
                 disabled={!scoreResult?.shareText}
                 style={{
-                  border: "1px solid #111827",
-                  background: "#111827",
-                  color: "#fff",
-                  padding: "10px 12px",
-                  fontWeight: 900,
+                  border: "1px solid var(--border-light)",
+                  background: "var(--bg2)",
+                  color: "var(--gold)",
+                  padding: "10px 16px",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
                   cursor: scoreResult?.shareText ? "pointer" : "not-allowed",
                   opacity: scoreResult?.shareText ? 1 : 0.6,
+                  borderRadius: 3,
                 }}
               >
                 Copy share
@@ -1183,107 +924,73 @@ if (hasAoa && myAoa <= 5.0) {
           </div>
 
           {showShare && submitted && scoreResult?.shareText ? (
-            <div style={{ marginTop: 14, borderTop: "1px solid #e5e7eb", paddingTop: 14 }}>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 900,
-                  letterSpacing: 1.2,
-                  color: "#6b7280",
-                  textTransform: "uppercase",
-                }}
-              >
+            <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+              <div style={{
+                fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+                color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
+              }}>
                 Copied to clipboard
               </div>
-              <pre
-                style={{
-                  marginTop: 10,
-                  whiteSpace: "pre-wrap",
-                  fontSize: 14,
-                  lineHeight: 1.6,
-                  color: "#111827",
-                  border: "1px solid #e5e7eb",
-                  background: "#fff",
-                  padding: 12,
-                }}
-              >
-{buildShareText(
-  puzzleNumber,
-  scoreResult.finalScore,
-  scoreResult.tierEmoji,
-  scoreResult.percentile
-)}            
-</pre>
+              <pre style={{
+                marginTop: 10,
+                whiteSpace: "pre-wrap",
+                fontSize: 14,
+                lineHeight: 1.6,
+                color: "var(--text)",
+                border: "1px solid var(--border-light)",
+                background: "var(--bg3)",
+                padding: 12,
+                fontFamily: "var(--font-body)",
+                borderRadius: 3,
+              }}>
+                {buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji, scoreResult.percentile)}
+              </pre>
             </div>
           ) : null}
         </section>
+
         {/* Legend */}
-<section
-  className="boundlegend"
-  style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}
->
-  <div style={{ fontSize: 12, fontWeight: 900, letterSpacing: 1.2, color: "#6b7280", textTransform: "uppercase" }}>
-    Legend
-  </div>
+        <section className="boundlegend" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+          <div style={{
+            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+            color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
+          }}>
+            Legend
+          </div>
 
-  <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
-    <LegendRow emoji="🟦" label="Common" points={1} />
-    <LegendRow emoji="🟨" label="Uncommon" points={2} />
-    <LegendRow emoji="🟧" label="Rare" points={3} />
-    <LegendRow emoji="🟥" label="Advanced" points={4} />
-  </div>
+          <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
+            <LegendRow emoji="🟦" label="Common" points={1} />
+            <LegendRow emoji="🟨" label="Uncommon" points={2} />
+            <LegendRow emoji="🟧" label="Rare" points={3} />
+            <LegendRow emoji="🟥" label="Advanced" points={4} />
+          </div>
 
-  <div style={{ marginTop: 12, color: "#6b7280", fontSize: 13, lineHeight: 1.65 }}>
-    Tiers are computed <strong>relative to today’s puzzle</strong> (percentiles). Score is tier points (+bonus) times a decaying time multiplier.
-  </div>
-</section>
+          <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
+            Tiers are computed <strong style={{ color: "var(--text-dim)" }}>relative to today's puzzle</strong> (percentiles). Score is tier points (+bonus) times a decaying time multiplier.
+          </div>
+        </section>
       </div>
 
       <style jsx>{`
-  .pop {
-    animation: pop 220ms ease-out both;
-  }
-
-  @keyframes pop {
-    0% {
-      transform: scale(0.97);
-      opacity: 0.7;
-    }
-    60% {
-      transform: scale(1.02);
-      opacity: 1;
-    }
-    100% {
-      transform: scale(1);
-    }
-  }
-
-.boundlegend {
-  grid-column: 1 / 2; /* keep it under the left column on desktop */
-  margin-top: 18px;
-}
-
-  @media (max-width: 980px) {
-  .boundgrid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Put Right column before Legend on mobile */
-  .boundright {
-    order: 1;
-  }
-
-  /* Keep left content first, but Legend last */
-  .boundleft {
-    order: 0;
-  }
-
-  .boundlegend {
-    order: 2;
-    margin-top: 22px !important;
-  }
-}
-`}</style>
+        .pop {
+          animation: pop 220ms ease-out both;
+        }
+        @keyframes pop {
+          0% { transform: scale(0.97); opacity: 0.7; }
+          60% { transform: scale(1.02); opacity: 1; }
+          100% { transform: scale(1); }
+        }
+        .boundlegend {
+          grid-column: 1 / 2;
+          margin-top: 18px;
+        }
+        @media (max-width: 980px) {
+          .boundgrid { grid-template-columns: 1fr !important; }
+          .boundright { order: 1; }
+          .boundleft { order: 0; }
+          .boundlegend { order: 2; margin-top: 22px !important; }
+        }
+      `}</style>
     </main>
   );
 }
@@ -1308,20 +1015,14 @@ function WordInput({
   const totalLen = pc.length;
 
   const fixedAt = (i: number) => pc[i] !== "_";
-
   const freeIdxs: number[] = [];
-  for (let i = 0; i < totalLen; i++) {
-    if (!fixedAt(i)) freeIdxs.push(i);
-  }
+  for (let i = 0; i < totalLen; i++) { if (!fixedAt(i)) freeIdxs.push(i); }
 
-  // Build display: fixed positions show pattern letter, free positions show what user typed
-  // value is always the full word (length = totalLen), with "" for untyped free positions
   function getDisplay(): string[] {
     const d: string[] = [];
     for (let i = 0; i < totalLen; i++) {
-      if (fixedAt(i)) {
-        d.push(pc[i]);
-      } else {
+      if (fixedAt(i)) { d.push(pc[i]); }
+      else {
         const v = (value || "").padEnd(totalLen, " ");
         const ch = v[i] ?? " ";
         d.push(/[A-Z]/i.test(ch) ? ch.toUpperCase() : "");
@@ -1331,7 +1032,6 @@ function WordInput({
   }
 
   function withChange(fullIdx: number, ch: string): string {
-    // Pad value to full length so positional indexing works
     const v = (value || "").padEnd(totalLen, " ");
     const chars = Array.from({ length: totalLen }, (_, i) => {
       if (fixedAt(i)) return pc[i];
@@ -1343,14 +1043,10 @@ function WordInput({
   }
 
   function focusNextFree(from: number) {
-    for (let i = from + 1; i < totalLen; i++) {
-      if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; }
-    }
+    for (let i = from + 1; i < totalLen; i++) { if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; } }
   }
   function focusPrevFree(from: number) {
-    for (let i = from - 1; i >= 0; i--) {
-      if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; }
-    }
+    for (let i = from - 1; i >= 0; i--) { if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; } }
   }
 
   function handleChange(fullIdx: number, e: React.ChangeEvent<HTMLInputElement>) {
@@ -1368,21 +1064,16 @@ function WordInput({
       e.preventDefault();
       const v = (value || "").padEnd(totalLen, " ");
       const cur = v[fullIdx] ?? " ";
-      if (/[A-Z]/i.test(cur)) {
-        onChange(withChange(fullIdx, ""));
-      } else {
+      if (/[A-Z]/i.test(cur)) { onChange(withChange(fullIdx, "")); }
+      else {
         focusPrevFree(fullIdx);
         const prevFree = freeIdxs[freeIdxs.indexOf(fullIdx) - 1];
-        if (prevFree !== undefined) {
-          onChange(withChange(prevFree, ""));
-        }
+        if (prevFree !== undefined) { onChange(withChange(prevFree, "")); }
       }
     } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      focusPrevFree(fullIdx);
+      e.preventDefault(); focusPrevFree(fullIdx);
     } else if (e.key === "ArrowRight") {
-      e.preventDefault();
-      focusNextFree(fullIdx);
+      e.preventDefault(); focusNextFree(fullIdx);
     }
   }
 
@@ -1392,11 +1083,11 @@ function WordInput({
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: totalLen > 10 ? "wrap" : "nowrap" }}>
         {Array.from({ length: totalLen }, (_, i) => {
           const fixed = fixedAt(i);
           const letter = display[i];
-          const borderColor = hasError ? "#ef4444" : fixed ? "#d1d5db" : "#111827";
+          const borderColor = hasError ? "#ef4444" : fixed ? "var(--border-light)" : "var(--gold)";
           return (
             <input
               key={i}
@@ -1410,13 +1101,14 @@ function WordInput({
               inputMode="text"
               autoCapitalize="characters"
               style={{
-                width: 46,
-                height: 50,
+                width: `min(46px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen}))`,
+                height: `min(50px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 1.09))`,
                 border: `1.5px solid ${borderColor}`,
-                background: fixed ? "#f3f4f6" : disabled ? "#f9fafb" : "#fff",
-                color: fixed ? "#6b7280" : "#111827",
-                fontSize: 20,
-                fontWeight: 900,
+                background: fixed ? "var(--bg3)" : disabled ? "var(--bg2)" : "var(--bg2)",
+                color: fixed ? "var(--gold)" : "var(--text)",
+                fontSize: `min(20px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 0.43))`,
+                fontWeight: 700,
+                fontFamily: "var(--font-body)",
                 textAlign: "center",
                 textTransform: "uppercase",
                 outline: "none",
@@ -1427,27 +1119,26 @@ function WordInput({
           );
         })}
       </div>
-      <div style={{ minHeight: 16, fontSize: 12, marginTop: 6, color: hasError ? "#ef4444" : "#9ca3af" }}>
+      <div style={{ minHeight: 16, fontSize: 12, marginTop: 6, color: hasError ? "#ef4444" : "var(--text-faint)", fontFamily: "var(--font-body)" }}>
         {hasError ? error : " "}
       </div>
     </div>
   );
 }
 
-function LegendRow({
-  emoji,
-  label,
-  points,
-}: {
-  emoji: TierEmoji;
-  label: string;
-  points: number;
-}) {
+function LegendRow({ emoji, label, points }: { emoji: TierEmoji; label: string; points: number }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
-      <span style={{ fontSize: 16 }}>{emoji}</span>
-      <span style={{ color: "#111827", fontWeight: 800 }}>{label}</span>
-      <span style={{ color: "#6b7280", fontWeight: 800 }}>
+      <span style={{
+  display: "inline-block",
+  width: 14,
+  height: 14,
+  borderRadius: 3,
+  background: emoji === "🟦" ? "#7aa8c7" : emoji === "🟨" ? "#c9b87a" : emoji === "🟧" ? "#c49060" : "#b06060",
+  flexShrink: 0,
+}} />
+      <span style={{ color: "var(--text)", fontWeight: 700, fontFamily: "var(--font-body)" }}>{label}</span>
+      <span style={{ color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
         — {points} {points === 1 ? "pt" : "pts"}
       </span>
     </div>

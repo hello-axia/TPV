@@ -21,21 +21,25 @@ type ApiResponse = {
   voted: "A" | "B" | "C" | "D" | null;
 };
 
-export default function GlobalQuestion({ questionId }: { questionId: string }) {
-  const [loading, setLoading] = useState(true); // first load only
-  const [refreshing, setRefreshing] = useState(false); // silent reloads
-  const [submitting, setSubmitting] = useState(false);
+const LETTERS = ["A", "B", "C", "D"] as const;
+type Letter = typeof LETTERS[number];
 
+export default function GlobalQuestion({ questionId }: { questionId: string }) {
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mustSignIn, setMustSignIn] = useState(false);
+  const [selected, setSelected] = useState<Letter | null>(null);
+  const [phase, setPhase] = useState<"pre" | "voting" | "result">("pre");
 
   const [user, setUser] = useState<User | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
-const tokenRef = useRef<string | null>(null); // ✅ always-current token (no stale state)
-const firstLoadDone = useRef(false);
+  const tokenRef = useRef<string | null>(null);
+  const firstLoadDone = useRef(false);
   const [authReady, setAuthReady] = useState(false);
-  
+
   function buildHeaders(extra?: Record<string, string>): Headers {
     const h = new Headers(extra);
     const t = tokenRef.current;
@@ -57,19 +61,18 @@ const firstLoadDone = useRef(false);
       });
 
       const text = await res.text();
-
-      // Helps debug when Next returns an HTML error page
       if (text.trim().startsWith("<")) {
-        throw new Error(
-          "Poll error: API returned HTML (not JSON). Check /pages/api/question/[id].ts default export."
-        );
+        throw new Error("Poll error: API returned HTML. Check /pages/api/question/[id].ts");
       }
 
       const json = JSON.parse(text) as ApiResponse;
-
       if (!res.ok) throw new Error((json as any)?.error || "Failed to load poll");
 
       setData(json);
+
+      // If they already voted, jump straight to results
+      if (json.voted) setPhase("result");
+
     } catch (e: any) {
       setError(e?.message || "Failed to load poll");
     } finally {
@@ -79,69 +82,46 @@ const firstLoadDone = useRef(false);
     }
   }
 
-// Load AFTER auth is known (even if signed out)
-useEffect(() => {
-  if (!authReady) return;
+  useEffect(() => {
+    if (!authReady) return;
+    if (user && !accessToken) return;
+    firstLoadDone.current = false;
+    load({ silent: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionId, authReady, user, accessToken]);
 
-  // If signed in, wait until we actually have a token before loading,
-  // otherwise the GET will return voted:null and you'll show buttons incorrectly.
-  if (user && !accessToken) return;
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase.auth.getSession();
+      if (!mounted) return;
+      setUser(data.session?.user ?? null);
+      const tok = data.session?.access_token ?? null;
+      setAccessToken(tok);
+      tokenRef.current = tok;
+      setAuthReady(true);
+    })();
 
-  firstLoadDone.current = false;
-  load({ silent: false });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [questionId, authReady, user, accessToken]);
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      const tok = session?.access_token ?? null;
+      setAccessToken(tok);
+      tokenRef.current = tok;
+      setMustSignIn(false);
+      setAuthReady(true);
+    });
 
-// auth tracking + refresh after auth is ready
-useEffect(() => {
-  let mounted = true;
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  (async () => {
-    const { data } = await supabase.auth.getSession();
-    if (!mounted) return;
-
-    setUser(data.session?.user ?? null);
-
-    const tok = data.session?.access_token ?? null;
-    setAccessToken(tok);
-    tokenRef.current = tok; // ✅ sync
-    
-    setAuthReady(true);
-  })();
-
-  const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-    setUser(session?.user ?? null);
-
-    const tok = session?.access_token ?? null;
-    setAccessToken(tok);
-    tokenRef.current = tok; // ✅ sync (so load uses it immediately)
-    
-    setMustSignIn(false);
-    setAuthReady(true);
-    
-    // ✅ now this GET will include Authorization (if signed in)
-    load({ silent: true });
-  });
-
-  return () => {
-    mounted = false;
-    sub.subscription.unsubscribe();
-  };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
-
-async function vote(choice: "A" | "B" | "C" | "D") {
-  if (submitting) return;
-
-  // ✅ if we already know they voted, don't even POST
-if (data?.voted) return;
-
-  if (!user || !accessToken) {
+  async function vote(choice: Letter) {
+    if (submitting || data?.voted) return;
+    if (!user || !accessToken) {
       setMustSignIn(true);
       setError(null);
       return;
     }
-
     try {
       setSubmitting(true);
       setError(null);
@@ -157,22 +137,16 @@ if (data?.voted) return;
 
       const text = await res.text();
       if (text.trim().startsWith("<")) {
-        throw new Error(
-          "Poll error: API returned HTML (not JSON). Check /pages/api/question/[id].ts default export."
-        );
+        throw new Error("Poll error: API returned HTML.");
       }
 
       const json = JSON.parse(text) as ApiResponse;
 
-      if (res.status === 401) {
-        setMustSignIn(true);
-        setError(null);
-        return;
-      }
-
+      if (res.status === 401) { setMustSignIn(true); setError(null); return; }
       if (!res.ok) throw new Error((json as any)?.error || "Vote failed");
 
       setData(json);
+      setPhase("result");
     } catch (e: any) {
       setError(e?.message || "Vote failed");
     } finally {
@@ -189,213 +163,425 @@ if (data?.voted) return;
     const B = q.b_count || 0;
     const C = q.c_count || 0;
     const D = q.d_count || 0;
-    const total = A + B + C + D;
-    return { total, A, B, C, D };
+    return { total: A + B + C + D, A, B, C, D };
   }, [q]);
 
   const pct = (n: number) =>
     totals.total ? Math.round((n / totals.total) * 100) : 0;
 
-  // results visible after a user has voted (and is signed in)
-  const canSeeResults = !!user && !!voted;
-  const SignInBanner = () => (
-    <div
-      style={{
-        border: "1px solid #e5e7eb",
-        background: "#fff",
-        borderRadius: 12,
-        padding: "12px 12px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-      }}
-    >
-      <div style={{ color: "#111827", fontWeight: 700 }}>
-        Sign in to vote, and to see results!
-        <div
-          style={{
-            color: "#6b7280",
-            fontWeight: 500,
-            fontSize: 13,
-            marginTop: 2,
-          }}
-        >
-          One vote per account.
-        </div>
-      </div>
+  const optionTexts: Record<Letter, string> = q
+    ? { A: q.a_text, B: q.b_text, C: q.c_text, D: q.d_text }
+    : { A: "", B: "", C: "", D: "" };
 
-      <Link
-        href="/signin"
-        style={{
-          textDecoration: "none",
-          border: "1px solid #e5e7eb",
-          background: "#111827",
-          color: "#fff",
-          borderRadius: 12,
-          padding: "10px 12px",
-          fontWeight: 800,
-          whiteSpace: "nowrap",
-        }}
-      >
-        Sign in
-      </Link>
-    </div>
-  );
-
-  const OptionRow = ({
-    letter,
-    text,
-  }: {
-    letter: "A" | "B" | "C" | "D";
-    text: string;
-  }) => (
-    <button
-      onClick={() => vote(letter)}
-      disabled={submitting || !!voted}
-      style={{
-        width: "100%",
-        textAlign: "left",
-        border: "1px solid #e5e7eb",
-        background: "#fff",
-        borderRadius: 12,
-        padding: "12px 12px",
-        display: "flex",
-        gap: 12,
-        alignItems: "center",
-        cursor: submitting ? "not-allowed" : "pointer",
-        opacity: submitting ? 0.7 : 1,
-      }}
-    >
-      <div
-        style={{
-          width: 24,
-          fontSize: 12,
-          fontWeight: 800,
-          color: "#6b7280",
-          letterSpacing: 1,
-        }}
-      >
-        {letter}
-      </div>
-      <div style={{ fontSize: 14, color: "#111827", fontWeight: 700 }}>
-        {text}
-      </div>
-    </button>
-  );
-
-  const ResultRow = ({
-    letter,
-    text,
-    count,
-  }: {
-    letter: "A" | "B" | "C" | "D";
-    text: string;
-    count: number;
-  }) => {
-    const percent = pct(count);
-    const isMine = voted === letter;
-
-    return (
-      <div style={{ display: "grid", gap: 6 }}>
-        <div
-          style={{ display: "flex", justifyContent: "space-between", gap: 12 }}
-        >
-          <div style={{ fontSize: 14, color: "#111827" }}>
-            <span style={{ fontWeight: 900 }}>{letter}</span>{" "}
-            <span style={{ color: "#6b7280", fontWeight: 600 }}>{text}</span>
-            {isMine ? (
-              <span style={{ marginLeft: 8, color: "#111827", fontWeight: 800 }}>
-                • You
-              </span>
-            ) : null}
-          </div>
-
-          <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>
-            {percent}% • {count}
-          </div>
-        </div>
-
-        <div
-          style={{
-            height: 8,
-            borderRadius: 999,
-            border: "1px solid #e5e7eb",
-            background: "#fff",
-          }}
-        >
-          <div
-            style={{
-              height: "100%",
-              width: `${percent}%`,
-              background: "#111827",
-              transition: "width 600ms ease",
-              opacity: isMine ? 1 : 0.25,
-              borderRadius: 999,
-            }}
-          />
-        </div>
-      </div>
-    );
+  const positionLabel = (letter: Letter) => {
+    if (!totals.total) return "";
+    const sorted = (["A", "B", "C", "D"] as Letter[])
+      .sort((a, b) => totals[b] - totals[a]);
+    const rank = sorted.indexOf(letter);
+    if (rank === 0) return "the most common view";
+    if (rank === 1) return "the second most common view";
+    return "a less common view";
   };
 
-// Don't render until auth is known. Otherwise you can briefly show vote buttons
-// before we learn voted status.
-if (!authReady) return null;
-
-if (loading && !q) return null;
-if (!q) return null;
+  if (!authReady || (loading && !q) || !q) return null;
 
   return (
-    <section style={{ marginTop: 14 }}>
-      <div style={{ borderTop: "1px solid #e5e7eb", marginBottom: 14 }} />
+    <section>
+      <style jsx>{`
+        .poll-wrap {
+          margin-top: 2.5rem;
+          border-top: 2px solid var(--gold-line);
+          padding-top: 2rem;
+        }
+        .option-btn {
+          width: 100%;
+          text-align: left;
+          background: transparent;
+          border: 1px solid var(--border-light);
+          border-radius: 3px;
+          padding: 0.9rem 1.1rem;
+          cursor: pointer;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          transition: border-color 0.15s ease, background 0.15s ease;
+          margin-bottom: 0.5rem;
+          position: relative;
+          overflow: hidden;
+        }
+        .option-btn:hover {
+          border-color: var(--gold-line);
+          background: var(--gold-dim);
+        }
+        .option-btn.selected {
+          border-color: var(--gold);
+          background: var(--gold-dim);
+        }
+        .option-btn:disabled {
+          cursor: default;
+        }
+        .letter {
+          font-family: var(--font-body);
+          font-size: 0.6rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          color: var(--gold);
+          padding-top: 2px;
+          min-width: 14px;
+        }
+        .opt-text {
+          font-family: var(--font-body);
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--text);
+          line-height: 1.45;
+        }
+        .submit-btn {
+          width: 100%;
+          padding: 0.85rem;
+          background: var(--gold);
+          color: var(--bg);
+          border: none;
+          border-radius: 3px;
+          font-family: var(--font-body);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: opacity 0.15s ease;
+          margin-top: 0.25rem;
+        }
+        .submit-btn:disabled {
+          opacity: 0.3;
+          cursor: default;
+        }
+        .result-row {
+          margin-bottom: 1rem;
+        }
+        .result-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
+          margin-bottom: 0.35rem;
+          gap: 0.5rem;
+        }
+        .result-label {
+          font-family: var(--font-body);
+          font-size: 0.85rem;
+          font-weight: 500;
+          color: var(--text-dim);
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          flex-wrap: wrap;
+        }
+        .you-badge {
+          font-size: 0.55rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--bg);
+          background: var(--gold);
+          padding: 1px 5px;
+          border-radius: 2px;
+        }
+        .result-pct {
+          font-family: var(--font-body);
+          font-size: 0.75rem;
+          font-weight: 600;
+          color: var(--text-faint);
+          white-space: nowrap;
+        }
+        .result-pct.mine {
+          color: var(--gold);
+        }
+        .bar-track {
+          height: 3px;
+          background: var(--border);
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        .bar-fill {
+          height: 100%;
+          border-radius: 2px;
+          background: var(--border-light);
+          transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .bar-fill.mine {
+          background: var(--gold);
+        }
+        .insight-box {
+          margin-top: 1.5rem;
+          padding: 1rem 1.25rem;
+          border-left: 2px solid var(--gold);
+          background: var(--gold-dim);
+          border-radius: 0 3px 3px 0;
+        }
+        .insight-label {
+          font-family: var(--font-body);
+          font-size: 0.6rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: var(--gold);
+          margin-bottom: 0.4rem;
+        }
+        .insight-text {
+          font-family: var(--font-body);
+          font-size: 0.85rem;
+          color: var(--text-dim);
+          line-height: 1.6;
+        }
+        .vote-count {
+          font-family: var(--font-body);
+          font-size: 0.65rem;
+          color: var(--text-faint);
+          margin-top: 1rem;
+          text-align: right;
+          letter-spacing: 0.04em;
+        }
+        .signin-banner {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          padding: 0.85rem 1.1rem;
+          border: 1px solid var(--border-light);
+          border-radius: 3px;
+          background: var(--bg3);
+          margin-bottom: 0.75rem;
+        }
+        .cta-start {
+          width: 100%;
+          padding: 0.85rem;
+          background: transparent;
+          color: var(--gold);
+          border: 1px solid var(--gold-line);
+          border-radius: 3px;
+          font-family: var(--font-body);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background 0.15s ease;
+        }
+        .cta-start:hover {
+          background: var(--gold-dim);
+        }
+      `}</style>
 
-      {error ? (
-        <div
-          style={{
-            color: "#b91c1c",
-            fontSize: 14,
-            marginBottom: 10,
-            fontWeight: 700,
-          }}
-        >
-          {error}
+      <div className="poll-wrap">
+
+        {/* Eyebrow */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.6rem",
+          marginBottom: "0.75rem",
+        }}>
+          <div className="eyebrow">The People's Verdict</div>
+          {refreshing && (
+            <span style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.6rem",
+              color: "var(--text-faint)",
+              letterSpacing: "0.08em",
+            }}>
+              Updating…
+            </span>
+          )}
         </div>
-      ) : null}
 
-{(!user && !voted) && (
-  <div style={{ marginBottom: 10 }}>
-    <SignInBanner />
-  </div>
-)}
+        {/* Question */}
+        <h3 style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(1.1rem, 2.5vw, 1.35rem)",
+          fontWeight: 400,
+          color: "var(--text)",
+          lineHeight: 1.3,
+          marginBottom: "0.5rem",
+        }}>
+          {q.prompt}
+        </h3>
 
-      {refreshing ? (
-        <div
-          style={{
-            fontSize: 12,
-            color: "#9ca3af",
-            marginBottom: 8,
-            fontWeight: 700,
-          }}
-        >
-          Updating…
-        </div>
-      ) : null}
+        <div className="divider" style={{ marginBottom: "1.5rem" }} />
 
-      <div style={{ display: "grid", gap: 8 }}>
-        {!canSeeResults ? (
+        {error && (
+          <div style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.8rem",
+            color: "#ef4444",
+            marginBottom: "0.75rem",
+          }}>
+            {error}
+          </div>
+        )}
+
+        {/* ── PRE STATE — teaser before engagement ── */}
+        {phase === "pre" && (
           <>
-            <OptionRow letter="A" text={q.a_text} />
-            <OptionRow letter="B" text={q.b_text} />
-            <OptionRow letter="C" text={q.c_text} />
-            <OptionRow letter="D" text={q.d_text} />
+            <p style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.88rem",
+              color: "var(--text-faint)",
+              lineHeight: 1.65,
+              marginBottom: "1.25rem",
+            }}>
+              {totals.total > 0
+                ? `${totals.total} readers have weighed in. Answer to see where you stand.`
+                : "Be one of the first to weigh in."}
+            </p>
+            <button className="cta-start" onClick={() => setPhase("voting")}>
+              Take the poll →
+            </button>
           </>
-        ) : (
+        )}
+
+        {/* ── VOTING STATE ── */}
+        {phase === "voting" && (
           <>
-            <ResultRow letter="A" text={q.a_text} count={totals.A} />
-            <ResultRow letter="B" text={q.b_text} count={totals.B} />
-            <ResultRow letter="C" text={q.c_text} count={totals.C} />
-            <ResultRow letter="D" text={q.d_text} count={totals.D} />
+            {mustSignIn && (
+              <div className="signin-banner">
+                <div>
+                  <div style={{
+                    fontFamily: "var(--font-body)",
+                    fontWeight: 600,
+                    fontSize: "0.88rem",
+                    color: "var(--text)",
+                    marginBottom: "0.2rem",
+                  }}>
+                    Sign in to vote and see results
+                  </div>
+                  <div style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.75rem",
+                    color: "var(--text-faint)",
+                  }}>
+                    One vote per account.
+                  </div>
+                </div>
+                <Link href="/signin" style={{
+                  textDecoration: "none",
+                  padding: "8px 14px",
+                  background: "var(--gold)",
+                  color: "var(--bg)",
+                  borderRadius: 3,
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  whiteSpace: "nowrap",
+                }}>
+                  Sign in
+                </Link>
+              </div>
+            )}
+
+            {LETTERS.map((letter) => (
+              <button
+                key={letter}
+                className={`option-btn ${selected === letter ? "selected" : ""}`}
+                onClick={() => setSelected(letter)}
+                disabled={submitting}
+              >
+                <span className="letter">{letter}</span>
+                <span className="opt-text">{optionTexts[letter]}</span>
+              </button>
+            ))}
+
+            <button
+              className="submit-btn"
+              onClick={() => selected && vote(selected)}
+              disabled={!selected || submitting}
+            >
+              {submitting ? "Submitting…" : "Submit my answer"}
+            </button>
+          </>
+        )}
+
+        {/* ── RESULT STATE ── */}
+        {phase === "result" && voted && (
+          <>
+            {LETTERS.map((letter) => {
+              const count = totals[letter];
+              const percent = pct(count);
+              const isMine = voted === letter;
+
+              return (
+                <div className="result-row" key={letter}>
+                  <div className="result-header">
+                    <div className="result-label">
+                      {optionTexts[letter]}
+                      {isMine && <span className="you-badge">You</span>}
+                    </div>
+                    <div className={`result-pct ${isMine ? "mine" : ""}`}>
+                      {percent}%
+                    </div>
+                  </div>
+                  <div className="bar-track">
+                    <div
+                      className={`bar-fill ${isMine ? "mine" : ""}`}
+                      style={{ width: `${percent}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+
+<div className="vote-count">{totals.total} readers responded</div>
+
+{/* Insight */}
+<div className="insight-box">
+  <div className="insight-label">
+    Your position — {positionLabel(voted)} ({pct(totals[voted])}% of readers)
+  </div>
+  <div className="insight-text">
+    You chose: <strong style={{ color: "var(--text)", fontWeight: 500 }}>{optionTexts[voted]}</strong>.
+    {" "}This is {positionLabel(voted)} among TPV readers.
+  </div>
+</div>
+
+<div style={{
+  marginTop: "1.25rem",
+  paddingTop: "1.25rem",
+  borderTop: "1px solid var(--border)",
+  display: "flex",
+  flexDirection: "column" as const,
+  gap: "0.5rem",
+}}>
+  <div style={{
+    fontFamily: "var(--font-body)",
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    letterSpacing: "0.1em",
+    textTransform: "uppercase" as const,
+    color: "var(--text-faint)",
+    marginBottom: "0.25rem",
+  }}>
+    Understand the disagreement
+  </div>
+  <div style={{
+    fontFamily: "var(--font-body)",
+    fontSize: "0.85rem",
+    color: "var(--text-dim)",
+    lineHeight: 1.6,
+  }}>
+    The article above breaks down exactly why reasonable people land on different sides — values, facts, and incentives.
+  </div>
+  <a href="#the-overview" style={{
+    fontFamily: "var(--font-body)",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    color: "var(--gold)",
+    textDecoration: "none",
+    marginTop: "0.25rem",
+  }}>
+    Read the breakdown &#8594;
+  </a>
+</div>
           </>
         )}
       </div>

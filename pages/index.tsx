@@ -8,7 +8,7 @@ type Post = {
   type: "Verdict" | "Briefing";
   slug: string;
   title: string;
-  date: string; // "MM-DD-YYYY"
+  date: string;
   summary: string;
   readTime?: string;
   questionId?: string;
@@ -20,63 +20,46 @@ function parseMDY(dateStr: string) {
   return new Date(yyyy, mm - 1, dd);
 }
 
-function SmallCard({
-  kicker,
-  title,
-  desc,
-  href,
-}: {
-  kicker: string;
-  title: string;
-  desc: string;
-  href: string;
+function SmallCard({ kicker, title, desc, href }: {
+  kicker: string; title: string; desc: string; href: string;
 }) {
   return (
-    <Link
-      href={href}
-      style={{
-        textDecoration: "none",
-        color: "inherit",
-        display: "block",
-        borderTop: "1px solid #e5e7eb",
-        paddingTop: 16,
+    <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+      <div style={{
+        borderTop: "1px solid var(--border)",
+        paddingTop: "1.1rem",
+        transition: "opacity 0.15s ease",
       }}
-    >
-      <div
-        style={{
-          fontSize: 12,
-          color: "#6b7280",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
+        className="small-card"
       >
-        <span>{kicker}</span>
-      </div>
-
-      <div
-        style={{
-          marginTop: 10,
-          fontSize: 22,
-          lineHeight: 1.18,
-          fontWeight: 900,
-          letterSpacing: -0.6,
-          color: "#111827",
-        }}
-      >
-        {title}
-      </div>
-
-      <div
-        style={{
-          marginTop: 10,
-          fontSize: 15,
+        <div style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "0.65rem",
+          fontWeight: 600,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "var(--text-faint)",
+          marginBottom: "0.6rem",
+        }}>
+          {kicker}
+        </div>
+        <div style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(1rem, 2vw, 1.2rem)",
+          lineHeight: 1.25,
+          color: "var(--text)",
+          marginBottom: "0.5rem",
+        }}>
+          {title}
+        </div>
+        <div style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "0.85rem",
           lineHeight: 1.65,
-          color: "#374151",
-        }}
-      >
-        {desc}
+          color: "var(--text-faint)",
+        }}>
+          {desc}
+        </div>
       </div>
     </Link>
   );
@@ -85,19 +68,9 @@ function SmallCard({
 function Hero({ post }: { post: Post | null }) {
   if (!post) {
     return (
-      <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 900,
-            letterSpacing: 1.2,
-            color: "#ef4444",
-            textTransform: "uppercase",
-          }}
-        >
-          Latest
-        </div>
-        <p style={{ marginTop: 12, color: "#6b7280", lineHeight: 1.7 }}>
+      <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
+        <div className="eyebrow">Latest</div>
+        <p style={{ marginTop: "0.75rem", color: "var(--text-faint)", lineHeight: 1.7 }}>
           Add a Briefing or Verdict markdown file to see it here.
         </p>
       </div>
@@ -107,74 +80,73 @@ function Hero({ post }: { post: Post | null }) {
   const href = post.type === "Verdict" ? `/verdicts/${post.slug}` : `/briefings/${post.slug}`;
 
   return (
-    <div style={{ borderTop: "1px solid #e5e7eb", paddingTop: 16 }}>
-      {/* meta line */}
-      <div
-        style={{
-          fontSize: 12,
-          color: "#6b7280",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          flexWrap: "wrap",
-        }}
-      >
+    <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
+      {/* Meta line */}
+      <div style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.65rem",
+        fontWeight: 600,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        color: "var(--text-faint)",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        marginBottom: "1rem",
+      }}>
         <span>{post.date}</span>
-        {post.readTime ? (
-          <span style={{ color: "rgba(239, 68, 68, 0.65)", fontWeight: 700 }}>
-            • {post.readTime}
-          </span>
-        ) : null}
-        <span style={{ color: "#9ca3af", fontWeight: 700 }}>• {post.type}</span>
+        {post.readTime && <span>· {post.readTime}</span>}
+        <span style={{ color: "var(--gold)" }}>· {post.type}</span>
       </div>
 
-      {/* title */}
-      <h2
-        style={{
-          marginTop: 12,
-          fontSize: 44,
-          lineHeight: 1.02,
-          fontWeight: 900,
-          letterSpacing: -1.1,
-          marginBottom: 0,
-          color: "#111827",
-        }}
-      >
+      {/* Title */}
+      <h2 style={{
+        fontFamily: "var(--font-display)",
+        fontSize: "clamp(1.75rem, 4vw, 2.75rem)",
+        lineHeight: 1.1,
+        fontWeight: 400,
+        color: "var(--text)",
+        marginBottom: "1rem",
+        letterSpacing: "-0.02em",
+      }}>
         {post.title}
       </h2>
 
-      {/* summary */}
-      <p
-        style={{
-          marginTop: 14,
-          color: "#374151",
-          fontSize: 18,
-          lineHeight: 1.7,
-          maxWidth: 900,
-        }}
-      >
+      {/* Summary */}
+      <p style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "1rem",
+        lineHeight: 1.75,
+        color: "var(--text-dim)",
+        marginBottom: "1.25rem",
+        maxWidth: 560,
+      }}>
         {post.summary}
       </p>
 
-      <div style={{ marginTop: 14 }}>
-        <Link
-          href={href}
-          style={{
-            color: "#111827",
-            textDecoration: "none",
-            fontWeight: 900,
-            letterSpacing: -0.2,
-          }}
-        >
-          Read →
-        </Link>
-      </div>
+      <Link href={href} style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.4rem",
+        fontFamily: "var(--font-body)",
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        color: "var(--gold)",
+        textDecoration: "none",
+        borderBottom: "1px solid var(--gold-line)",
+        paddingBottom: "2px",
+        transition: "border-color 0.15s ease",
+      }}>
+        Read →
+      </Link>
 
-      {post.questionId ? (
-        <div style={{ marginTop: 16 }}>
+      {post.questionId && (
+        <div style={{ marginTop: "1.5rem" }}>
           <GlobalQuestion questionId={post.questionId} />
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -214,171 +186,208 @@ export default function HomePage({
   const below = all.slice(1, 4);
 
   return (
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
-      {/* Masthead */}
-      <div
-  className="masthead"
-  style={{
-    display: "grid",
-    gridTemplateColumns: "1fr 1.2fr",
-    gap: 32,
-    alignItems: "center",
-  }}
->
-                {/* Left */}
-                <div>
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 900,
-              letterSpacing: 1.2,
-              color: "#ef4444",
-              textTransform: "uppercase",
-            }}
-          >
-            TPV
-          </div>
+    <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 5rem" }}>
 
-          <h1
-            style={{
-              fontSize: 56,
-              lineHeight: 1.02,
-              fontWeight: 900,
-              letterSpacing: -1.2,
-              margin: "10px 0 0",
-              color: "#111827",
-            }}
-          >
-            News, structured
+      {/* ── MASTHEAD ── */}
+      <div className="masthead fade-up" style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "2.5rem",
+        alignItems: "start",
+        marginBottom: "2.5rem",
+      }}>
+        {/* Left — identity */}
+        <div>
+          <div className="eyebrow" style={{ marginBottom: "1rem" }}>The People's Verdict</div>
+
+          <h1 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
+            lineHeight: 1.05,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            color: "var(--text)",
+            marginBottom: "1rem",
+          }}>
+            The political noise,<br />
+            <em>decoded.</em>
           </h1>
 
-          <p
-            style={{
-              marginTop: 12,
-              color: "#374151",
-              fontSize: 18,
-              lineHeight: 1.6,
-              fontStyle: "italic",
-              maxWidth: 900,
-            }}
-          >
-            {/* News, structured — built for interpretation, not outrage. */}
+          <p style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "1rem",
+            lineHeight: 1.75,
+            color: "var(--text-dim)",
+            maxWidth: 420,
+            marginBottom: "1.5rem",
+          }}>
+            For people who care about politics but don't know where to start.
+            No spin. No outrage. Just the structure you need to think for yourself.
           </p>
 
-          <div
-            className="commitment-mobile"
-            style={{
-              marginTop: 12,
-              paddingTop: 12,
-              borderTop: "1px solid #e5e7eb",
-              color: "#4b5563",
-              fontSize: 14,
-              lineHeight: 1.7,
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: 1.4,
-                textTransform: "uppercase",
-                color: "#6b7280",
-                fontWeight: 900,
-                marginBottom: 6,
-              }}
-            >
-              Publishing Commitment
+          {/* Social proof */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "1rem",
+            flexWrap: "wrap",
+          }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              padding: "0.5rem 0.9rem",
+              background: "var(--gold-dim)",
+              border: "1px solid var(--gold-line)",
+              borderRadius: 3,
+            }}>
+              <span style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.7rem",
+                fontWeight: 600,
+                letterSpacing: "0.08em",
+                color: "var(--gold)",
+              }}>
+                Readers have weighed in on recent issues
+              </span>
             </div>
-            Two structured analyses weekly — <strong>Briefing</strong> (Tue) and{" "}
-            <strong>Verdict</strong> (Fri). Coverage is limited to developments of
-            structural or national significance; TPV is not a breaking-news service.
+
+            <Link href="/bound" style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "0.95rem",
+              color: "var(--text-dim)",
+              textDecoration: "none",
+              borderBottom: "1px solid var(--border-light)",
+              paddingBottom: "1px",
+              transition: "color 0.15s ease, border-color 0.15s ease",
+            }}>
+              Play Bound →
+            </Link>
           </div>
         </div>
 
-        {/* Right */}
-        <div
-          className="commitment-desktop"
-          style={{
-            borderLeft: "1px solid #e5e7eb",
-            paddingLeft: 24,
-            fontSize: 13,
-            lineHeight: 1.7,
-            color: "#4b5563",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              letterSpacing: 1.4,
-              textTransform: "uppercase",
-              color: "#6b7280",
-              fontWeight: 900,
-              marginBottom: 6,
-            }}
-          >
-            Publishing Commitment
+        {/* Right — publishing commitment */}
+        <div className="commitment-desktop" style={{
+          borderLeft: "1px solid var(--border)",
+          paddingLeft: "2rem",
+          paddingTop: "0.25rem",
+        }}>
+          <div className="eyebrow" style={{ marginBottom: "0.75rem" }}>Publishing Commitment</div>
+          <p style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.88rem",
+            lineHeight: 1.75,
+            color: "var(--text-faint)",
+          }}>
+            Two structured analyses weekly —{" "}
+            <strong style={{ color: "var(--text-dim)", fontWeight: 500 }}>Briefing</strong> (Tue) and{" "}
+            <strong style={{ color: "var(--text-dim)", fontWeight: 500 }}>Verdict</strong> (Fri).
+            Coverage is limited to developments of structural or national significance.
+            TPV is not a breaking-news service.
+          </p>
+
+          {/* What each type means */}
+          <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem" }}>
+            {[
+              { label: "Verdict", desc: "Deep issue breakdowns using the IDU framework — values, facts, forecasts, and where you land." },
+              { label: "Briefing", desc: "Quick context on trending claims — what's real, what's noise, and why it matters." },
+            ].map((item) => (
+              <div key={item.label} style={{
+                display: "flex",
+                gap: "0.75rem",
+                alignItems: "flex-start",
+              }}>
+                <div style={{
+                  width: 2,
+                  minHeight: "100%",
+                  alignSelf: "stretch",
+                  background: "var(--gold-line)",
+                  flexShrink: 0,
+                  marginTop: 3,
+                }} />
+                <div>
+                  <div style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.72rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--gold)",
+                    marginBottom: "0.2rem",
+                  }}>
+                    {item.label}
+                  </div>
+                  <div style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.82rem",
+                    lineHeight: 1.6,
+                    color: "var(--text-faint)",
+                  }}>
+                    {item.desc}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-          Two structured analyses weekly — <strong>Briefing</strong> (Tue) and{" "}
-          <strong>Verdict</strong> (Fri). Coverage is limited to developments of
-          structural or national significance; TPV is not a breaking-news service.
         </div>
       </div>
 
-      <div style={{ borderTop: "1px solid #e5e7eb", margin: "18px 0 22px" }} />
+      {/* ── DIVIDER ── */}
+      <div style={{ borderTop: "1px solid var(--border)", margin: "0 0 2rem" }} />
 
-      {/* Hero + Below (layout unchanged) */}
-      <div
-        className="homegrid"
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1.6fr 1fr",
-          gap: 18,
-          alignItems: "start",
-        }}
-      >
+      {/* ── CONTENT GRID ── */}
+      <div className="homegrid fade-up-delay-2" style={{
+        display: "grid",
+        gridTemplateColumns: "1.6fr 1fr",
+        gap: "2rem",
+        alignItems: "start",
+      }}>
+        {/* Hero article */}
         <Hero post={hero} />
 
-        <div style={{ display: "grid", gap: 16 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              justifyContent: "space-between",
-              gap: 12,
-            }}
-          >
-            <div style={{ fontSize: 14, fontWeight: 900, color: "#111827" }}>More recent</div>
-
-            <div style={{ display: "flex", gap: 12 }}>
-              <Link
-                href="/briefings"
-                style={{
-                  color: "#6b7280",
+        {/* Recent sidebar */}
+        <div style={{ display: "grid", gap: "1.25rem" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            gap: 12,
+            paddingBottom: "0.5rem",
+          }}>
+            <div style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--text-faint)",
+            }}>
+              More recent
+            </div>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              {[
+                { href: "/briefings", label: "Briefings" },
+                { href: "/verdicts", label: "Verdicts" },
+              ].map((l) => (
+                <Link key={l.href} href={l.href} style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.7rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--text-faint)",
                   textDecoration: "none",
-                  fontSize: 13,
-                  fontWeight: 800,
-                }}
-              >
-                Briefings
-              </Link>
-              <Link
-                href="/verdicts"
-                style={{
-                  color: "#6b7280",
-                  textDecoration: "none",
-                  fontSize: 13,
-                  fontWeight: 800,
-                }}
-              >
-                Verdicts
-              </Link>
+                  transition: "color 0.15s ease",
+                }}>
+                  {l.label}
+                </Link>
+              ))}
             </div>
           </div>
 
           {below.map((p) => {
-            const kicker = `${p.date}${
-              p.readTime ? ` • ${p.readTime}` : ""
-            } • ${p.type}`;
-
+            const kicker = `${p.date}${p.readTime ? ` · ${p.readTime}` : ""} · ${p.type}`;
             return (
               <SmallCard
                 key={`${p.type}-${p.slug}`}
@@ -393,29 +402,27 @@ export default function HomePage({
       </div>
 
       <style jsx>{`
-        @media (max-width: 980px) {
+        .small-card:hover { opacity: 0.75; }
+
+        @media (max-width: 900px) {
           .homegrid {
             grid-template-columns: 1fr !important;
           }
+          .masthead {
+            grid-template-columns: 1fr !important;
+          }
+          .commitment-desktop {
+            border-left: none !important;
+            padding-left: 0 !important;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem !important;
+          }
         }
 
-.commitment-mobile {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .commitment-desktop {
-    display: none !important;
-  }
-  .commitment-mobile {
-    display: block !important;
-  }
-}
-
-        @media (max-width: 900px) {
+        @media (max-width: 600px) {
           main {
-            padding-left: 14px !important;
-            padding-right: 14px !important;
+            padding-top: 2rem !important;
+            padding-bottom: 4rem !important;
           }
         }
       `}</style>
@@ -426,11 +433,5 @@ export default function HomePage({
 export const getStaticProps: GetStaticProps = async () => {
   const latestVerdicts = getAllVerdictsMeta();
   const latestBriefings = getAllBriefingsMeta();
-
-  return {
-    props: {
-      latestVerdicts,
-      latestBriefings,
-    },
-  };
+  return { props: { latestVerdicts, latestBriefings } };
 };

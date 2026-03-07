@@ -4,27 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClients";
 
-const navLinkStyle = (active: boolean): React.CSSProperties => ({
-  padding: "8px 10px",
-  borderRadius: 10,
-  textDecoration: "none",
-  color: active ? "#111827" : "#6b7280",
-  background: active ? "#f3f4f6" : "transparent",
-  fontWeight: active ? 600 : 500,
-  whiteSpace: "nowrap",
-  fontSize: 14,
-});
-
-const mobileLinkStyle = (active: boolean): React.CSSProperties => ({
-  padding: "9px 10px",
-  borderRadius: 10,
-  textDecoration: "none",
-  color: active ? "#111827" : "#6b7280",
-  background: active ? "#f3f4f6" : "transparent",
-  fontWeight: active ? 700 : 600,
-  fontSize: 15,
-});
-
 function initialsFromUser(u: User | null) {
   if (!u) return "•";
   const meta: any = u.user_metadata || {};
@@ -42,30 +21,31 @@ function displayNameFromUser(u: User | null) {
   return u.email || "Account";
 }
 
+const links = [
+  { href: "/", label: "Home", sub: null },
+  { href: "/verdicts", label: "Verdicts", sub: "Deep issue breakdowns" },
+  { href: "/briefings", label: "Briefings", sub: "Quick context on what's trending" },
+  { href: "/about", label: "About", sub: null },
+  { href: "/contact", label: "Contact", sub: null },
+];
+
 export default function Nav() {
   const router = useRouter();
-
   const [user, setUser] = useState<User | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setUser(data.session?.user ?? null);
     })();
-
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
-    return () => {
-      mounted = false;
-      sub.subscription.unsubscribe();
-    };
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {
@@ -75,14 +55,6 @@ export default function Nav() {
 
   const initial = useMemo(() => initialsFromUser(user), [user]);
   const name = useMemo(() => displayNameFromUser(user), [user]);
-
-  const links = [
-    { href: "/", label: "Home" },
-    { href: "/verdicts", label: "Verdicts" },
-    { href: "/briefings", label: "Briefings" },
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ];
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -94,10 +66,9 @@ export default function Nav() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo:
-          typeof window !== "undefined"
-            ? `${window.location.origin}/auth/callback`
-            : undefined,
+        redirectTo: typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback`
+          : undefined,
       },
     });
   }
@@ -105,68 +76,60 @@ export default function Nav() {
   return (
     <>
       <header
-      data-mobile-open={mobileOpen ? "1" : "0"}
+        data-mobile-open={mobileOpen ? "1" : "0"}
         style={{
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "rgba(255,255,255,0.92)",
-          backdropFilter: "blur(10px)",
-          borderBottom: "1px solid #e5e7eb",
+          background: "rgba(12,12,11,0.92)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
         {/* TOP BAR */}
-        <div
-          style={{
-            maxWidth: 1120,
-            margin: "0 auto",
-            height: 64, // lock height so logo can be bigger without growing header
-            padding: "0 14px",
+        <div style={{
+          maxWidth: 1100,
+          margin: "0 auto",
+          height: 64,
+          padding: "0 var(--space-lg)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+        }}>
+          {/* Logo */}
+          <Link href="/" style={{
+            height: 124,
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-          }}
-        >
-          {/* Logo */}
-          <Link
-  href="/"
-  style={{
-    height: 124,
-    display: "flex",
-    alignItems: "center",
-    textDecoration: "none",
-    overflow: "hidden", // 👈 prevents header expansion
-  }}
->
-  <img
-    src="/tpv.png"
-    alt="TPV"
-    style={{
-      height: "100%",      // 👈 fills the 64px container
-      width: "auto",
-      objectFit: "contain",
-      display: "block",
-    }}
-  />
-</Link>
+            textDecoration: "none",
+            overflow: "hidden",
+            gap: 10,
+          }}>
+            <img
+              src="/tpv.png"
+              alt="TPV"
+              style={{ height: 124, width: "auto", objectFit: "contain", display: "block" }}
+            />
+          </Link>
 
           {/* Right controls */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Mobile hamburger (only shows on mobile via CSS) */}
+
+            {/* Mobile hamburger */}
             <button
               className="tpv-mobile-hamburger"
               onClick={() => setMobileOpen((v) => !v)}
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileOpen}
               style={{
-                border: "1px solid #e5e7eb",
-                background: "#fff",
-                borderRadius: 12,
+                border: "1px solid var(--border-light)",
+                background: "transparent",
+                borderRadius: 3,
                 padding: "8px 10px",
-                fontSize: 18,
+                fontSize: 16,
                 lineHeight: 1,
-                color: "#111827",
+                color: "var(--text-dim)",
                 cursor: "pointer",
                 display: "none",
               }}
@@ -179,18 +142,21 @@ export default function Nav() {
               onClick={() => setDrawerOpen(true)}
               aria-label="Open account"
               style={{
-                border: "1px solid #e5e7eb",
-                background: "#fff",
-                borderRadius: 999,
+                border: "1px solid var(--border-light)",
+                background: "transparent",
+                borderRadius: "50%",
                 width: 34,
                 height: 34,
                 display: "inline-flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontWeight: 800,
-                color: "#111827",
+                fontFamily: "var(--font-body)",
+                fontWeight: 600,
+                fontSize: "0.8rem",
+                color: "var(--text-dim)",
                 cursor: "pointer",
                 userSelect: "none",
+                transition: "border-color 0.15s ease, color 0.15s ease",
               }}
             >
               {initial}
@@ -198,76 +164,136 @@ export default function Nav() {
           </div>
         </div>
 
-        {/* CHIN (desktop only) */}
-        <div
-          className="tpv-chin"
-          style={{
-            borderTop: "1px solid #e5e7eb",
-            background: "rgba(255,255,255,0.92)",
-            backdropFilter: "blur(10px)",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 1120,
-              margin: "0 auto",
-              padding: "8px 14px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-            }}
-          >
-            {links.map((l) => (
-              <Link key={l.href} href={l.href} style={navLinkStyle(router.pathname === l.href)}>
-                {l.label}
-              </Link>
-            ))}
-
-            <Link
-              href="/bound"
-              style={{
-                ...navLinkStyle(router.pathname === "/bound"),
-                fontStyle: "italic",
-              }}
-            >
-              Bound
-            </Link>
+        {/* CHIN — desktop nav */}
+        <div className="tpv-chin" style={{
+          borderTop: "1px solid var(--border)",
+          background: "rgba(12,12,11,0.92)",
+          backdropFilter: "blur(12px)",
+        }}>
+          <div style={{
+            maxWidth: 1100,
+            margin: "0 auto",
+            padding: "0 var(--space-lg)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 4,
+          }}>
+            {links.map((l) => {
+  const active = router.pathname === l.href;
+  return (
+    <Link
+      key={l.href}
+      href={l.href}
+      title={l.sub ?? undefined}
+      style={{
+        padding: "10px 14px",
+        textDecoration: "none",
+        fontFamily: "var(--font-body)",
+        fontSize: "0.8rem",
+        fontWeight: active ? 600 : 400,
+        letterSpacing: "0.04em",
+        color: active ? "var(--gold)" : "var(--text-faint)",
+        borderBottom: active ? "1px solid var(--gold)" : "1px solid transparent",
+        transition: "color 0.15s ease, border-color 0.15s ease",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {l.label}
+    </Link>
+  );
+})}
+<Link
+  href="/bound"
+  style={{
+    padding: "10px 14px",
+    textDecoration: "none",
+    fontFamily: "var(--font-display)",
+    fontStyle: "italic",
+    fontSize: "0.9rem",
+    color: router.pathname === "/bound" ? "var(--gold)" : "var(--text-faint)",
+    borderBottom: router.pathname === "/bound" ? "1px solid var(--gold)" : "1px solid transparent",
+    transition: "color 0.15s ease, border-color 0.15s ease",
+    whiteSpace: "nowrap",
+  }}
+>
+  Bound
+</Link>
           </div>
         </div>
 
-        {/* MOBILE MENU (only on mobile) */}
+        {/* MOBILE MENU */}
         {mobileOpen && (
-          <div
-            className="tpv-mobile-menu"
-            style={{
-              borderTop: "1px solid #e5e7eb",
-              background: "rgba(255,255,255,0.96)",
-              backdropFilter: "blur(10px)",
-            }}
-          >
-            <div
-              style={{
-                maxWidth: 1120,
-                margin: "0 auto",
-                padding: "10px 14px 12px",
-                display: "grid",
-                gap: 8,
-              }}
-            >
-              {links.map((l) => (
-                <Link key={l.href} href={l.href} style={mobileLinkStyle(router.pathname === l.href)}>
-                  {l.label}
-                </Link>
-              ))}
+          <div className="tpv-mobile-menu" style={{
+            borderTop: "1px solid var(--border)",
+            background: "var(--bg2)",
+          }}>
+            <div style={{
+              maxWidth: 1100,
+              margin: "0 auto",
+              padding: "1rem var(--space-lg) 1.25rem",
+              display: "grid",
+              gap: 2,
+            }}>
+              {links.map((l) => {
+                const active = router.pathname === l.href;
+                return (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    style={{
+                      padding: "10px 12px",
+                      textDecoration: "none",
+                      fontFamily: "var(--font-body)",
+                      fontSize: "0.95rem",
+                      fontWeight: active ? 600 : 400,
+                      color: active ? "var(--gold)" : "var(--text-dim)",
+                      borderRadius: 3,
+                      background: active ? "var(--gold-dim)" : "transparent",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                    }}
+                  >
+                    {l.label}
+                    {l.sub && (
+                      <span style={{
+                        fontSize: "0.7rem",
+                        color: "var(--text-faint)",
+                        fontWeight: 400,
+                      }}>
+                        {l.sub}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
               <Link
                 href="/bound"
                 style={{
-                  ...mobileLinkStyle(router.pathname === "/bound"),
+                  padding: "10px 12px",
+                  textDecoration: "none",
+                  fontFamily: "var(--font-display)",
                   fontStyle: "italic",
+                  fontSize: "1rem",
+                  color: "var(--gold)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
                 }}
               >
                 Bound
+                <span style={{
+                  fontFamily: "var(--font-body)",
+                  fontStyle: "normal",
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-faint)",
+                }}>
+                  Daily puzzle
+                </span>
               </Link>
             </div>
           </div>
@@ -275,26 +301,13 @@ export default function Nav() {
 
         <style jsx>{`
           @media (max-width: 768px) {
-            .tpv-chin {
-              display: none !important;
-            }
-            .tpv-mobile-hamburger {
-              display: inline-flex !important;
-              align-items: center;
-              justify-content: center;
-            }
+            .tpv-chin { display: none !important; }
+            .tpv-mobile-hamburger { display: inline-flex !important; align-items: center; justify-content: center; }
           }
-            /* Expose a global "header offset" used by article anchors */
-header {
-  --tpv-header-offset: 120px;
-}
-
-/* On mobile, when the dropdown is open, header is taller */
-@media (max-width: 768px) {
-  header[data-mobile-open="1"] {
-    --tpv-header-offset: 220px;
-  }
-}
+          header { --tpv-header-offset: 120px; }
+          @media (max-width: 768px) {
+            header[data-mobile-open="1"] { --tpv-header-offset: 220px; }
+          }
         `}</style>
       </header>
 
@@ -304,7 +317,7 @@ header {
         style={{
           position: "fixed",
           inset: 0,
-          background: drawerOpen ? "rgba(17,24,39,0.25)" : "transparent",
+          background: drawerOpen ? "rgba(0,0,0,0.6)" : "transparent",
           pointerEvents: drawerOpen ? "auto" : "none",
           transition: "background 220ms ease",
           zIndex: 60,
@@ -319,58 +332,61 @@ header {
           top: 0,
           right: 0,
           height: "100vh",
-          width: 360,
+          width: 340,
           maxWidth: "92vw",
-          background: "#fff",
-          borderLeft: "1px solid #e5e7eb",
+          background: "var(--bg2)",
+          borderLeft: "1px solid var(--border-light)",
           zIndex: 70,
           transform: drawerOpen ? "translateX(0)" : "translateX(102%)",
-          transition: "transform 260ms ease",
-          boxShadow: "0 20px 50px rgba(0,0,0,0.12)",
+          transition: "transform 260ms var(--ease-out)",
+          boxShadow: "-20px 0 60px rgba(0,0,0,0.4)",
           display: "flex",
           flexDirection: "column",
         }}
       >
         {/* Drawer header */}
-        <div
-          style={{
-            padding: "14px 16px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
-            borderBottom: "1px solid #e5e7eb",
-          }}
-        >
+        <div style={{
+          padding: "1rem 1.25rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          borderBottom: "1px solid var(--border)",
+        }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 999,
-                border: "1px solid #e5e7eb",
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: 800,
-              }}
-            >
+            <div style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              border: "1px solid var(--border-light)",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--font-body)",
+              fontWeight: 600,
+              fontSize: "0.8rem",
+              color: "var(--gold)",
+            }}>
               {initial}
             </div>
-            <div style={{ fontWeight: 800, color: "#111827" }}>{name}</div>
+            <div style={{
+              fontFamily: "var(--font-body)",
+              fontWeight: 500,
+              fontSize: "0.9rem",
+              color: "var(--text)",
+            }}>
+              {name}
+            </div>
           </div>
-
           <button
             onClick={() => setDrawerOpen(false)}
-            aria-label="Close"
             style={{
-              border: "1px solid #e5e7eb",
-              background: "#fff",
-              borderRadius: 10,
-              padding: "8px 10px",
+              border: "1px solid var(--border-light)",
+              background: "transparent",
+              borderRadius: 3,
+              padding: "6px 10px",
               cursor: "pointer",
-              color: "#111827",
-              fontWeight: 800,
+              color: "var(--text-faint)",
+              fontSize: "0.8rem",
               lineHeight: 1,
             }}
           >
@@ -379,102 +395,92 @@ header {
         </div>
 
         {/* Drawer content */}
-        <div style={{ padding: "16px", overflowY: "auto" }}>
+        <div style={{ padding: "1.25rem", overflowY: "auto", flex: 1 }}>
+
           {/* Subscription */}
-          <div style={{ fontSize: 11, letterSpacing: 1.2, color: "#ef4444", fontWeight: 900 }}>
-            YOUR SUBSCRIPTION
-          </div>
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 28,
-              fontWeight: 900,
-              letterSpacing: -0.8,
-              color: "#111827",
-            }}
-          >
+          <div className="eyebrow" style={{ marginBottom: "0.5rem" }}>Your Subscription</div>
+          <div style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "1.75rem",
+            color: "var(--text)",
+            marginBottom: "1.25rem",
+          }}>
             Free
           </div>
 
-          <div style={{ marginTop: 16, borderTop: "1px solid #e5e7eb" }} />
+          <div className="divider-full" />
 
           {/* For you */}
-          <div style={{ marginTop: 16, fontSize: 11, letterSpacing: 1.2, color: "#ef4444", fontWeight: 900 }}>
-            FOR YOU
+          <div className="eyebrow" style={{ marginBottom: "0.75rem", marginTop: "1rem" }}>For You</div>
+          <div style={{ marginBottom: "0.4rem", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text)", fontSize: "0.9rem" }}>
+            Bookmarks
           </div>
-          <div style={{ marginTop: 10, display: "grid", gap: 10 }}>
-            <div style={{ color: "#111827", fontWeight: 700 }}>Bookmarks</div>
-            <div style={{ color: "#6b7280", fontSize: 13 }}>
-              Coming soon — saved articles and Bound progress.
-            </div>
+          <div style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-faint)", lineHeight: 1.5 }}>
+            Coming soon — saved articles and Bound progress.
           </div>
 
-          <div style={{ marginTop: 16, borderTop: "1px solid #e5e7eb" }} />
+          <div className="divider-full" />
 
           {/* Actions */}
-          <div style={{ marginTop: 16, display: "grid", gap: 10 }}>
+          <div style={{ display: "grid", gap: 8, marginTop: "1rem" }}>
             {user ? (
               <>
-                <Link
-                  href="/account"
-                  style={{
-                    textDecoration: "none",
-                    color: "#111827",
-                    fontWeight: 800, // match Log out
-                    padding: "10px 12px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 12,
-                    background: "#fff",
-                  }}
-                >
+                <Link href="/account" style={{
+                  textDecoration: "none",
+                  color: "var(--text-dim)",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 500,
+                  fontSize: "0.88rem",
+                  padding: "10px 14px",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: 3,
+                  background: "transparent",
+                  transition: "border-color 0.15s ease",
+                }}>
                   Manage account
                 </Link>
-
-                <button
-                  onClick={signOut}
-                  style={{
-                    textAlign: "left",
-                    border: "1px solid #e5e7eb",
-                    background: "#fff",
-                    borderRadius: 12,
-                    padding: "10px 12px",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    color: "#111827",
-                  }}
-                >
+                <button onClick={signOut} style={{
+                  textAlign: "left",
+                  border: "1px solid var(--border-light)",
+                  background: "transparent",
+                  borderRadius: 3,
+                  padding: "10px 14px",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 500,
+                  fontSize: "0.88rem",
+                  cursor: "pointer",
+                  color: "var(--text-dim)",
+                }}>
                   Log out
                 </button>
               </>
             ) : (
               <>
-                <button
-                  onClick={signInGoogle}
-                  style={{
-                    border: "1px solid #e5e7eb",
-                    background: "#fff",
-                    borderRadius: 12,
-                    padding: "10px 12px",
-                    fontWeight: 800,
-                    cursor: "pointer",
-                    color: "#111827",
-                  }}
-                >
+                <button onClick={signInGoogle} style={{
+                  border: "1px solid var(--gold-line)",
+                  background: "var(--gold-dim)",
+                  borderRadius: 3,
+                  padding: "10px 14px",
+                  fontFamily: "var(--font-body)",
+                  fontWeight: 600,
+                  fontSize: "0.8rem",
+                  letterSpacing: "0.05em",
+                  cursor: "pointer",
+                  color: "var(--gold)",
+                  textAlign: "left",
+                }}>
                   Sign in with Google
                 </button>
-
-                <Link
-                  href="/signin"
-                  style={{
-                    textDecoration: "none",
-                    color: "#6b7280",
-                    fontWeight: 700,
-                    padding: "10px 12px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: 12,
-                    background: "#fafafa",
-                  }}
-                >
+                <Link href="/signin" style={{
+                  textDecoration: "none",
+                  color: "var(--text-faint)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.8rem",
+                  padding: "10px 14px",
+                  border: "1px solid var(--border)",
+                  borderRadius: 3,
+                  background: "transparent",
+                }}>
                   More sign-in options
                 </Link>
               </>

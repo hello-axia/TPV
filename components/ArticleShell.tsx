@@ -1,9 +1,43 @@
 // components/ArticleShell.tsx
 import Link from "next/link";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
+
+function ReadingProgress() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    function update() {
+      const el = document.documentElement;
+      const scrolled = el.scrollTop || document.body.scrollTop;
+      const total = el.scrollHeight - el.clientHeight;
+      setProgress(total > 0 ? Math.min(100, (scrolled / total) * 100) : 0);
+    }
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  return (
+    <div style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 2,
+      zIndex: 100,
+      background: "var(--border)",
+    }}>
+      <div style={{
+        height: "100%",
+        width: `${progress}%`,
+        background: "var(--gold)",
+        transition: "width 0.1s linear",
+      }} />
+    </div>
+  );
+}
 
 export default function ArticleShell({
-  type, // "Verdict" | "Briefing"
+  type,
   title,
   date,
   readTime,
@@ -22,95 +56,154 @@ export default function ArticleShell({
   rightRail?: ReactNode;
 }) {
   return (
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 14px 64px" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div
-          style={{
-            fontSize: 12,
-            fontWeight: 900,
-            letterSpacing: 1.2,
-            color: "#ef4444",
-            textTransform: "uppercase",
-          }}
-        >
-          {type}
-        </div>
+    <>
+      <ReadingProgress />
 
-        <div
-          style={{
-            marginTop: 10,
-            fontSize: 12,
-            color: "#6b7280",
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
+
+        {/* ── ARTICLE HEADER ── */}
+        <div className="article-header fade-up" style={{ marginBottom: "2rem", maxWidth: 720 }}>
+
+          {/* Back + meta row */}
+          <div style={{
             display: "flex",
             alignItems: "center",
-            gap: 8,
+            gap: "0.75rem",
+            marginBottom: "1.25rem",
             flexWrap: "wrap",
-          }}
-        >
-          <span>{date}</span>
-          {readTime ? (
-            <span style={{ color: "rgba(239, 68, 68, 0.65)", fontWeight: 700 }}>
-              • {readTime}
-            </span>
-          ) : null}
-          <span style={{ color: "#9ca3af", fontWeight: 700 }}>• {type}</span>
-          <span style={{ color: "#9ca3af", fontWeight: 700 }}>•</span>
+          }}>
+            <Link href={backHref} style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-faint)",
+              textDecoration: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.3rem",
+              transition: "color 0.15s ease",
+              borderBottom: "1px solid var(--border)",
+              paddingBottom: "1px",
+            }}>
+              ← Back
+            </Link>
 
-          <Link href={backHref} style={{ color: "#111827", textDecoration: "none", fontWeight: 800 }}>
-            Back
-          </Link>
+            <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
+
+            <span style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--text-faint)",
+            }}>
+              {date}
+            </span>
+
+            {readTime && (
+              <>
+                <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
+                <span style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-faint)",
+                }}>
+                  {readTime}
+                </span>
+              </>
+            )}
+
+            <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
+
+            {/* Type badge */}
+            <span style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.6rem",
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--gold)",
+              background: "var(--gold-dim)",
+              border: "1px solid var(--gold-line)",
+              borderRadius: 2,
+              padding: "2px 7px",
+            }}>
+              {type}
+            </span>
+          </div>
+
+          {/* Title */}
+          <h1 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
+            lineHeight: 1.1,
+            fontWeight: 400,
+            letterSpacing: "-0.02em",
+            color: "var(--text)",
+            marginBottom: "1rem",
+          }}>
+            {title}
+          </h1>
+
+          {/* Gold divider */}
+          <div className="divider" />
+
+          {/* Summary / deck */}
+          <p style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "1.05rem",
+            lineHeight: 1.75,
+            color: "var(--text-dim)",
+            fontStyle: "italic",
+            marginTop: "1rem",
+          }}>
+            {summary}
+          </p>
         </div>
 
-        <h1
-          style={{
-            fontSize: 56,
-            lineHeight: 1.02,
-            fontWeight: 900,
-            letterSpacing: -1.2,
-            margin: "12px 0 0",
-            color: "#111827",
-          }}
-        >
-          {title}
-        </h1>
+        {/* ── FULL DIVIDER ── */}
+        <div style={{ borderTop: "1px solid var(--border)", margin: "0 0 2.5rem" }} />
 
-        <p
-          style={{
-            marginTop: 12,
-            color: "#374151",
-            fontSize: 18,
-            lineHeight: 1.6,
-            fontStyle: "italic",
-            maxWidth: 900,
-          }}
-        >
-          {summary}
-        </p>
-      </div>
+        {/* ── ARTICLE LAYOUT ── */}
+        <div className="tpv-article">
+          <section className="prose fade-up-delay-1" style={{ minWidth: 0 }}>
+            {children}
+          </section>
+          {rightRail && (
+            <aside style={{ minWidth: 0 }}>
+              {rightRail}
+            </aside>
+          )}
+        </div>
 
-      <div style={{ borderTop: "1px solid #e5e7eb", margin: "18px 0 22px" }} />
-
-      {/* Layout */}
-      <div className="tpv-article">
-        <section style={{ minWidth: 0 }}>{children}</section>
-        {rightRail ? <aside style={{ minWidth: 0 }}>{rightRail}</aside> : null}
-      </div>
-
-      <style jsx>{`
-        .tpv-article {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 26px;
-        }
-        @media (min-width: 980px) {
+        <style jsx>{`
           .tpv-article {
-            grid-template-columns: 1.25fr 0.75fr;
-            gap: 36px;
-            align-items: start;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
           }
-        }
-      `}</style>
-    </main>
+
+          @media (min-width: 980px) {
+            .tpv-article {
+              grid-template-columns: 1.35fr 0.65fr;
+              gap: 3rem;
+              align-items: start;
+            }
+          }
+
+          @media (max-width: 600px) {
+            .article-header {
+              margin-bottom: 1.5rem !important;
+            }
+          }
+        `}</style>
+      </main>
+    </>
   );
 }

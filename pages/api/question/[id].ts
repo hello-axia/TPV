@@ -67,7 +67,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const uid = await getUserIdFromBearer();
     if (!uid) return res.status(200).json({ question, voted: null });
 
-    const { data: voteRow, error: voteErr } = await supabaseAdmin
+    const token = getBearer(req);
+    const supabaseUser = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
+    );
+
+    const { data: voteRow, error: voteErr } = await supabaseUser
       .from("tpv_question_votes")
       .select("choice")
       .eq("question_id", id)
