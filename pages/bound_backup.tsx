@@ -2,39 +2,108 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 type TierEmoji = "🟦" | "🟨" | "🟧" | "🟥";
-type TierName = "Instant" | "Fast" | "Moderate" | "Slow";
+type TierName = "Common" | "Uncommon" | "Rare" | "Advanced";
 
+const TIER_POINTS: Record<TierEmoji, number> = { "🟦": 1, "🟨": 2, "🟧": 3, "🟥": 4 };
 const TIER_LABELS: Record<TierEmoji, TierName> = {
-  "🟦": "Instant",
-  "🟨": "Fast",
-  "🟧": "Moderate",
-  "🟥": "Slow",
+  "🟦": "Common",
+  "🟨": "Uncommon",
+  "🟧": "Rare",
+  "🟥": "Advanced",
 };
 
-const TIER_COLOR: Record<TierEmoji, string> = {
-  "🟦": "#7aa8c7",
-  "🟨": "#c9b87a",
-  "🟧": "#c49060",
-  "🟥": "#b06060",
-};
+const PCT_COMMON_MAX = 35;
+const PCT_UNCOMMON_MAX = 50;
+const PCT_RARE_MAX = 80;
 
-function tierFromSeconds(timeSec: number): TierEmoji {
-  if (timeSec < 30) return "🟦";
-  if (timeSec < 90) return "🟨";
-  if (timeSec < 180) return "🟧";
-  return "🟥";
+function multiplierFromSeconds(timeSec: number) {
+  const t = Math.max(0, timeSec);
+  if (t < 60) return 2.0;
+  if (t < 120) return 1.7;
+  if (t < 180) return 1.45;
+  if (t < 240) return 1.25;
+  return 1.0;
+}
+
+function formatMult(mult: number) {
+  const s = String(Math.round(mult * 100) / 100);
+  return `${s}x`;
 }
 
 function speedLabelFromSeconds(timeSec: number) {
   const t = Math.max(0, timeSec);
-  if (t < 30) return "Instant pace";
-  if (t < 90) return "Fast pace";
-  if (t < 180) return "Moderate pace";
-  return "Slow pace";
+  if (t < 60) return "Insane speed bonus";
+  if (t < 120) return "Fast speed bonus";
+  if (t < 180) return "Quick speed bonus";
+  if (t < 240) return "Speed bonus";
+  return "No speed bonus";
 }
 
 function onlyLettersUpper(s: string) {
   return (s || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
+}
+
+function candidateForms(rawWord: string): string[] {
+  const W = onlyLettersUpper(rawWord);
+  if (!W) return [];
+  const forms: string[] = [];
+  const add = (s: string) => {
+    const k = onlyLettersUpper(s);
+    if (!k) return;
+    if (!forms.includes(k)) forms.push(k);
+  };
+  add(W);
+  if (W.endsWith("IES") && W.length > 3) add(W.slice(0, -3) + "Y");
+  if (W.endsWith("ES") && W.length > 2) add(W.slice(0, -2));
+  if (W.endsWith("S") && W.length > 1) add(W.slice(0, -1));
+  if (W.endsWith("ING") && W.length > 4) {
+    const stem = W.slice(0, -3);
+    add(stem);
+    if (stem.length > 1) add(stem.slice(0, -1));
+    add(stem + "E");
+  }
+  if (W.endsWith("ED") && W.length > 3) {
+    const stem = W.slice(0, -2);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    if (stem.length > 1) add(stem.slice(0, -1));
+    add(stem + "E");
+  }
+  if (W.endsWith("ER") && W.length > 3) {
+    const stem = W.slice(0, -2);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    add(stem + "E");
+  }
+  if (W.endsWith("EST") && W.length > 4) {
+    const stem = W.slice(0, -3);
+    add(stem);
+    if (stem.endsWith("I") && stem.length > 1) add(stem.slice(0, -1) + "Y");
+    add(stem + "E");
+  }
+  return forms;
+}
+
+function zipfForWord(zipf: Record<string, number>, rawWord: string): number | undefined {
+  const forms = candidateForms(rawWord);
+  let best: number | undefined = undefined;
+  for (const k of forms) {
+    const v = zipf[k];
+    if (!Number.isFinite(v)) continue;
+    if (best == null || (v as number) > best) best = v as number;
+  }
+  return best;
+}
+
+function aoaForWord(aoa: Record<string, number>, rawWord: string): number | undefined {
+  const forms = candidateForms(rawWord);
+  let best: number | undefined = undefined;
+  for (const k of forms) {
+    const v = aoa[k];
+    if (!Number.isFinite(v)) continue;
+    if (best == null || (v as number) < best) best = v as number;
+  }
+  return best;
 }
 
 function normalizePattern(p: string) {
@@ -62,10 +131,10 @@ function fitsPattern(word: string, pattern: string) {
 
 type BoundPatternEntry =
   | { len: number; kind: "both"; start: string; end: string; count: number }
-  | { len: number; kind: "start2_end1"; start: string; start2: string; end: string; count: number }
-  | { len: number; kind: "start1_end2"; start: string; end2: string; end: string; count: number };
+  | { len: number; kind: "start"; start: string; count: number }
+  | { len: number; kind: "end"; end: string; count: number };
 
-const PUZZLE_START_LOCAL_DATE = "2026-03-08";
+const PUZZLE_START_LOCAL_DATE = "2026-03-04";
 
 function localDateKey(d = new Date()) {
   const yyyy = d.getFullYear();
@@ -96,12 +165,13 @@ function hashStringToInt(s: string) {
 function buildPatternFromEntry(p: BoundPatternEntry) {
   const L = Math.max(2, p.len);
   const tiles = Array.from({ length: L }, () => "_");
-  tiles[0] = p.start;
-  tiles[L - 1] = p.end;
-  if (p.kind === "start2_end1") {
-    tiles[1] = p.start2;
-  } else if (p.kind === "start1_end2") {
-    tiles[L - 2] = p.end2;
+  if (p.kind === "both") {
+    tiles[0] = p.start;
+    tiles[L - 1] = p.end;
+  } else if (p.kind === "start") {
+    tiles[0] = p.start;
+  } else {
+    tiles[L - 1] = p.end;
   }
   return tiles.join(" ");
 }
@@ -119,30 +189,32 @@ function formatSubmittedAt(iso: string | null) {
   });
 }
 
-function buildShareText(puzzleNumber: number, timeSec: number, tierEmoji: TierEmoji) {
-  return `Bound #${puzzleNumber}\nTime: ${timeSec}s\n${tierEmoji}`;
-}
-
 function MetaKicker({ children }: { children: React.ReactNode }) {
-  return <div className="eyebrow">{children}</div>;
+  return (
+    <div className="eyebrow">
+      {children}
+    </div>
+  );
 }
 
 function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 8,
-      padding: "6px 10px",
-      border: "1px solid var(--border-light)",
-      background: "var(--bg2)",
-      color: "var(--text-dim)",
-      fontSize: 13,
-      borderRadius: 999,
-      whiteSpace: "nowrap",
-      fontWeight: 700,
-      fontFamily: "var(--font-body)",
-    }}>
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "6px 10px",
+        border: "1px solid var(--border-light)",
+        background: "var(--bg2)",
+        color: "var(--text-dim)",
+        fontSize: 13,
+        borderRadius: 999,
+        whiteSpace: "nowrap",
+        fontWeight: 700,
+        fontFamily: "var(--font-body)",
+      }}
+    >
       {children}
     </span>
   );
@@ -151,12 +223,20 @@ function Pill({ children }: { children: React.ReactNode }) {
 type ScoreResult = {
   tierEmoji: TierEmoji;
   tierName: TierName;
+  points: number;
+  percentile: number;
+  aoaPct: number;
+  zipfPct: number;
+  blendPct: number;
+  bonusPoints: number;
   timeSec: number;
+  multiplier: number;
+  finalScore: number;
   shareText: string;
 };
 
 type StoredSubmission = {
-  v: 3;
+  v: 2;
   puzzleNumber: number;
   localDayKey: string;
   pattern: string;
@@ -168,11 +248,84 @@ type StoredSubmission = {
 };
 
 function startedKey(puzzleNumber: number) {
-  return `bound:v3:startedAt:${puzzleNumber}`;
+  return `bound:v2:startedAt:${puzzleNumber}`;
 }
 function submissionKey(puzzleNumber: number) {
-  return `bound:v3:submission:${puzzleNumber}`;
+  return `bound:v2:submission:${puzzleNumber}`;
 }
+
+function clamp(n: number, lo: number, hi: number) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+function tierFromPercentile(pct: number): TierEmoji {
+  const p = clamp(pct, 0, 100);
+  if (p < PCT_COMMON_MAX) return "🟦";
+  if (p < PCT_UNCOMMON_MAX) return "🟨";
+  if (p < PCT_RARE_MAX) return "🟧";
+  return "🟥";
+}
+
+function aoaHardnessPct(aoaValue: number | undefined) {
+  const EASY = 5.5;
+  const HARD = 10.5;
+  const aoa = Number.isFinite(aoaValue as number) ? (aoaValue as number) : NaN;
+  if (!Number.isFinite(aoa)) return 0;
+  return clamp(((aoa - EASY) / (HARD - EASY)) * 100, 0, 100);
+}
+
+function percentileRank(values: number[], x: number) {
+  if (!values.length) return 50;
+  const sorted = values.slice().sort((a, b) => a - b);
+  let count = 0;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i] <= x) count++;
+    else break;
+  }
+  const denom = Math.max(1, sorted.length - 1);
+  const rank01 = (count - 1) / denom;
+  return clamp(rank01 * 100, 0, 100);
+}
+
+function buildShareText(puzzleNumber: number, finalScore: number, tierEmoji: string, percentile: number) {
+  const pct = Math.round(percentile * 10) / 10;
+  return `Bounds #${puzzleNumber}\nScore: ${finalScore}\nPercentile: ${pct}\n${tierEmoji}`;
+}
+
+function tierIndexFromEmoji(t: TierEmoji) {
+  return t === "🟦" ? 0 : t === "🟨" ? 1 : t === "🟧" ? 2 : 3;
+}
+function tierEmojiFromIndex(i: number): TierEmoji {
+  if (i <= 0) return "🟦";
+  if (i === 1) return "🟨";
+  if (i === 2) return "🟧";
+  return "🟥";
+}
+
+function applyZipfCapsOnly(baseTier: TierEmoji, zipfValue: number | undefined) {
+  if (!Number.isFinite(zipfValue as number)) return baseTier;
+  const z = zipfValue as number;
+  let capIdx: number | null = null;
+  if (z >= 5.1) capIdx = 0;
+  else if (z >= 4.7) capIdx = 1;
+  else if (z >= 4.2) capIdx = 2;
+  let idx = tierIndexFromEmoji(baseTier);
+  if (capIdx != null) idx = Math.min(idx, capIdx);
+  return tierEmojiFromIndex(idx);
+}
+
+function formatOrdinal(n: number) {
+  const x = Math.round(n);
+  const mod100 = x % 100;
+  if (mod100 >= 11 && mod100 <= 13) return `${x}th`;
+  switch (x % 10) {
+    case 1: return `${x}st`;
+    case 2: return `${x}nd`;
+    case 3: return `${x}rd`;
+    default: return `${x}th`;
+  }
+}
+
 
 export default function BoundPage() {
   const [localDayKeyState, setLocalDayKeyState] = useState(() => localDateKey());
@@ -215,12 +368,15 @@ export default function BoundPage() {
   const [resultAnimKey, setResultAnimKey] = useState(0);
 
   const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
+  const aoaCacheRef = useRef<Record<string, number> | null>(null);
+  const zipfCacheRef = useRef<Record<string, number> | null>(null);
+  const candidateCacheRef = useRef<{ key: string; aoaValues: number[]; zipfValues: number[] } | null>(null);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const res = await fetch("/bound-patterns.json?v=2026-03-08", { cache: "force-cache" });
+        const res = await fetch("/bound-patterns.json?v=2026-03-04", { cache: "force-cache" });
         if (!res.ok) return;
         const json = (await res.json()) as BoundPatternEntry[];
         if (alive) setPatternBank(json);
@@ -251,10 +407,16 @@ export default function BoundPage() {
     return Math.max(0, Math.floor((nowMs - startedAtMs) / 1000));
   }, [nowMs, startedAtMs]);
 
-  const liveSpeedLabel = useMemo(() => {
-    if (!revealed || submitted) return null;
-    return speedLabelFromSeconds(elapsedSec);
+  const liveMultiplier = useMemo(() => {
+    if (!revealed) return null;
+    if (submitted) return null;
+    return multiplierFromSeconds(elapsedSec);
   }, [revealed, submitted, elapsedSec]);
+
+  const liveSpeedLabel = useMemo(() => {
+    if (liveMultiplier == null) return null;
+    return speedLabelFromSeconds(elapsedSec);
+  }, [liveMultiplier, elapsedSec]);
 
   useEffect(() => {
     setRevealed(false);
@@ -274,7 +436,7 @@ export default function BoundPage() {
       const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
       if (rawSub) {
         const parsed = JSON.parse(rawSub) as StoredSubmission;
-        if (parsed && parsed.v === 3 && parsed.puzzleNumber === puzzleNumber && parsed.localDayKey === localDayKeyState) {
+        if (parsed && parsed.v === 2 && parsed.puzzleNumber === puzzleNumber && parsed.localDayKey === localDayKeyState) {
           setRevealed(true);
           setStartedAtMs(parsed.startedAtMs ?? null);
           setWord(parsed.word ?? "");
@@ -309,6 +471,73 @@ export default function BoundPage() {
     } catch { return null; }
   }
 
+  async function loadAoaPred(): Promise<Record<string, number> | null> {
+    if (aoaCacheRef.current) return aoaCacheRef.current;
+    try {
+      const AOA_VERSION = "2026-03-04b";
+      const res = await fetch(`/aoa_pred_full.json?v=${AOA_VERSION}`, { cache: "no-store" });
+      if (!res.ok) return null;
+      const json = (await res.json()) as Record<string, number>;
+      const map: Record<string, number> = {};
+      for (const [k, v] of Object.entries(json)) {
+        const kk = onlyLettersUpper(k);
+        if (!kk) continue;
+        const vv = Number(v);
+        if (!Number.isFinite(vv)) continue;
+        map[kk] = vv;
+      }
+      aoaCacheRef.current = map;
+      return map;
+    } catch { return null; }
+  }
+
+  async function loadZipf(): Promise<Record<string, number> | null> {
+    if (zipfCacheRef.current) return zipfCacheRef.current;
+    try {
+      const res = await fetch("/subtlex-us-zipf.json", { cache: "force-cache" });
+      if (!res.ok) return null;
+      const json = (await res.json()) as Record<string, number>;
+      const map: Record<string, number> = {};
+      for (const [k, v] of Object.entries(json)) {
+        const kk = onlyLettersUpper(k);
+        const vv = Number(v);
+        if (!kk) continue;
+        if (!Number.isFinite(vv)) continue;
+        map[kk] = vv;
+      }
+      zipfCacheRef.current = map;
+      return map;
+    } catch { return null; }
+  }
+
+  async function ensureCandidateValuesForPattern(): Promise<{ aoaValues: number[]; zipfValues: number[] } | null> {
+    const key = `v4|${normalizePattern(pattern)}|${len}`;
+    if (candidateCacheRef.current?.key === key) {
+      return { aoaValues: candidateCacheRef.current.aoaValues, zipfValues: candidateCacheRef.current.zipfValues };
+    }
+    const wb = await loadWordbank();
+    const aoa = await loadAoaPred();
+    const zipf = await loadZipf();
+    if (!wb || !aoa) return null;
+    const aoaValues: number[] = [];
+    const zipfValues: number[] = [];
+    const pCompact = normalizePattern(pattern).replace(/\s+/g, "");
+    for (const w of Object.keys(wb)) {
+      if (w.length !== pCompact.length) continue;
+      if (!fitsPattern(w, pattern)) continue;
+      const aRaw = aoaForWord(aoa, w);
+      const a = Number.isFinite(aRaw) ? (aRaw as number) : NaN;
+      if (Number.isFinite(a)) aoaValues.push(a);
+      if (zipf) {
+        const zRaw = zipfForWord(zipf, w);
+        const z = Number.isFinite(zRaw) ? (zRaw as number) : NaN;
+        if (Number.isFinite(z)) zipfValues.push(z);
+      }
+    }
+    candidateCacheRef.current = { key, aoaValues, zipfValues };
+    return { aoaValues, zipfValues };
+  }
+
   function validateInstant(raw: string) {
     const w = onlyLettersUpper(raw);
     if (!revealed) return { ok: false, word: w, msg: "Reveal to start." };
@@ -326,9 +555,8 @@ export default function BoundPage() {
     if (!revealed) return false;
     if (locked) return false;
     if (!instant.ok) return false;
-    if (onlyLettersUpper(word).length !== len) return false;
     return true;
-  }, [puzzleReady, revealed, locked, instant.ok, word, len]);
+  }, [puzzleReady, revealed, locked, instant.ok]);
 
   function onReveal() {
     if (!puzzleReady) return;
@@ -346,39 +574,58 @@ export default function BoundPage() {
     if (!canSubmit) return;
     setShowShare(false);
     const w = onlyLettersUpper(word);
-
-    // Double-check length
-    if (w.length !== len) {
-      setError("Word length doesn't match the pattern.");
-      return;
-    }
-
     const wb = await loadWordbank();
     if (!wb) { setError("Word list not loaded. Refresh and try again."); return; }
     if (!(w in wb)) { setError("Not a valid word."); return; }
-
-    const tSec = elapsedSec;
-    const tierEmoji = tierFromSeconds(tSec);
+    const aoa = await loadAoaPred();
+    const zipf = await loadZipf();
+    if (!aoa) { setError("Difficulty data not loaded. Refresh and try again."); return; }
+    const myAoaRaw = aoaForWord(aoa, w);
+    const hasAoa = Number.isFinite(myAoaRaw);
+    const myAoa: number = hasAoa ? (myAoaRaw as number) : NaN;
+    const myZipfRaw = zipf ? zipfForWord(zipf, w) : undefined;
+    let myZipf: number = Number.isFinite(myZipfRaw as number) ? (myZipfRaw as number) : 3.8;
+    myZipf = Math.max(2.0, Math.min(6.5, myZipf));
+    console.log("[BOUND DEBUG]", "word=", w, "aoa=", myAoa, "zipf=", myZipf, "zipfLooksLike=", typeof myZipf === "number" ? myZipf >= 0 && myZipf <= 8 ? "ZIPF_OK" : "NOT_ZIPF_SCALE" : "MISSING");
+    const cand = await ensureCandidateValuesForPattern();
+    const aoaValues = cand?.aoaValues ?? [];
+    const zipfValues = cand?.zipfValues ?? [];
+    const aoaPct = Number.isFinite(myAoa) && aoaValues.length ? percentileRank(aoaValues, myAoa) : 100;
+    const zipfPct = Number.isFinite(myZipf) && zipfValues.length ? percentileRank(zipfValues, myZipf) : 50;
+    const zipfHardRel = clamp(100 - zipfPct, 0, 100);
+    const aoaHardAbs = aoaHardnessPct(myAoa);
+    const pct = hasAoa ? clamp(0.85 * aoaHardAbs + 0.15 * zipfHardRel, 0, 100) : clamp(Math.max(zipfHardRel, 80), 0, 100);
+    let tierEmoji = tierFromPercentile(pct);
+    tierEmoji = applyZipfCapsOnly(tierEmoji, myZipf);
+    if (hasAoa && myAoa <= 6.0) { if (tierEmoji === "🟧" || tierEmoji === "🟥") tierEmoji = "🟨"; }
+    if (hasAoa && myAoa <= 5.0) { tierEmoji = "🟦"; }
     const tierName = TIER_LABELS[tierEmoji];
-    const shareText = buildShareText(puzzleNumber, tSec, tierEmoji);
-
+    const points = TIER_POINTS[tierEmoji];
+    const bonusPoints = 0;
+    const tSec = elapsedSec;
+    const mult = multiplierFromSeconds(tSec);
+    const rawScore = (points + bonusPoints) * mult;
+    const finalScore = Math.round(rawScore * 100) / 100;
+    const shareText = buildShareText(puzzleNumber, finalScore, tierEmoji, Math.round(pct * 10) / 10);
     const result: ScoreResult = {
-      tierEmoji,
-      tierName,
-      timeSec: tSec,
-      shareText,
+      tierEmoji, tierName, points,
+      percentile: Math.round(pct * 10) / 10,
+      aoaPct: Math.round(aoaPct * 10) / 10,
+      zipfPct: Math.round(zipfPct * 10) / 10,
+      blendPct: Math.round(pct * 10) / 10,
+      bonusPoints, timeSec: tSec,
+      multiplier: Math.round(mult * 100) / 100,
+      finalScore, shareText,
     };
-
     const submittedIso = new Date().toISOString();
     setSubmitted(true);
     setLocked(true);
     setScoreResult(result);
     setSubmittedAt(submittedIso);
     setResultAnimKey((k) => k + 1);
-
     try {
       const payload: StoredSubmission = {
-        v: 3, puzzleNumber, localDayKey: localDayKeyState, pattern, length: len,
+        v: 2, puzzleNumber, localDayKey: localDayKeyState, pattern, length: len,
         startedAtMs: startedAtMs ?? Date.now(), submittedAt: submittedIso, word: w, scoreResult: result,
       };
       localStorage.setItem(submissionKey(puzzleNumber), JSON.stringify(payload));
@@ -388,7 +635,7 @@ export default function BoundPage() {
 
   async function onCopyShare() {
     if (!submitted || !scoreResult) return;
-    const text = buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji);
+    const text = buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji, scoreResult.percentile);
     try { await navigator.clipboard.writeText(text); setShowShare(true); }
     catch { setShowShare(false); }
   }
@@ -423,7 +670,7 @@ export default function BoundPage() {
               gap: 10,
               padding: "6px 10px",
               border: "1px solid var(--border-light)",
-              background: "var(--bg2)",
+              background: (liveMultiplier ?? 1) > 1 ? "var(--bg3)" : "var(--bg2)",
               color: "var(--text-dim)",
               fontSize: 13,
               borderRadius: 999,
@@ -436,13 +683,20 @@ export default function BoundPage() {
                 <span style={{ fontWeight: 700, color: "var(--text)" }}>
                   {submitted && scoreResult ? `${scoreResult.timeSec}s` : revealed ? `${elapsedSec}s` : "—"}
                 </span>
-                {revealed && !submitted && liveSpeedLabel ? (
+                {revealed && !submitted && liveMultiplier != null ? (
                   <span style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, letterSpacing: 0.2 }}>
-                    {liveSpeedLabel}
+                    {liveSpeedLabel} • {formatMult(liveMultiplier ?? 1)}
                   </span>
                 ) : null}
               </span>
             </span>
+
+            {submitted && scoreResult ? (
+              <Pill>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Score</span>
+                <span style={{ fontWeight: 700, color: "var(--gold)" }}>{scoreResult.finalScore}</span>
+              </Pill>
+            ) : null}
           </div>
         </div>
 
@@ -454,7 +708,7 @@ export default function BoundPage() {
           maxWidth: 900,
           fontFamily: "var(--font-body)",
         }}>
-          Reveal the puzzle, then submit <strong style={{ color: "var(--text)" }}>one word</strong> that fits. Faster is better.
+          Reveal the puzzle, then submit <strong style={{ color: "var(--text)" }}>one word</strong> that fits.
         </p>
 
         <div style={{ borderTop: "1px solid var(--border)", margin: "12px 0 4px" }} />
@@ -595,23 +849,28 @@ export default function BoundPage() {
                   <div
                     key={`result-${resultAnimKey}`}
                     className="pop"
-                    style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}
+                    style={{ fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}
                   >
                     <span style={{
-                      display: "inline-block",
-                      width: 12,
-                      height: 12,
-                      borderRadius: 2,
-                      background: TIER_COLOR[scoreResult.tierEmoji],
-                      verticalAlign: "middle",
-                    }} />
-                    <span style={{ color: "var(--text-faint)" }}>•</span>
-                    <span>{scoreResult.tierName}</span>
+  display: "inline-block",
+  width: 12,
+  height: 12,
+  borderRadius: 2,
+  background: scoreResult.tierEmoji === "🟦" ? "#7aa8c7" : scoreResult.tierEmoji === "🟨" ? "#c9b87a" : scoreResult.tierEmoji === "🟧" ? "#c49060" : "#b06060",
+  verticalAlign: "middle",
+  marginRight: 4,
+}} />
+                    <span style={{ color: "var(--text-faint)", fontWeight: 700 }}> • </span>
+                    {scoreResult.finalScore}
                   </div>
                 </div>
 
                 <div style={{ marginTop: 6, color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6, fontFamily: "var(--font-body)" }}>
-                  Time: <strong style={{ color: "var(--text)" }}>{scoreResult.timeSec}s</strong>
+                  Tier: <strong style={{ color: "var(--text)" }}>{scoreResult.tierName}</strong>{" "}
+                  <span style={{ color: "var(--text-faint)" }}>({formatOrdinal(scoreResult.percentile)} percentile)</span>
+                  <br />
+                  Time: <strong style={{ color: "var(--text)" }}>{scoreResult.timeSec}s</strong>{" "}
+                  • Score multiplier: <strong style={{ color: "var(--text)" }}>{scoreResult.multiplier}</strong>
                 </div>
               </div>
             </div>
@@ -643,6 +902,7 @@ export default function BoundPage() {
             ) : (
               <button
                 onClick={onCopyShare}
+                disabled={!scoreResult?.shareText}
                 style={{
                   border: "1px solid var(--border-light)",
                   background: "var(--bg2)",
@@ -653,7 +913,8 @@ export default function BoundPage() {
                   fontWeight: 700,
                   letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  cursor: "pointer",
+                  cursor: scoreResult?.shareText ? "pointer" : "not-allowed",
+                  opacity: scoreResult?.shareText ? 1 : 0.6,
                   borderRadius: 3,
                 }}
               >
@@ -662,7 +923,7 @@ export default function BoundPage() {
             )}
           </div>
 
-          {showShare && submitted && scoreResult ? (
+          {showShare && submitted && scoreResult?.shareText ? (
             <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
               <div style={{
                 fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
@@ -682,7 +943,7 @@ export default function BoundPage() {
                 fontFamily: "var(--font-body)",
                 borderRadius: 3,
               }}>
-                {buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji)}
+                {buildShareText(puzzleNumber, scoreResult.finalScore, scoreResult.tierEmoji, scoreResult.percentile)}
               </pre>
             </div>
           ) : null}
@@ -698,14 +959,14 @@ export default function BoundPage() {
           </div>
 
           <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
-            <LegendRow emoji="🟦" label="Instant" time="under 30s" />
-            <LegendRow emoji="🟨" label="Fast" time="30–90s" />
-            <LegendRow emoji="🟧" label="Moderate" time="90–180s" />
-            <LegendRow emoji="🟥" label="Slow" time="180s+" />
+            <LegendRow emoji="🟦" label="Common" points={1} />
+            <LegendRow emoji="🟨" label="Uncommon" points={2} />
+            <LegendRow emoji="🟧" label="Rare" points={3} />
+            <LegendRow emoji="🟥" label="Advanced" points={4} />
           </div>
 
           <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
-            Tiers are based on <strong style={{ color: "var(--text-dim)" }}>how fast you find a word</strong> that fits the pattern.
+            Tiers are computed <strong style={{ color: "var(--text-dim)" }}>relative to today's puzzle</strong> (percentiles). Score is tier points (+bonus) times a decaying time multiplier.
           </div>
         </section>
       </div>
@@ -865,20 +1126,20 @@ function WordInput({
   );
 }
 
-function LegendRow({ emoji, label, time }: { emoji: TierEmoji; label: string; time: string }) {
+function LegendRow({ emoji, label, points }: { emoji: TierEmoji; label: string; points: number }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
       <span style={{
-        display: "inline-block",
-        width: 14,
-        height: 14,
-        borderRadius: 3,
-        background: TIER_COLOR[emoji],
-        flexShrink: 0,
-      }} />
+  display: "inline-block",
+  width: 14,
+  height: 14,
+  borderRadius: 3,
+  background: emoji === "🟦" ? "#7aa8c7" : emoji === "🟨" ? "#c9b87a" : emoji === "🟧" ? "#c49060" : "#b06060",
+  flexShrink: 0,
+}} />
       <span style={{ color: "var(--text)", fontWeight: 700, fontFamily: "var(--font-body)" }}>{label}</span>
       <span style={{ color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
-        — {time}
+        — {points} {points === 1 ? "pt" : "pts"}
       </span>
     </div>
   );

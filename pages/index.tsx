@@ -190,14 +190,10 @@ export default function HomePage({
 
       {/* ── MASTHEAD ── */}
       <div className="masthead fade-up" style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-        gap: "2.5rem",
-        alignItems: "start",
         marginBottom: "2.5rem",
       }}>
-        {/* Left — identity */}
-        <div>
+        {/* Identity block */}
+        <div style={{ maxWidth: 640, marginBottom: "2rem" }}>
           <div className="eyebrow" style={{ marginBottom: "1rem" }}>The People's Verdict</div>
 
           <h1 style={{
@@ -209,8 +205,7 @@ export default function HomePage({
             color: "var(--text)",
             marginBottom: "1rem",
           }}>
-            The political noise,<br />
-            <em>decoded.</em>
+            Structured analysis for independent thinkers.
           </h1>
 
           <p style={{
@@ -218,118 +213,130 @@ export default function HomePage({
             fontSize: "1rem",
             lineHeight: 1.75,
             color: "var(--text-dim)",
-            maxWidth: 420,
+            maxWidth: 520,
             marginBottom: "1.5rem",
           }}>
-            For people who care about politics but don't know where to start.
-            No spin. No outrage. Just the structure you need to think for yourself.
+            TPV breaks every political issue into its real components, values, facts, and incentives, so you can form an opinion that's actually yours.
           </p>
 
-          {/* Social proof */}
+          {/* CTAs */}
           <div style={{
             display: "flex",
             alignItems: "center",
             gap: "1rem",
             flexWrap: "wrap",
           }}>
-            <div style={{
-              display: "flex",
+            <Link href="/verdicts" style={{
+              display: "inline-flex",
               alignItems: "center",
-              gap: "0.5rem",
-              padding: "0.5rem 0.9rem",
-              background: "var(--gold-dim)",
-              border: "1px solid var(--gold-line)",
+              gap: "0.4rem",
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--bg)",
+              background: "var(--gold)",
+              textDecoration: "none",
+              padding: "10px 16px",
               borderRadius: 3,
+              transition: "opacity 0.15s ease",
             }}>
-              <span style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.7rem",
-                fontWeight: 600,
-                letterSpacing: "0.08em",
-                color: "var(--gold)",
-              }}>
-                Readers have weighed in on recent issues
-              </span>
-            </div>
+              Read a Verdict →
+            </Link>
 
-            <Link href="/bound" style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: "0.95rem",
+            <Link href="/briefings" style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
               color: "var(--text-dim)",
               textDecoration: "none",
-              borderBottom: "1px solid var(--border-light)",
-              paddingBottom: "1px",
-              transition: "color 0.15s ease, border-color 0.15s ease",
+              padding: "10px 16px",
+              border: "1px solid var(--border-light)",
+              borderRadius: 3,
+              transition: "opacity 0.15s ease",
             }}>
-              Play Bound →
+              Read a Briefing
             </Link>
           </div>
         </div>
 
-        {/* Right — publishing commitment */}
-        <div className="commitment-desktop" style={{
-          borderLeft: "1px solid var(--border)",
-          paddingLeft: "2rem",
-          paddingTop: "0.25rem",
-        }}>
-          <div className="eyebrow" style={{ marginBottom: "0.75rem" }}>Publishing Commitment</div>
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.88rem",
-            lineHeight: 1.75,
-            color: "var(--text-faint)",
-          }}>
-            Two structured analyses weekly —{" "}
-            <strong style={{ color: "var(--text-dim)", fontWeight: 500 }}>Briefing</strong> (Tue) and{" "}
-            <strong style={{ color: "var(--text-dim)", fontWeight: 500 }}>Verdict</strong> (Fri).
-            Coverage is limited to developments of structural or national significance.
-            TPV is not a breaking-news service.
-          </p>
-
-          {/* What each type means */}
-          <div style={{ marginTop: "1.5rem", display: "grid", gap: "0.75rem" }}>
-            {[
-              { label: "Verdict", desc: "Deep issue breakdowns a consistent framework — values, facts, forecasts, and where you land." },
-              { label: "Briefing", desc: "Quick context on trending claims — what's real, what's noise, and why it matters." },
-            ].map((item) => (
-              <div key={item.label} style={{
-                display: "flex",
-                gap: "0.75rem",
-                alignItems: "flex-start",
-              }}>
+        {/* Format explainer — now below headline, not beside it */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "1rem",
+          borderTop: "1px solid var(--border)",
+          paddingTop: "1.5rem",
+        }}
+          className="format-grid"
+        >
+          {[
+            {
+              label: "Verdict",
+              freq: "Every Tuesday",
+              desc: "Polarizing issues broken down by values, facts, forecasts and incentives. Ends with a reader poll.",
+              href: "/verdicts",
+            },
+            {
+              label: "Briefing",
+              freq: "Every Friday",
+              desc: "Institutional and policy stories structured as: what happened, why it matters, what changes, what to watch.",
+              href: "/briefings",
+            },
+          ].map((item) => (
+            <Link key={item.label} href={item.href} style={{ textDecoration: "none" }}>
+              <div style={{
+                padding: "1.1rem",
+                border: "1px solid var(--border-light)",
+                borderRadius: 4,
+                background: "var(--bg2)",
+                transition: "border-color 0.15s ease",
+              }}
+                className="format-card"
+              >
                 <div style={{
-                  width: 2,
-                  minHeight: "100%",
-                  alignSelf: "stretch",
-                  background: "var(--gold-line)",
-                  flexShrink: 0,
-                  marginTop: 3,
-                }} />
-                <div>
+                  display: "flex",
+                  alignItems: "baseline",
+                  justifyContent: "space-between",
+                  gap: 8,
+                  marginBottom: "0.5rem",
+                }}>
                   <div style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.72rem",
-                    fontWeight: 600,
-                    letterSpacing: "0.08em",
-                    textTransform: "uppercase",
-                    color: "var(--gold)",
-                    marginBottom: "0.2rem",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "1.1rem",
+                    color: "var(--text)",
+                    fontWeight: 400,
                   }}>
                     {item.label}
                   </div>
                   <div style={{
                     fontFamily: "var(--font-body)",
-                    fontSize: "0.82rem",
-                    lineHeight: 1.6,
-                    color: "var(--text-faint)",
+                    fontSize: "0.62rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "var(--gold)",
                   }}>
-                    {item.desc}
+                    {item.freq}
                   </div>
                 </div>
+                <div style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.82rem",
+                  lineHeight: 1.65,
+                  color: "var(--text-faint)",
+                }}>
+                  {item.desc}
+                </div>
               </div>
-            ))}
-          </div>
+            </Link>
+          ))}
         </div>
       </div>
 
@@ -403,6 +410,7 @@ export default function HomePage({
 
       <style jsx>{`
         .small-card:hover { opacity: 0.75; }
+        .format-card:hover { border-color: var(--gold-line) !important; }
 
         @media (max-width: 900px) {
           .homegrid {
@@ -411,11 +419,8 @@ export default function HomePage({
           .masthead {
             grid-template-columns: 1fr !important;
           }
-          .commitment-desktop {
-            border-left: none !important;
-            padding-left: 0 !important;
-            border-top: 1px solid var(--border);
-            padding-top: 1.5rem !important;
+          .format-grid {
+            grid-template-columns: 1fr !important;
           }
         }
 
