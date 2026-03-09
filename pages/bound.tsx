@@ -65,7 +65,7 @@ type BoundPatternEntry =
   | { len: number; kind: "start2_end1"; start: string; start2: string; end: string; count: number }
   | { len: number; kind: "start1_end2"; start: string; end2: string; end: string; count: number };
 
-const PUZZLE_START_LOCAL_DATE = "2026-03-08";
+const PUZZLE_START_LOCAL_DATE = "2026-03-07";
 
 function localDateKey(d = new Date()) {
   const yyyy = d.getFullYear();
