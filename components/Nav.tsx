@@ -4,23 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClients";
 
-function initialsFromUser(u: User | null) {
-  if (!u) return "•";
-  const meta: any = u.user_metadata || {};
-  const first = (meta.first_name || meta.name || "").trim();
-  if (first) return first[0].toUpperCase();
-  const email = (u.email || "").trim();
-  return email ? email[0].toUpperCase() : "•";
-}
-
-function displayNameFromUser(u: User | null) {
-  if (!u) return "Account";
-  const meta: any = u.user_metadata || {};
-  const first = (meta.first_name || meta.name || "").trim();
-  if (first) return first;
-  return u.email || "Account";
-}
-
 const links = [
   { href: "/", label: "Home", sub: null },
   { href: "/verdicts", label: "Verdicts", sub: "Deep issue breakdowns" },
@@ -32,6 +15,7 @@ const links = [
 export default function Nav() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -40,10 +24,30 @@ export default function Nav() {
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
-      setUser(data.session?.user ?? null);
+      const u = data.session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", u.id)
+          .single();
+        if (mounted) setUsername(profile?.username || null);
+      }
     })();
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("username")
+          .eq("id", u.id)
+          .single();
+        setUsername(profile?.username || null);
+      } else {
+        setUsername(null);
+      }
     });
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
@@ -53,8 +57,19 @@ export default function Nav() {
     setMobileOpen(false);
   }, [router.pathname]);
 
-  const initial = useMemo(() => initialsFromUser(user), [user]);
-  const name = useMemo(() => displayNameFromUser(user), [user]);
+  const initial = useMemo(() => {
+    if (!user) return "•";
+    if (username) return username[0].toUpperCase();
+    return (user.email || "•")[0].toUpperCase();
+  }, [user, username]);
+
+  const displayName = useMemo(() => {
+    if (!user) return "Account";
+    if (username) return `@${username}`;
+    return user.email || "Account";
+  }, [user, username]);
+
+
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -374,7 +389,7 @@ export default function Nav() {
               fontSize: "0.9rem",
               color: "var(--text)",
             }}>
-              {name}
+              {displayName}
             </div>
           </div>
           <button

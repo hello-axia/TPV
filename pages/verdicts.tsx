@@ -1,10 +1,37 @@
 import Link from "next/link";
 import { GetStaticProps } from "next";
+import { useEffect, useState } from "react";
 import { getAllVerdictsMeta, VerdictMeta } from "../lib/verdicts";
 
-function Card({ title, summary, date, readTime, href }: {
-  title: string; summary: string; date: string; readTime?: string; href: string;
+function useReaderCount(questionId?: string): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!questionId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!res.ok || !alive) return;
+        const json = await res.json();
+        const q = json.question;
+        if (!q || !alive) return;
+        const t = (q.a_count || 0) + (q.b_count || 0) + (q.c_count || 0) + (q.d_count || 0);
+        if (t > 0) setCount(t);
+      } catch { /* fail silently */ }
+    })();
+    return () => { alive = false; };
+  }, [questionId]);
+  return count;
+}
+
+function Card({ title, summary, date, readTime, href, questionId }: {
+  title: string; summary: string; date: string; readTime?: string; href: string; questionId?: string;
 }) {
+  const readerCount = useReaderCount(questionId);
+
   return (
     <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }} className="verdict-card">
       <div style={{
@@ -30,6 +57,9 @@ function Card({ title, summary, date, readTime, href }: {
           <span>{date}</span>
           {readTime && <><span>·</span><span>{readTime}</span></>}
           <span style={{ color: "var(--gold)" }}>· Verdict</span>
+          {readerCount != null && (
+            <><span>·</span><span>{readerCount} {readerCount === 1 ? "reader" : "readers"} weighed in</span></>
+          )}
         </div>
 
         {/* Title */}
@@ -115,6 +145,7 @@ export default function VerdictsPage({ items }: { items: VerdictMeta[] }) {
             date={v.date}
             readTime={v.readTime}
             href={`/verdicts/${v.slug}`}
+            questionId={(v as any).questionId}
           />
         ))}
       </div>

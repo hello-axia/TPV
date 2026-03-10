@@ -20,19 +20,16 @@ function getBearer(req: NextApiRequest) {
   return m?.[1] || null;
 }
 
-// Admin client (server-only)
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-// Anon client ONLY for validating the bearer token -> user id
-const supabaseAnon = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const supabaseAdmin = createClient(
+    process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const supabaseAnon = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
   const id = String(req.query.id || "").trim();
   if (!id) return res.status(400).json({ error: "Missing id" });
 

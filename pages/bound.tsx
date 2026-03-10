@@ -215,6 +215,7 @@ export default function BoundPage() {
   const [resultAnimKey, setResultAnimKey] = useState(0);
 
   const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
+  const autoFocusRef = useRef<(() => void) | undefined>(undefined);
 
   useEffect(() => {
     let alive = true;
@@ -340,6 +341,7 @@ export default function BoundPage() {
     setStartedAtMs(ms);
     setNowMs(ms);
     try { localStorage.setItem(startedKey(puzzleNumber), String(ms)); } catch { /* ignore */ }
+    setTimeout(() => { autoFocusRef.current?.(); }, 100);
   }
 
   async function onSubmit() {
@@ -355,7 +357,7 @@ export default function BoundPage() {
 
     const wb = await loadWordbank();
     if (!wb) { setError("Word list not loaded. Refresh and try again."); return; }
-    if (!(w in wb)) { setError("Not a valid word."); return; }
+    if (!(w in wb)) { setError("I don't think that one's in the dictionary..."); return; }
 
     const tSec = elapsedSec;
     const tierEmoji = tierFromSeconds(tSec);
@@ -482,14 +484,15 @@ export default function BoundPage() {
           >
             {revealed ? (
               <WordInput
-                label="1"
-                value={word}
-                onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
-                disabled={locked}
-                error={error}
-                placeholder="TYPE WORD…"
-                pattern={pattern}
-              />
+              label="1"
+              value={word}
+              onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
+              disabled={locked}
+              error={error}
+              placeholder="TYPE WORD…"
+              pattern={pattern}
+              autoFocusRef={autoFocusRef}
+            />
             ) : (
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {new Array(5).fill("?").map((_, i) => (
@@ -705,7 +708,7 @@ export default function BoundPage() {
           </div>
 
           <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
-            Tiers are based on <strong style={{ color: "var(--text-dim)" }}>how fast you find a word</strong> that fits the pattern.
+            The faster you find a word, <strong style={{ color: "var(--text-dim)" }}>the better.</strong> No second chances.
           </div>
         </section>
       </div>
@@ -740,6 +743,7 @@ function WordInput({
   disabled,
   error,
   pattern,
+  autoFocusRef,
 }: {
   label: string;
   value: string;
@@ -748,14 +752,69 @@ function WordInput({
   error?: string | null;
   placeholder: string;
   pattern: string;
+  autoFocusRef?: React.MutableRefObject<(() => void) | undefined>;
 }) {
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const hiddenInputRef = useRef<HTMLInputElement | null>(null);
+
   const pc = (pattern || "").replace(/\s/g, "").toUpperCase();
   const totalLen = pc.length;
 
   const fixedAt = (i: number) => pc[i] !== "_";
   const freeIdxs: number[] = [];
   for (let i = 0; i < totalLen; i++) { if (!fixedAt(i)) freeIdxs.push(i); }
+
+  useEffect(() => {
+    if (autoFocusRef) {
+      autoFocusRef.current = () => {
+        hiddenInputRef.current?.focus();
+      };
+    }
+  });
+
+  
+  function handleHiddenKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (disabled) return;
+    if (e.key === "Backspace") {
+      e.preventDefault();
+      const v = (value || "").padEnd(totalLen, " ");
+      // find last filled free slot and clear it
+      for (let i = freeIdxs.length - 1; i >= 0; i--) {
+        const idx = freeIdxs[i];
+        if (/[A-Z]/i.test(v[idx] ?? " ")) {
+          const chars = Array.from({ length: totalLen }, (_, j) => {
+            if (fixedAt(j)) return pc[j];
+            if (j === idx) return " ";
+            const existing = v[j] ?? " ";
+            return /[A-Z]/i.test(existing) ? existing.toUpperCase() : " ";
+          });
+          onChange(chars.join(""));
+          return;
+        }
+      }
+      return;
+    }
+    if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
+      e.preventDefault();
+      const ch = e.key.toUpperCase();
+      const v = (value || "").padEnd(totalLen, " ");
+      // find first empty free slot
+      for (let i = 0; i < freeIdxs.length; i++) {
+        const idx = freeIdxs[i];
+        if (!/[A-Z]/i.test(v[idx] ?? " ")) {
+          const chars = Array.from({ length: totalLen }, (_, j) => {
+            if (fixedAt(j)) return pc[j];
+            if (j === idx) return ch;
+            const existing = v[j] ?? " ";
+            return /[A-Z]/i.test(existing) ? existing.toUpperCase() : " ";
+          });
+          onChange(chars.join(""));
+          return;
+        }
+      }
+      // all slots full — do nothing (user must backspace)
+      return;
+    }
+  }
 
   function getDisplay(): string[] {
     const d: string[] = [];
@@ -770,91 +829,58 @@ function WordInput({
     return d;
   }
 
-  function withChange(fullIdx: number, ch: string): string {
-    const v = (value || "").padEnd(totalLen, " ");
-    const chars = Array.from({ length: totalLen }, (_, i) => {
-      if (fixedAt(i)) return pc[i];
-      if (i === fullIdx) return ch === "" ? " " : ch;
-      const existing = v[i] ?? " ";
-      return /[A-Z]/i.test(existing) ? existing.toUpperCase() : " ";
-    });
-    return chars.join("");
-  }
-
-  function focusNextFree(from: number) {
-    for (let i = from + 1; i < totalLen; i++) { if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; } }
-  }
-  function focusPrevFree(from: number) {
-    for (let i = from - 1; i >= 0; i--) { if (!fixedAt(i)) { inputRefs.current[i]?.focus(); return; } }
-  }
-
-  function handleChange(fullIdx: number, e: React.ChangeEvent<HTMLInputElement>) {
-    if (disabled) return;
-    const raw = (e.target.value || "").replace(/[^a-zA-Z]/g, "").toUpperCase();
-    if (!raw) return;
-    const ch = raw[raw.length - 1];
-    onChange(withChange(fullIdx, ch));
-    focusNextFree(fullIdx);
-  }
-
-  function handleKeyDown(fullIdx: number, e: React.KeyboardEvent<HTMLInputElement>) {
-    if (disabled) return;
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      const v = (value || "").padEnd(totalLen, " ");
-      const cur = v[fullIdx] ?? " ";
-      if (/[A-Z]/i.test(cur)) { onChange(withChange(fullIdx, "")); }
-      else {
-        focusPrevFree(fullIdx);
-        const prevFree = freeIdxs[freeIdxs.indexOf(fullIdx) - 1];
-        if (prevFree !== undefined) { onChange(withChange(prevFree, "")); }
-      }
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault(); focusPrevFree(fullIdx);
-    } else if (e.key === "ArrowRight") {
-      e.preventDefault(); focusNextFree(fullIdx);
-    }
-  }
-
   const display = getDisplay();
   const v = (value || "").padEnd(totalLen, " ");
   const hasError = !!error && freeIdxs.some(i => /[A-Z]/i.test(v[i] ?? " "));
 
   return (
-    <div>
+    <div onClick={() => hiddenInputRef.current?.focus()} style={{ cursor: "text" }}>
+      <input
+        ref={hiddenInputRef}
+        onKeyDown={handleHiddenKeyDown}
+        onChange={() => {}}
+        value=""
+        style={{
+          position: "fixed",
+          opacity: 0,
+          pointerEvents: "none",
+          width: 0,
+          height: 0,
+          top: 0,
+          left: 0,
+        }}
+        inputMode="text"
+        autoCapitalize="characters"
+        autoCorrect="off"
+        autoComplete="off"
+      />
       <div style={{ display: "flex", gap: 8, flexWrap: totalLen > 10 ? "wrap" : "nowrap" }}>
         {Array.from({ length: totalLen }, (_, i) => {
           const fixed = fixedAt(i);
           const letter = display[i];
           const borderColor = hasError ? "#ef4444" : fixed ? "var(--border-light)" : "var(--gold)";
           return (
-            <input
+            <div
               key={i}
-              ref={el => { inputRefs.current[i] = el; }}
-              value={letter}
-              readOnly={fixed || disabled}
-              disabled={disabled && !fixed}
-              onChange={(e) => handleChange(i, e)}
-              onKeyDown={(e) => handleKeyDown(i, e)}
-              maxLength={2}
-              inputMode="text"
-              autoCapitalize="characters"
               style={{
                 width: `min(46px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen}))`,
                 height: `min(50px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 1.09))`,
                 border: `1.5px solid ${borderColor}`,
-                background: fixed ? "var(--bg3)" : disabled ? "var(--bg2)" : "var(--bg2)",
+                background: fixed ? "var(--bg3)" : "var(--bg2)",
                 color: fixed ? "var(--gold)" : "var(--text)",
                 fontSize: `min(20px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 0.43))`,
                 fontWeight: 700,
                 fontFamily: "var(--font-body)",
                 textAlign: "center",
                 textTransform: "uppercase",
-                outline: "none",
-                caretColor: "transparent",
-                letterSpacing: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                userSelect: "none",
               }}
-            />
+            >
+              {letter}
+            </div>
           );
         })}
       </div>

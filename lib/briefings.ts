@@ -66,6 +66,8 @@ export function getBriefingBySlug(slug: string) {
       summary: String(data.summary ?? ""),
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
+      tldr: Array.isArray(data.tldr) ? data.tldr : null,
+keyTension: data.keyTension ? String(data.keyTension) : null,
     },
     content,
   };

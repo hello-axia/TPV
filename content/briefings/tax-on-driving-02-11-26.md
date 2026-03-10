@@ -4,6 +4,11 @@ date: "02-11-2026"
 readTime: "3 min read"
 summary: 'In recent weeks, social media has claimed that Congress has "passed" a new federal tax based on how much you drive.'
 questionId: "miles-driven-tax-2026-02-11"
+tldr:
+  - "Social media claimed Congress passed a new 'miles driven' tax — that's not accurate"
+  - "What actually happened: Congress authorized a small pilot program to study a per-mile fee, not enact one"
+  - "The real story is that the gas tax hasn't been raised since 1993, and fuel-efficient cars are slowly starving highway funding"
+  - "A mileage-based tax is being seriously studied, but is years away from becoming law — if it ever does"
 ---
 
 
@@ -35,8 +40,6 @@ Watch federal transportation reauthorization. The U.S. periodically rewrite and 
 ## **The Takeaway**
 The U.S. is actively studying the potential change from gas to mileage-based taxes, but no new nationwide federal per-mile tax was passed in recent weeks. 
 
-## **The Question**
-Before reading this, what did you think Congress had done about a “miles driven” tax?
 
 
 <!-- TPV_QUESTION:miles-driven-tax-2026-02-11 -->

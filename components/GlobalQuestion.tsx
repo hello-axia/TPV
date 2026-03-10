@@ -24,6 +24,22 @@ type ApiResponse = {
 const LETTERS = ["A", "B", "C", "D"] as const;
 type Letter = typeof LETTERS[number];
 
+function getPeerMessage(voted: Letter, totals: Record<Letter, number> & { total: number }, pct: (n: number) => number): string {
+  const myPct = pct(totals[voted]);
+  const sorted = (["A", "B", "C", "D"] as Letter[]).sort((a, b) => totals[b] - totals[a]);
+  const rank = sorted.indexOf(voted);
+  const topPct = pct(totals[sorted[0]]);
+
+  if (rank === 0) {
+    if (myPct >= 50) return `You're with the majority on this one. ${myPct}% of readers landed here too.`;
+    return `You picked the most common answer, though nobody has a strong majority yet. ${myPct}% chose the same.`;
+  }
+  if (rank === 1) {
+    return `You're in the second camp. ${myPct}% agree with you, while ${topPct}% went the other way.`;
+  }
+  return `You're in the minority on this one at ${myPct}%. That doesn't mean you're wrong. Read the breakdown and see if it changes anything.`;
+}
+
 export default function GlobalQuestion({ questionId }: { questionId: string }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -69,8 +85,6 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
       if (!res.ok) throw new Error((json as any)?.error || "Failed to load poll");
 
       setData(json);
-
-      // If they already voted, jump straight to results
       if (json.voted) setPhase("result");
 
     } catch (e: any) {
@@ -92,6 +106,14 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
 
   useEffect(() => {
     let mounted = true;
+
+    const timeout = setTimeout(() => {
+      if (mounted && !authReady) {
+        tokenRef.current = null;
+        setAuthReady(true);
+      }
+    }, 2000);
+
     (async () => {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
@@ -100,6 +122,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
       setAccessToken(tok);
       tokenRef.current = tok;
       setAuthReady(true);
+      clearTimeout(timeout);
     })();
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -111,9 +134,20 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
       setAuthReady(true);
     });
 
-    return () => { mounted = false; sub.subscription.unsubscribe(); };
+    return () => {
+      mounted = false;
+      clearTimeout(timeout);
+      sub.subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!authReady) return;
+    if (user && !accessToken) return;
+    load({ silent: firstLoadDone.current });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionId, authReady, user, accessToken]);
 
   async function vote(choice: Letter) {
     if (submitting || data?.voted) return;
@@ -173,17 +207,9 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     ? { A: q.a_text, B: q.b_text, C: q.c_text, D: q.d_text }
     : { A: "", B: "", C: "", D: "" };
 
-  const positionLabel = (letter: Letter) => {
-    if (!totals.total) return "";
-    const sorted = (["A", "B", "C", "D"] as Letter[])
-      .sort((a, b) => totals[b] - totals[a]);
-    const rank = sorted.indexOf(letter);
-    if (rank === 0) return "the most common view";
-    if (rank === 1) return "the second most common view";
-    return "a less common view";
-  };
-
   if (!authReady || (loading && !q) || !q) return null;
+
+  const peerMessage = voted ? getPeerMessage(voted, totals, pct) : null;
 
   return (
     <section>
@@ -297,28 +323,28 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
           color: var(--gold);
         }
         .bar-track {
-          height: 3px;
-          background: var(--border);
-          border-radius: 2px;
-          overflow: hidden;
-        }
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+}
         .bar-fill {
-          height: 100%;
-          border-radius: 2px;
-          background: var(--border-light);
-          transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+  height: 100%;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
         .bar-fill.mine {
           background: var(--gold);
         }
-        .insight-box {
+        .peer-box {
           margin-top: 1.5rem;
           padding: 1rem 1.25rem;
           border-left: 2px solid var(--gold);
           background: var(--gold-dim);
           border-radius: 0 3px 3px 0;
         }
-        .insight-label {
+        .peer-label {
           font-family: var(--font-body);
           font-size: 0.6rem;
           font-weight: 700;
@@ -327,11 +353,11 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
           color: var(--gold);
           margin-bottom: 0.4rem;
         }
-        .insight-text {
+        .peer-text {
           font-family: var(--font-body);
-          font-size: 0.85rem;
+          font-size: 0.88rem;
           color: var(--text-dim);
-          line-height: 1.6;
+          line-height: 1.65;
         }
         .vote-count {
           font-family: var(--font-body);
@@ -370,6 +396,57 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
         .cta-start:hover {
           background: var(--gold-dim);
         }
+        .social-proof {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          margin-bottom: 1.25rem;
+          flex-wrap: wrap;
+        }
+        .social-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: var(--gold);
+          flex-shrink: 0;
+        }
+        .social-text {
+          font-family: var(--font-body);
+          font-size: 0.78rem;
+          color: var(--text-faint);
+          font-weight: 500;
+        }
+        .breakdown-nudge {
+          margin-top: 1.25rem;
+          padding-top: 1.25rem;
+          border-top: 1px solid var(--border);
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        .breakdown-label {
+          font-family: var(--font-body);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: var(--text-faint);
+          margin-bottom: 0.25rem;
+        }
+        .breakdown-text {
+          font-family: var(--font-body);
+          font-size: 0.85rem;
+          color: var(--text-dim);
+          line-height: 1.6;
+        }
+        .breakdown-link {
+          font-family: var(--font-body);
+          font-size: 0.78rem;
+          font-weight: 600;
+          color: var(--gold);
+          text-decoration: none;
+          margin-top: 0.25rem;
+        }
       `}</style>
 
       <div className="poll-wrap">
@@ -389,7 +466,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
               color: "var(--text-faint)",
               letterSpacing: "0.08em",
             }}>
-              Updating…
+              Updating...
             </span>
           )}
         </div>
@@ -419,22 +496,24 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
           </div>
         )}
 
-        {/* ── PRE STATE — teaser before engagement ── */}
+        {/* ── PRE STATE ── */}
         {phase === "pre" && (
           <>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.88rem",
-              color: "var(--text-faint)",
-              lineHeight: 1.65,
-              marginBottom: "1.25rem",
-            }}>
-              {totals.total > 0
-                ? `${totals.total} readers have weighed in. Answer to see where you stand.`
-                : "Be one of the first to weigh in."}
-            </p>
+            {totals.total > 0 ? (
+              <div className="social-proof">
+                <div className="social-dot" />
+                <span className="social-text">
+                  {totals.total} {totals.total === 1 ? "reader has" : "readers have"} weighed in. Where do you land?
+                </span>
+              </div>
+            ) : (
+              <div className="social-proof">
+                <div className="social-dot" />
+                <span className="social-text">Be one of the first to weigh in.</span>
+              </div>
+            )}
             <button className="cta-start" onClick={() => setPhase("voting")}>
-              Take the poll →
+              Take the poll
             </button>
           </>
         )}
@@ -497,7 +576,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
               onClick={() => selected && vote(selected)}
               disabled={!selected || submitting}
             >
-              {submitting ? "Submitting…" : "Submit my answer"}
+              {submitting ? "Submitting..." : "Submit my answer"}
             </button>
           </>
         )}
@@ -531,57 +610,26 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
               );
             })}
 
-<div className="vote-count">{totals.total} readers responded</div>
+            <div className="vote-count">{totals.total} {totals.total === 1 ? "reader" : "readers"} responded</div>
 
-{/* Insight */}
-<div className="insight-box">
-  <div className="insight-label">
-    Your position — {positionLabel(voted)} ({pct(totals[voted])}% of readers)
-  </div>
-  <div className="insight-text">
-    You chose: <strong style={{ color: "var(--text)", fontWeight: 500 }}>{optionTexts[voted]}</strong>.
-    {" "}This is {positionLabel(voted)} among TPV readers.
-  </div>
-</div>
+            {/* Peer message */}
+            {peerMessage && (
+              <div className="peer-box">
+                <div className="peer-label">Where you stand</div>
+                <div className="peer-text">{peerMessage}</div>
+              </div>
+            )}
 
-<div style={{
-  marginTop: "1.25rem",
-  paddingTop: "1.25rem",
-  borderTop: "1px solid var(--border)",
-  display: "flex",
-  flexDirection: "column" as const,
-  gap: "0.5rem",
-}}>
-  <div style={{
-    fontFamily: "var(--font-body)",
-    fontSize: "0.72rem",
-    fontWeight: 700,
-    letterSpacing: "0.1em",
-    textTransform: "uppercase" as const,
-    color: "var(--text-faint)",
-    marginBottom: "0.25rem",
-  }}>
-    Understand the disagreement
-  </div>
-  <div style={{
-    fontFamily: "var(--font-body)",
-    fontSize: "0.85rem",
-    color: "var(--text-dim)",
-    lineHeight: 1.6,
-  }}>
-    The article above breaks down exactly why reasonable people land on different sides — values, facts, and incentives.
-  </div>
-  <a href="#the-overview" style={{
-    fontFamily: "var(--font-body)",
-    fontSize: "0.78rem",
-    fontWeight: 600,
-    color: "var(--gold)",
-    textDecoration: "none",
-    marginTop: "0.25rem",
-  }}>
-    Read the breakdown &#8594;
-  </a>
-</div>
+            {/* Breakdown nudge */}
+            <div className="breakdown-nudge">
+              <div className="breakdown-label">Want to understand the split?</div>
+              <div className="breakdown-text">
+                Here's why people disagree on this one.
+              </div>
+              <a href="#the-overview" className="breakdown-link">
+                See why people disagree &rarr;
+              </a>
+            </div>
           </>
         )}
       </div>

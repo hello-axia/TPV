@@ -11,7 +11,10 @@ export type VerdictMeta = {
   questionId?: string;
 };
 
+
+
 const verdictsDir = path.join(process.cwd(), "content", "verdicts");
+
 
 export function getAllVerdictsMeta(): VerdictMeta[] {
   const files = fs.readdirSync(verdictsDir).filter((f) => f.endsWith(".md"));
@@ -39,6 +42,7 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
   return items;
 }
 
+
 export function getVerdictBySlug(slug: string) {
   const fullPath = path.join(verdictsDir, `${slug}.md`);
   const raw = fs.readFileSync(fullPath, "utf8");
@@ -52,6 +56,8 @@ export function getVerdictBySlug(slug: string) {
       summary: String(data.summary ?? ""),
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
+      tldr: Array.isArray(data.tldr) ? data.tldr : undefined,
+      keyTension: data.keyTension ? String(data.keyTension) : undefined,
     },
     content,
   };

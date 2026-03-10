@@ -197,59 +197,89 @@
    }
    
    /* ---- Article prose ---- */
-   .prose {
-    font-family: var(--font-body);
-    font-size: 1.05rem;
-    line-height: 1.85;
-    color: #d4cec8;  /* brighter than --text-dim for long-form reading */
-  }
-   
-   .prose h2 {
-     font-family: var(--font-display);
-     font-size: clamp(1.2rem, 2.5vw, 1.5rem);
-     color: var(--text);
-     margin-top: 2.5rem;
-     margin-bottom: 0.75rem;
-   }
-   
-   .prose p { margin-bottom: 1.25rem; }
-   
-   .prose ul {
-     list-style: none;
-     padding: 0;
-     margin-bottom: 1.25rem;
-   }
-   
-   .prose ul li {
-     padding-left: 1.25rem;
-     position: relative;
-     margin-bottom: 0.6rem;
-     color: var(--text-dim);
-     font-size: 1.05rem;
-     line-height: 1.75;
-   }
-   
-   .prose ul li::before {
-     content: '—';
-     position: absolute;
-     left: 0;
-     color: var(--gold);
-     font-size: 0.8rem;
-     top: 0.15rem;
-   }
-   
-   .prose strong {
-     color: var(--text);
-     font-weight: 600;
-   }
-   
-   .prose a {
-     color: var(--gold);
-     border-bottom: 1px solid var(--gold-line);
-     transition: border-color 0.15s ease;
-   }
-   
-   .prose a:hover { border-color: var(--gold); opacity: 1; }
+.prose {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.85;
+  color: #d4cec8;
+}
+
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+  color: var(--text);
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.prose h3 {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose p { margin-bottom: 1.25rem; }
+
+/* Top-level list — no marker, just indented blocks */
+.prose ul {
+  list-style: none;
+  padding: 0;
+  margin-bottom: 1.5rem;
+}
+
+.prose ul li {
+  padding-left: 0;
+  position: relative;
+  margin-bottom: 1rem;
+  color: #d4cec8;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  border-left: 2px solid var(--border);
+  padding-left: 1rem;
+}
+
+.prose ul li::before {
+  display: none;
+}
+
+/* Nested list — under a bold label inside a li */
+.prose ul li ul {
+  margin-top: 0.6rem;
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
+.prose ul li ul li {
+  border-left: none;
+  padding-left: 0.75rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.97rem;
+  color: var(--text-dim);
+}
+
+.prose ul li ul li::before {
+  display: none;
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.prose a {
+  color: var(--gold);
+  border-bottom: 1px solid var(--gold-line);
+  transition: border-color 0.15s ease;
+}
+
+.prose a:hover { border-color: var(--gold); opacity: 1; }
    
    /* ---- Fade-in animation ---- */
    @keyframes fadeUp {

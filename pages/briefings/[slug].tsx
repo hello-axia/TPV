@@ -1,4 +1,5 @@
 import { GetStaticPaths, GetStaticProps } from "next";
+import { useEffect, useState } from "react";
 import { remark } from "remark";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
@@ -15,6 +16,8 @@ type BriefingMeta = {
   summary: string;
   readTime?: string;
   questionId?: string;
+  tldr?: string[];
+  keyTension?: string;
 };
 
 type HtmlParts = { before: string; after: string; hasMarker: boolean };
@@ -123,6 +126,30 @@ function JumpTo({ toc, hasPoll }: { toc: TocItem[]; hasPoll: boolean }) {
   );
 }
 
+function useReaderCount(questionId?: string): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!questionId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!res.ok || !alive) return;
+        const json = await res.json();
+        const q = json.question;
+        if (!q || !alive) return;
+        const t = (q.a_count || 0) + (q.b_count || 0) + (q.c_count || 0) + (q.d_count || 0);
+        if (t > 0) setCount(t);
+      } catch { /* fail silently */ }
+    })();
+    return () => { alive = false; };
+  }, [questionId]);
+  return count;
+}
+
 export default function BriefingPostPage({
   meta,
   contentHtmlParts,
@@ -134,6 +161,7 @@ export default function BriefingPostPage({
   toc: TocItem[];
   hasPoll: boolean;
 }) {
+  const readerCount = useReaderCount(meta.questionId);
   return (
     <ArticleShell
       type="Briefing"
@@ -142,6 +170,8 @@ export default function BriefingPostPage({
       readTime={meta.readTime}
       summary={meta.summary}
       backHref="/briefings"
+      tldr={meta.tldr}
+      keyTension={meta.keyTension}
       rightRail={<JumpTo toc={toc} hasPoll={hasPoll} />}
     >
       <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.before }} />

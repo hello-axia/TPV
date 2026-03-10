@@ -45,6 +45,10 @@ export default function ArticleShell({
   backHref,
   children,
   rightRail,
+  readerCount,
+  tldr,
+  keyTension,
+  showSummary = true,
 }: {
   type: "Verdict" | "Briefing";
   title: string;
@@ -54,6 +58,10 @@ export default function ArticleShell({
   backHref: string;
   children: ReactNode;
   rightRail?: ReactNode;
+  readerCount?: number | null;
+  tldr?: string[];
+  keyTension?: string;
+  showSummary?: boolean;
 }) {
   return (
     <>
@@ -136,6 +144,22 @@ export default function ArticleShell({
             }}>
               {type}
             </span>
+
+            {readerCount != null && readerCount > 0 && (
+              <>
+                <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
+                <span style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.65rem",
+                  fontWeight: 600,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-faint)",
+                }}>
+                  {readerCount} {readerCount === 1 ? "reader" : "readers"} weighed in
+                </span>
+              </>
+            )}
           </div>
 
           {/* Title */}
@@ -155,20 +179,131 @@ export default function ArticleShell({
           <div className="divider" />
 
           {/* Summary / deck */}
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "1.05rem",
-            lineHeight: 1.75,
-            color: "var(--text-dim)",
-            fontStyle: "italic",
-            marginTop: "1rem",
-          }}>
-            {summary}
-          </p>
+          {showSummary && (
+            <p style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "1.05rem",
+              lineHeight: 1.75,
+              color: "var(--text-dim)",
+              fontStyle: "italic",
+              marginTop: "1rem",
+            }}>
+              {summary}
+            </p>
+          )}
         </div>
 
+
         {/* ── FULL DIVIDER ── */}
-        <div style={{ borderTop: "1px solid var(--border)", margin: "0 0 2.5rem" }} />
+        <div style={{ borderTop: "1px solid var(--border)", margin: "2rem 0 2rem" }} />
+
+        {/* ── TL;DR ── */}
+        {tldr && tldr.length > 0 && (
+          <div style={{
+            maxWidth: 720,
+            marginBottom: "1.5rem",
+            padding: "1.25rem 1.5rem",
+            background: "var(--bg2)",
+            border: "1px solid var(--border-light)",
+            borderRadius: 3,
+          }}>
+            <div className="eyebrow" style={{ marginBottom: "0.85rem" }}>30-second version</div>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+              {tldr.map((item, i) => (
+                <li key={i} style={{
+                  display: "flex",
+                  gap: "0.75rem",
+                  alignItems: "flex-start",
+                  marginBottom: i < tldr.length - 1 ? "0.6rem" : 0,
+                }}>
+                  <span style={{
+                    color: "var(--gold)",
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.75rem",
+                    fontWeight: 700,
+                    paddingTop: "0.2rem",
+                    flexShrink: 0,
+                  }}>—</span>
+                  <span style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.92rem",
+                    color: "var(--text-dim)",
+                    lineHeight: 1.65,
+                  }}>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ── KEY TENSION ── */}
+        {keyTension && (
+          <div style={{
+            maxWidth: 720,
+            marginBottom: "2.5rem",
+            padding: "1rem 1.25rem",
+            borderLeft: "2px solid var(--gold)",
+            background: "var(--gold-dim)",
+            borderRadius: "0 3px 3px 0",
+          }}>
+            <div className="eyebrow" style={{ marginBottom: "0.5rem" }}>
+  {type === "Briefing" ? "TL;DR" : "The core tension"}
+</div>
+            <p style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.95rem",
+              color: "var(--text-dim)",
+              lineHeight: 1.7,
+              fontStyle: "italic",
+              margin: 0,
+            }}>{keyTension}</p>
+          </div>
+        )}
+
+ {/* ── POLL TEASER ── */}
+ {readerCount != null && readerCount > 0 && (
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "1rem",
+            padding: "0.85rem 1.1rem",
+            background: "var(--gold-dim)",
+            border: "1px solid var(--gold-line)",
+            borderRadius: 3,
+            marginTop: "1.5rem",
+            marginBottom: "0",
+            maxWidth: 720,
+            flexWrap: "wrap",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <div style={{
+                width: 6, height: 6, borderRadius: "50%",
+                background: "var(--gold)", flexShrink: 0,
+              }} />
+              <span style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.82rem",
+                color: "var(--text-dim)",
+                fontWeight: 500,
+              }}>
+                {readerCount} {readerCount === 1 ? "reader has" : "readers have"} weighed in on this one.
+              </span>
+            </div>
+            <a href="#tpv-question" style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              color: "var(--gold)",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}>
+              Where do you land? →
+            </a>
+          </div>
+        )}
 
         {/* ── ARTICLE LAYOUT ── */}
         <div className="tpv-article">
@@ -200,9 +335,6 @@ export default function ArticleShell({
           @media (max-width: 600px) {
             .article-header {
               margin-bottom: 1.5rem !important;
-            }
-            .tpv-article aside {
-              order: -1;
             }
           }
         `}</style>

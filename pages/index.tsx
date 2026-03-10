@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { GetStaticProps } from "next";
+import { useEffect, useState } from "react";
 import GlobalQuestion from "../components/GlobalQuestion";
 import { getAllVerdictsMeta, VerdictMeta } from "../lib/verdicts";
 import { getAllBriefingsMeta, BriefingMeta } from "../lib/briefings";
@@ -18,6 +19,41 @@ function parseMDY(dateStr: string) {
   const [mm, dd, yyyy] = dateStr.split("-").map((x) => Number(x));
   if (!mm || !dd || !yyyy) return new Date(0);
   return new Date(yyyy, mm - 1, dd);
+}
+
+function useReaderCount(questionId?: string): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!questionId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
+        if (!res.ok || !alive) return;
+        const json = await res.json();
+        const q = json.question;
+        if (!q || !alive) return;
+        const t = (q.a_count || 0) + (q.b_count || 0) + (q.c_count || 0) + (q.d_count || 0);
+        if (t > 0) setCount(t);
+      } catch { /* fail silently */ }
+    })();
+    return () => { alive = false; };
+  }, [questionId]);
+  return count;
+}
+
+function useCommunityCount(): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    fetch("/api/community-count")
+      .then((r) => r.json())
+      .then((j) => { if (j.count > 0) setCount(j.count); })
+      .catch(() => {});
+  }, []);
+  return count;
 }
 
 function SmallCard({ kicker, title, desc, href }: {
@@ -66,12 +102,14 @@ function SmallCard({ kicker, title, desc, href }: {
 }
 
 function Hero({ post }: { post: Post | null }) {
+  const readerCount = useReaderCount(post?.questionId);
+
   if (!post) {
     return (
       <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
         <div className="eyebrow">Latest</div>
         <p style={{ marginTop: "0.75rem", color: "var(--text-faint)", lineHeight: 1.7 }}>
-          Add a Briefing or Verdict markdown file to see it here.
+          Nothing here yet. Check back Tuesday or Friday.
         </p>
       </div>
     );
@@ -92,11 +130,15 @@ function Hero({ post }: { post: Post | null }) {
         display: "flex",
         alignItems: "center",
         gap: "0.5rem",
+        flexWrap: "wrap",
         marginBottom: "1rem",
       }}>
         <span>{post.date}</span>
         {post.readTime && <span>· {post.readTime}</span>}
         <span style={{ color: "var(--gold)" }}>· {post.type}</span>
+        {readerCount !== null && (
+          <span>· {readerCount} {readerCount === 1 ? "reader" : "readers"} weighed in</span>
+        )}
       </div>
 
       {/* Title */}
@@ -184,6 +226,7 @@ export default function HomePage({
 
   const hero = all[0] ?? null;
   const below = all.slice(1, 4);
+  const communityCount = useCommunityCount();
 
   return (
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 5rem" }}>
@@ -191,9 +234,13 @@ export default function HomePage({
       {/* ── MASTHEAD ── */}
       <div className="masthead fade-up" style={{
         marginBottom: "2.5rem",
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "2.5rem",
+        alignItems: "start",
       }}>
         {/* Identity block */}
-        <div style={{ maxWidth: 640, marginBottom: "2rem" }}>
+        <div style={{ marginBottom: "2rem" }}>
           <div className="eyebrow" style={{ marginBottom: "1rem" }}>The People's Verdict</div>
 
           <h1 style={{
@@ -218,6 +265,32 @@ export default function HomePage({
           }}>
             TPV breaks every political issue into its real components, values, facts, and incentives, so you can form an opinion that's actually yours.
           </p>
+          
+          {communityCount !== null && (
+  <div style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    marginBottom: "1.25rem",
+  }}>
+    <span style={{
+      width: 6,
+      height: 6,
+      borderRadius: "50%",
+      background: "var(--gold)",
+      flexShrink: 0,
+      display: "inline-block",
+    }} />
+    <span style={{
+      fontFamily: "var(--font-body)",
+      fontSize: "0.78rem",
+      color: "var(--text-faint)",
+      fontWeight: 500,
+    }}>
+      {communityCount} readers committed to independent thinking
+    </span>
+  </div>
+)}
 
           {/* CTAs */}
           <div style={{
@@ -266,26 +339,27 @@ export default function HomePage({
           </div>
         </div>
 
-        {/* Format explainer — now below headline, not beside it */}
+        {/* Format explainer — right column */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: "1fr",
           gap: "1rem",
-          borderTop: "1px solid var(--border)",
-          paddingTop: "1.5rem",
+          borderLeft: "1px solid var(--border)",
+          paddingLeft: "2rem",
+          paddingTop: "0.25rem",
         }}
           className="format-grid"
         >
           {[
             {
               label: "Verdict",
-              freq: "Every Tuesday",
+              freq: "Every Friday",
               desc: "Polarizing issues broken down by values, facts, forecasts and incentives. Ends with a reader poll.",
               href: "/verdicts",
             },
             {
               label: "Briefing",
-              freq: "Every Friday",
+              freq: "Every Tuesday",
               desc: "Institutional and policy stories structured as: what happened, why it matters, what changes, what to watch.",
               href: "/briefings",
             },
@@ -420,7 +494,11 @@ export default function HomePage({
             grid-template-columns: 1fr !important;
           }
           .format-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 1fr 1fr !important;
+            border-left: none !important;
+            padding-left: 0 !important;
+            border-top: 1px solid var(--border) !important;
+            padding-top: 1.5rem !important;
           }
         }
 
