@@ -36,7 +36,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
           <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 0, overflow: "hidden" }}>            
-            <img src="/tpv.png" alt="TPV" style={{ height: 124, width: "auto", display: "block", margin: 0, padding: 0 }} />
+            <img src="/tpv.png" alt="TPV" style={{ height: 28, width: "auto", display: "block", margin: 0, padding: 0 }} />
             </div>
             <p style={{
   fontFamily: "var(--font-body)",

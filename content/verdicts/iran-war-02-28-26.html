@@ -1,0 +1,444 @@
+<script type="application/json" id="tpv-meta">
+  {
+    "title": "Should the United States Have Gone to War with Iran?",
+    "date": "03-11-2026",
+    "readTime": "12 min read",
+    "summary": "On February 28, 2026, the US and Israel launched coordinated strikes on Iran, killing Supreme Leader Khamenei and targeting its nuclear program — one day after Iran reportedly offered major concessions at the negotiating table. Was it justified?",
+    "questionId": "iran-war-justified-02-28-26",
+    "tldr": [
+      "The US and Israel launched ~900 strikes on Iran on February 28, 2026, killing Supreme Leader Khamenei and targeting nuclear facilities.",
+      "Iran had reportedly offered major concessions the day before the strikes — the Trump administration disputed this.",
+      "There was no congressional authorization. The War Powers Resolution's 60-day clock has never been successfully enforced.",
+      "Intelligence assessments conflict: the DIA said Iran moved most of its enriched uranium before the strikes; the CIA said damage would take years to rebuild.",
+      "The core dispute is not just about Iran — it's about who gets to decide when America goes to war."
+    ],
+    "keyTension": "The US struck Iran one day after a reported diplomatic breakthrough — with no congressional vote, contested intelligence, and an unclear definition of success. Was this necessary prevention, or a war of choice that bypassed the Constitution?",
+    "glossary": [
+      { "term": "IAEA", "definition": "The International Atomic Energy Agency — the UN body responsible for verifying that countries are not secretly developing nuclear weapons. Its inspectors confirmed Iran's uranium enrichment levels." },
+      { "term": "JCPOA", "definition": "Joint Comprehensive Plan of Action — the 2015 nuclear deal between Iran and six world powers (US, UK, France, Germany, Russia, China). It limited Iran's enrichment in exchange for sanctions relief. The US withdrew in 2018 under Trump's first term." },
+      { "term": "IRGC", "definition": "Islamic Revolutionary Guard Corps — Iran's elite paramilitary force, separate from the regular military. It controls much of Iran's proxy network, including support for Hamas and Hezbollah." },
+      { "term": "Breakout time", "definition": "The estimated time for Iran to produce enough weapons-grade uranium for one bomb — not to build an actual deliverable weapon. Experts estimate building the weapon itself would take an additional 1–2 years after reaching breakout." },
+      { "term": "War Powers Resolution", "definition": "A 1973 law requiring the president to notify Congress within 48 hours of committing US forces to armed conflict, and to withdraw forces within 60 days without congressional authorization. It has never been successfully enforced against a sitting president." },
+      { "term": "AUMF", "definition": "Authorization for Use of Military Force — passed in 2001 after 9/11. It has since been interpreted broadly to justify a wide range of military actions far beyond its original scope." },
+      { "term": "DIA", "definition": "Defense Intelligence Agency — the Pentagon's primary military intelligence body. Its preliminary assessment after the February 2026 strikes concluded that Iran had moved much of its enriched uranium before the attack." },
+      { "term": "Enrichment", "definition": "The process of increasing the concentration of the U-235 isotope in uranium. Civilian nuclear power requires ~3–5% enrichment. Weapons-grade uranium requires 90%+. Iran was enriching to 60% by mid-2025." },
+      { "term": "Proxy network", "definition": "A network of armed groups that a state funds, trains, and directs without direct military involvement. Iran's proxy network includes Hamas (Gaza), Hezbollah (Lebanon), and Houthi rebels (Yemen)." },
+      { "term": "Caroline Doctrine", "definition": "An 1837 legal standard defining when preemptive self-defense is justified: the threat must be 'instant, overwhelming, and leaving no choice of means.' It remains the foundational standard in international law for preemptive military action." }
+    ]
+  }
+  </script>
+  
+  <style>
+    /* ── Base prose — exact match to research HTML ── */
+    .tpv-prose {
+      font-size: 17px;
+      line-height: 1.75;
+      color: #e8e4dd;
+      font-family: 'DM Sans', sans-serif;
+    }
+  
+    /* ── Section marker (gold label above h2) ── */
+    .tpv-prose .section-marker {
+      display: block;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c8a96e;
+      font-weight: 600;
+      margin-bottom: 10px;
+      margin-top: 72px;
+      font-family: 'DM Sans', sans-serif;
+    }
+  
+    /* ── H2 — serif, white, bottom border only ── */
+    .tpv-prose h2 {
+      font-family: 'DM Serif Display', serif !important;
+      font-size: 1.75rem !important;
+      font-weight: 400 !important;
+      color: #ffffff !important;
+      line-height: 1.25 !important;
+      margin-bottom: 24px !important;
+      padding-bottom: 14px !important;
+      border-bottom: 1px solid #272727 !important;
+      margin-top: 0 !important;
+      padding-top: 0 !important;
+      border-top: none !important;
+      letter-spacing: normal !important;
+      scroll-margin-top: 120px;
+    }
+  
+    /* ── H3 — gold, small caps, uppercase — EXACT match to research ── */
+    .tpv-prose h3 {
+      font-size: 0.72rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.14em !important;
+      text-transform: uppercase !important;
+      color: #c8a96e !important;
+      margin-top: 36px !important;
+      margin-bottom: 12px !important;
+      font-family: 'DM Sans', sans-serif !important;
+      border: none !important;
+      padding: 0 !important;
+    }
+  
+    /* ── Paragraphs ── */
+    .tpv-prose p {
+      margin: 0 0 20px 0;
+      color: #e8e4dd;
+      font-size: 17px;
+      line-height: 1.75;
+      font-family: 'DM Sans', sans-serif;
+    }
+  
+    /* ── Strong — white ── */
+    .tpv-prose strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+  
+    /* ── Lists ── */
+    .tpv-prose ul, .tpv-prose ol {
+      padding-left: 1.25rem;
+      margin: 0 0 20px 0;
+    }
+    .tpv-prose li {
+      font-size: 0.88rem;
+      color: #a09a90;
+      margin-bottom: 8px;
+      line-height: 1.55;
+    }
+  
+    /* ── Sub-labels ── */
+    .tpv-sub-label {
+      display: block;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #5c5750;
+      font-weight: 600;
+      margin-bottom: 14px;
+      margin-top: 36px;
+      font-family: 'DM Sans', sans-serif;
+    }
+  
+    /* ── Fact claim ── */
+    .tpv-fact-claim {
+      font-weight: 600;
+      color: #ffffff;
+    }
+  
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      font-size: 0.63rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 2px 8px;
+      margin-left: 8px;
+      vertical-align: middle;
+      border-radius: 2px;
+    }
+    .badge-contested { background: rgba(192, 57, 43, 0.25); color: #e74c3c; }
+    .badge-agreed    { background: rgba(46, 204, 113, 0.15); color: #2ecc71; }
+    .badge-unknown   { background: rgba(200, 169, 110, 0.2); color: #c8a96e; }
+  
+    /* ── Fact grid ── */
+    .fact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      margin: 32px 0;
+      background: #1e1e1e;
+      border: 1px solid #222;
+    }
+    .fact-item { background: #161616; padding: 18px 20px; }
+    .fact-label {
+      font-size: 0.68rem; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #5c5750; margin-bottom: 6px;
+    }
+    .fact-value { font-size: 1rem; color: #ffffff; font-weight: 500; line-height: 1.4; }
+  
+    /* ── Two sides ── */
+    .two-sides {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2px; margin: 32px 0; background: #1a1a1a;
+    }
+    .side-card { background: #161616; padding: 22px 24px; }
+    .side-card.blue { border-top: 2px solid #2980b9; }
+    .side-card.red  { border-top: 2px solid #c0392b; }
+    .side-label {
+      font-size: 0.68rem; letter-spacing: 0.14em;
+      text-transform: uppercase; font-weight: 600; margin-bottom: 14px;
+    }
+    .side-card.blue .side-label { color: #5dade2; }
+    .side-card.red  .side-label { color: #e74c3c; }
+    .side-card ul { padding-left: 16px; }
+  
+    /* ── Callout ── */
+    .callout {
+      border-left: 3px solid #c8a96e;
+      background: rgba(200, 169, 110, 0.12);
+      padding: 18px 22px; margin: 32px 0;
+      font-style: italic; font-size: 1.05rem;
+      line-height: 1.65; color: #e8e4dd;
+    }
+  
+    /* ── Sources ── */
+    .tpv-sources { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #272727; }
+    .tpv-sources-title {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: #5c5750; margin-bottom: 1.5rem;
+    }
+    .tpv-sources-category { margin-bottom: 1.5rem; }
+    .tpv-sources-category-label {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #c8a96e; margin-bottom: 0.6rem;
+    }
+    .tpv-sources-list {
+      display: flex; flex-direction: column;
+      border: 1px solid #272727; border-radius: 3px; overflow: hidden;
+    }
+    .tpv-source-item {
+      display: flex; align-items: baseline; gap: 0.75rem;
+      padding: 0.6rem 0.85rem; border-bottom: 1px solid #272727;
+      font-size: 0.82rem; color: #a09a90; line-height: 1.5;
+    }
+    .tpv-source-item:last-child { border-bottom: none; }
+    .tpv-source-item a { color: #c8a96e; text-decoration: none; border-bottom: 1px solid rgba(200,169,110,0.25); }
+    .tpv-source-item a:hover { border-color: #c8a96e; }
+    .tpv-source-pub { color: #5c5750; font-size: 0.75rem; flex-shrink: 0; }
+  
+    @media (max-width: 600px) {
+      .fact-grid { grid-template-columns: 1fr; }
+      .two-sides { grid-template-columns: 1fr; }
+    }
+  </style>
+  
+  <span class="section-marker">I. What Happened</span>
+  <h2 id="the-overview">The Overview</h2>
+  
+  <p>On February 28, 2026, the US and Israel launched a coordinated military operation on Iran, dubbing it Operation Epic Fury and Operation Roaring Lion respectively. The attack consisted of nearly 900 strikes on Iranian military infrastructure, nuclear facilities, and leadership. The strikes resulted in the death of the Iranian Supreme Leader Ali Khamenei, along with dozens of other senior Iranian officials and military commanders. Iran responded within hours with ballistic missiles and drone strikes, hitting Israel and US military bases across the Gulf region.</p>
+  
+  <p>The proximate cause was reportedly a deadlocked set of nuclear negotiations. Over the early months of 2026, the US and Iran held indirect talks about Iran's nuclear program, with the US demanding a permanent end to all uranium enrichment, while Iran pushed for its right to enrich. On February 27th, Iran had agreed to degrade its enriched uranium stockpiles to the lowest level possible and accept full IAEA verification, according to Oman's foreign minister who was speaking for Iran. President Trump said he was "not thrilled" with the talks, and proceeded with military action.</p>
+  
+  <div class="fact-grid">
+    <div class="fact-item"><div class="fact-label">Strikes launched</div><div class="fact-value">~900 in 12 hours</div></div>
+    <div class="fact-item"><div class="fact-label">Operation name (US)</div><div class="fact-value">Operation Epic Fury</div></div>
+    <div class="fact-item"><div class="fact-label">Operation name (Israel)</div><div class="fact-value">Operation Roaring Lion</div></div>
+    <div class="fact-item"><div class="fact-label">Key result</div><div class="fact-value">Supreme Leader Khamenei killed</div></div>
+    <div class="fact-item"><div class="fact-label">US troops killed</div><div class="fact-value">7 (Iranian retaliation)</div></div>
+    <div class="fact-item"><div class="fact-label">Iran's response</div><div class="fact-value">Ballistic missiles + drones across Gulf</div></div>
+  </div>
+  
+  <span class="section-marker">II. The Media Framing</span>
+  <h2 id="the-disagreement">The Disagreement</h2>
+  
+  <p>While facts bring in all the media reporting, this conflict is first a disagreement about framing.</p>
+  
+  <h3>How the right is framing it</h3>
+  <p>The dominant right-wing and pro-Trump administration framing treats this as a long overdue reckoning with a regime that has waged war with the US as early as 1979. Iran is framed as the "world's leading state sponsor of terrorism," backing groups like Hamas and Hezbollah, resulting in the death of hundreds of Americans through proxies. Now, Iran was close to having enough materials to build a nuclear bomb. Trump is framed as the president who is finally neutralizing the threat, doing what every president since Carter was too scared to do.</p>
+  
+  <h3>How the left is framing it</h3>
+  <p>The dominant left-wing and antiwar framing treats this as an illegal, unilateral war of choice that bypassed Congress and violated international law. There was no congressional authorization, no United Nations approval, and no clear imminent threat from Iran towards the US. Peaceful diplomacy was working: Iran had just offered major concessions, and Trump killed the deal and started a war. Trump is framed as a right-wing extremist Benjamin Netanyahu ally, dragging the US to fight for Israel's conflict.</p>
+  
+  <h3>How international institutions are framing it</h3>
+  <p>The United Nations General Assembly and Secretary-General expressed deep concern. The IAEA's director told CBS News that Iran's nuclear material was still there, in large quantities, despite the US strikes in June 2025. France, Germany, and the United Kingdom all condemned Iran's retaliatory strikes. Canada's Prime Minister largely backs the US effort in halting Iran's nuclear developments. Arab Gulf States, including Qatar, Saudi Arabia, UAE, and Bahrain, warned the US not to strike because they feared Iranian retaliation on their territory — and their fears were later confirmed when Iranian missiles hit their countries.</p>
+  
+  <div class="two-sides">
+    <div class="side-card red">
+      <div class="side-label">How the right caricatures the left</div>
+      <ul>
+        <li>Naive pacifists who would have let Iran build a nuclear weapon</li>
+        <li>Defending a regime that massacred 30,000 of its own people</li>
+      </ul>
+    </div>
+    <div class="side-card blue">
+      <div class="side-label">How the left caricatures the right</div>
+      <ul>
+        <li>War profiteers and defense contractors disguised as patriots</li>
+        <li>Israel supporters who let Netanyahu run US foreign policy</li>
+      </ul>
+    </div>
+  </div>
+  
+  <span class="section-marker">III. The Underlying Disagreement</span>
+  <h2 id="the-values">The Values</h2>
+  
+  <p>Underneath this strike lies a much older disagreement about what the US stands for, what it owes its allies, and when US military force should be called upon. There are values that must be discussed before facts are analyzed.</p>
+  
+  <h3>Value System 1: Preemptive Security and Credible Deterrence</h3>
+  <p>In a world full of nuclear-armed countries, the US has the obligation to prevent hostile states from acquiring nuclear weapons. But deterrence only works if the threat of force is credible. A logical endpoint to "exhaust all diplomacy options" might be a nuclear-armed Iran if the dictatorship never heeds to the agreements. Under this view, the moral urgency is prevention: a nuclear Iran is not a small issue. The cost of acting now, however high, is less than the cost of acting later. Supporters of this view do not fear having a war, but facing the alternative: an Iran with nuclear capabilities.</p>
+  
+  <h3>Value System 2: Constitutional Order, International Law, and the Cost of Unilateralism</h3>
+  <p>Supporters of this view hold to this fact: the mechanisms by which the US declares war matters as much as the outcome of the war. Democracy requires that the decision to put American lives at risk must go through Congress. Under this view, moral urgency is process: the precedent of a president unilaterally starting a major war without congressional or international authorization is far more dangerous than any single adversary, in the long run. A president without democratic backing is a fearful one.</p>
+  
+  <h3>Value System 3: Iranian Civilian Lives and the Ethics of Regime Change</h3>
+  <p>This third value system, often less in mainstream US debate, centers the lives and self-determination of Iranian civilians. The regime massacred thousands of its own citizens in January 2026, but liberation from the outside may cost even more civilian deaths, destroy infrastructure, and create an uncertain power vacuum that may not be liberation at all. The worst-case outcome is not the regime continuing — it is the regime being replaced by chaos or civil war, with Iran's civilians paying the price for a war they did not choose.</p>
+  
+  <div class="callout">
+    The deepest values conflict is not really about Iran. It is about a question that has haunted American foreign policy since 1945: when a powerful democracy perceives a threat from a weaker authoritarian state, does its power give it the right to act? Or precisely because of that power, does it have a heightened obligation to restrain itself?
+  </div>
+  
+  <span class="section-marker">IV. What the Words Actually Mean</span>
+  <h2 id="the-definitions">The Definitions</h2>
+  
+  <h3>"Imminent Threat"</h3>
+  <p>The US legal framework for presidential war-declarations hinges on the concept of "imminent threat." The Trump administration cited this as justification for the strikes, but provided no public evidence that Iran was preparing a specific, near-term attack on the US. The Caroline Doctrine's standard for an imminent threat is: "instant, overwhelming, and leaving no choice of means."</p>
+  
+  <h3>"Nuclear Program" / "Nuclear Threat"</h3>
+  <p>This term, in the media, often conflates two different things: enriching uranium and having a nuclear weapon. When officials said Iran was "a week away" from bomb-grade material, this referred specifically to producing enough enriched uranium, not having a deliverable weapon, which experts estimate would take an additional 1–2 years.</p>
+  
+  <h3>"Diplomacy Was Exhausted"</h3>
+  <p>The Trump administration's stated rationale for the strikes was that it had sought repeatedly to make a deal with Iran, but they rejected every opportunity. But critics point out that the US demanded zero enrichment with no sanctions relief as a starting point, which Iran had consistently said was unacceptable. Iran, a day before the strikes, was making a potential breakthrough, so some critics say that the administration was never seriously interested in compromise.</p>
+  
+  <span class="section-marker">V. What We Actually Know</span>
+  <h2 id="the-facts">The Facts</h2>
+  
+  <span class="tpv-sub-label">What is widely agreed</span>
+  
+  <p><span class="tpv-fact-claim">Iran was enriching uranium to 60% purity.</span> <span class="badge badge-agreed">Agreed</span> — The IAEA confirmed this. By mid-2025, Iran had enriched approximately 972 pounds of uranium to 60% purity. Weapons-grade is 90%. The enrichment of uranium is non-linear. Going from natural to 60% is very difficult, but the remaining 30% is relatively easier.</p>
+  
+  <p><span class="tpv-fact-claim">Iran's "breakout time" was near zero.</span> <span class="badge badge-agreed">Agreed</span> — The "breakout time" refers to the time to produce enough weapons-grade materials for one bomb, not to build the actual weapon.</p>
+  
+  <p><span class="tpv-fact-claim">Iran's JCPOA stockpile restrictions were far exceeded.</span> <span class="badge badge-agreed">Agreed</span> — By early 2026, Iran's overall enriched uranium stockpile was more than 40 times the JCPOA-permitted limit.</p>
+  
+  <span class="tpv-sub-label">What is genuinely contested</span>
+  
+  <p><span class="tpv-fact-claim">How close Iran was to an actual nuclear weapon.</span> <span class="badge badge-contested">Contested</span> — There is a significant gap between "breakout time" (days to produce enough material) and "bomb time" (months to years to build a device). The administration collapsed this distinction in public statements.</p>
+  
+  <p><span class="tpv-fact-claim">Effectiveness of the June 2025 strikes.</span> <span class="badge badge-contested">Contested</span> — Trump said the June 2025 strikes obliterated Iran's nuclear capacity. The IAEA's director general said in February 2026 that Iran's nuclear material was still there in large quantities. A preliminary DIA report after the February 2026 strikes assessed that Iran had moved much of its enriched uranium before the strikes. CIA Director Ratcliffe said the damage would take years to rebuild, directly contradicting the DIA.</p>
+  
+  <p><span class="tpv-fact-claim">Whether a diplomatic deal was within reach.</span> <span class="badge badge-contested">Contested</span> — Oman's foreign minister said a "breakthrough" had been reached on February 27. Trump said Iran rejected a proposal for a civilian nuclear program with US investment. US envoy Witkoff said Iran was "boasting" about its ability to build 11 bombs.</p>
+  
+  <span class="tpv-sub-label">What remains unknown</span>
+  
+  <p><span class="tpv-fact-claim">What Iran actually had.</span> <span class="badge badge-unknown">Unknown</span> — If the DIA report was correct, and Iran had moved most of its enriched uranium before the strikes, the amount of material unaccounted for is unknown.</p>
+  
+  <p><span class="tpv-fact-claim">What comes next in Iran.</span> <span class="badge badge-unknown">Unknown</span> — Mojtaba Khamenei has been selected as supreme leader. Trump said the choice is "unacceptable." What happens next for the regime is unknown.</p>
+  
+  <span class="section-marker">VI. Competing Theories of What Comes Next</span>
+  <h2 id="the-forecasts">The Forecasts</h2>
+  
+  <p>Every side in this debate carries an implicit theory of how the world works. Here are the competing causal stories, laid out without endorsement. Each depends on assumptions that are contestable.</p>
+  
+  <h3>Model 1: The War Supporters Were Right — The Threat Is Neutralized</h3>
+  <p>The optimistic pro-intervention forecast runs like this: the strikes killed Khamenei and the IRGC leadership, eliminating the decision-making center that was the primary driver of both the nuclear program and the proxy network. This weakens the regime enough for internal protests to collapse the government, and within 2 years, a new government emerges that abandons nuclear ambitions and stabilizes regional security.</p>
+  
+  <h3>Model 2: The Antiwar Critics Were Right — This Becomes a Quagmire</h3>
+  <p>The pessimistic forecast runs like this: the Iranian regime survives the strikes, and the civilian population rallies behind the government, leading to a more stable nuclear direction. The result would be escalating proxy attacks and economic disruption. The US would lose regional influence but would have to continue sending in resources to sustain the war.</p>
+  
+  <h3>Model 3: The Proliferation Cascade — The Broader Nuclear Lesson</h3>
+  <p>This forecast centers on nuclear arsenal: the US demonstrated it will not tolerate enrichment programs in hostile states, setting a precedent that creates pressure on other governments. North Korea has nuclear weapons and is left alone. Gaddafi gave his up, and he died. Other states facing US hostility may now accelerate their own nuclear programs as the only viable deterrent.</p>
+  
+  <h3>Model 4: The Venezuela Model — Limited But Achievable</h3>
+  <p>The final forecast imagines a scenario similar to Venezuela: the US applies overwhelming military and economic pressure, kills key leaders, and then offers compromise to the surviving regime regarding the nuclear program. The regime, weakened and leaderless, accepts terms it previously refused.</p>
+  
+  <span class="section-marker">VII. Who Wanted What and Why</span>
+  <h2 id="the-incentives">The Incentives</h2>
+  
+  <h3>Trump administration incentives</h3>
+  <p>Trump began his second term striking Iran's nuclear facilities in June 2025, and claimed that he had "obliterated" Iranian nuclear capacities. However, it became clear that Iran had either moved, or restarted their uranium enrichment program, undermining his earlier claims. Domestic Iranian human rights violations also added incentive for Trump to act. While Obama's signature foreign policy regarding Iran was the JCPOA, Trump replaced it with a maximalist military solution. The War Powers Resolution has never successfully been enforced against a president, making constitutional constraint functionally aspirational.</p>
+  
+  <h3>Israeli (Netanyahu) incentives</h3>
+  <p>Netanyahu has believed for decades that a nuclear Iran is an existential threat to Israel, and had been planning to strike Iran for years. Iran is uniquely weak right now — with a collapsed economy, proxies decimated, protests destabilizing the government, and military degradation from the June strikes. However, another incentive for Netanyahu specifically would be political survival. Netanyahu has been under criminal indictment in Israel for years, but war consolidates political power and creates reasons to delay legal proceedings.</p>
+  
+  <h3>Iranian government incentives</h3>
+  <p>Why did Iran not simply accept Trump's compromise? Because to Iran, it was no compromise. Accepting "zero enrichment" would have been politically catastrophic for any Iranian leader. Enrichment has been framed as a domestic right and a national accomplishment for decades. Iran has also complied with US demands in the past — the JCPOA was a compromise the Iranian government accepted. However, in 2018, the US withdrew from the deal anyway. To the Iranian government, compliance does not produce security, which makes commitment to any deal harder to sustain.</p>
+  
+  <h3>Congressional constraints</h3>
+  <p>Congress has been weakened in war-making decisions for decades, especially after 2001 with the passing of the AUMF, which was interpreted to authorize virtually unlimited presidential war authority. The institutional incentive for Congress as a whole is to avoid going on record. If the war goes well, they are not needed. If the war goes badly, they can criticize the president, claiming never to have authorized it. The Founders' intent was explicitly to make war a deliberate, collective decision, but that design relies on Congress being willing to assert its power.</p>
+  
+  <h3>Media and public opinion constraints</h3>
+  <p>Initial polling showed Americans were skeptical about the decision to wage war. A May 2025 Rasmussen poll found 57% of Americans supported an attack on Iran, but this was before the actual costs of war became visible. Support has since deteriorated, especially without a clear definition of success.</p>
+  
+  <span class="section-marker">VIII. What Would Change Your Mind</span>
+  <h2 id="the-persuasion-point">The Persuasion Point</h2>
+  
+  <h3>On the nuclear threat justification</h3>
+  <p>Someone who believes that the nuclear threat was real and imminent would update their view if: a comprehensive post-strike assessment confirmed that Iran had moved most of its enriched uranium before the strikes began and the program was set back by mere months. Someone who believes the nuclear threat was exaggerated would update their view if: evidence emerges that Iran had a weapons development program genuinely close to completion. The contested DIA vs CIA assessments about strike effectiveness is the pivot point.</p>
+  
+  <h3>On the diplomatic track</h3>
+  <p>Someone who believes diplomacy was working and was sabotaged would update their view if: evidence surfaced showing that the breakthrough was a negotiation tactic rather than a genuine offer. Someone who believes the Trump administration was never serious about diplomacy would change their view if: evidence emerges that shows the US presented a genuine compromise that Iran flatly rejected.</p>
+  
+  <h3>On the constitutional and legal question</h3>
+  <p>Someone who believes the president has broad inherent authority to launch these preemptive strikes would update their view if: the courts rule that this action exceeded the President's authority, even past the AUMF-granted rights. Someone who believes congressional authorization is non-negotiable would have to grapple with the fact that the 60-day WPR clock has never been enforced in the law's 50-year history, making constitutional constraint functionally aspirational rather than operational.</p>
+  
+  <h3>On the regime change strategy</h3>
+  <p>If in the next 6 months the current regime topples and a transitional government emerges that agrees to binding nuclear constraints, the strikes may have been justified. If instead the regime consolidates under Mojtaba Khamenei, and nuclear developments continue with even more proxy attacks, the critic's model was correct.</p>
+  
+  <div id="tpv-poll-marker"></div>
+  
+  <span class="section-marker">IX. The Bottom Line</span>
+  <h2 id="the-conclusion">The Conclusion</h2>
+  
+  <p>The argument about whether the US should have engaged in this war really decomposes into three different arguments, and no resolution can be offered unless they are separated.</p>
+  
+  <p>The first is about nuclear deterrence, and how we assess the threats that may occur. For Iran specifically, at what point is their enrichment program an unacceptable risk? This is a difficult question, and reasonable people with access to the same intelligence have reached different conclusions across different administrations.</p>
+  
+  <p>The second is about the legitimacy of executive war-making. Can the president unilaterally decide to put US service members in harm's way and declare a war without a congressional vote? This is constitutionally clear in one direction but has been practically unenforceable.</p>
+  
+  <p>The third, and most important one, is a tension in the US identity. The US sees itself simultaneously as a nation bound by international order, but also an exceptional nation that operates outside those rules when its security interests demand it. These two self-conceptions cannot be true at the same time. At a point of crisis, the current administration must choose between them, and the flippant commitment to the choice brings hostility towards the government.</p>
+  
+  <p>Ultimately, Iran is a symptom of deeper internal problems within the United States. Every generation gets its own version of it, this one just happened to come with missiles.</p>
+  
+  <div class="tpv-sources">
+    <div class="tpv-sources-title">Sources</div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Primary Event Coverage</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">Wikipedia</span><a href="https://en.wikipedia.org/wiki/2026_Iran_war" target="_blank" rel="noopener">2026 Iran War</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Al Jazeera</span><a href="https://www.aljazeera.com/news/2026/2/28/us-israel-bomb-iran-a-timeline-of-talks-and-threats-leading-up-to-attacks" target="_blank" rel="noopener">Timeline of Talks and Threats Leading Up to Attacks</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">NBC News</span><a href="https://www.nbcnews.com/world/iran/live-blog/israel-iran-live-updates-rcna261099" target="_blank" rel="noopener">Khamenei Death — Live Blog</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">CBS News</span><a href="https://www.cbsnews.com/live-updates/iran-us-war-day-3-american-deaths-israel-gulf-allies-hit-missile-strikes/" target="_blank" rel="noopener">Iran War Day 3 Live Updates</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">NPR</span><a href="https://www.npr.org/2026/02/28/nx-s1-5730158/israel-iran-strikes-trump-us" target="_blank" rel="noopener">Khamenei Killed — NPR Coverage</a></div>
+      </div>
+    </div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Nuclear Program</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">CBS News</span><a href="https://www.cbsnews.com/news/iran-nuclear-program-what-to-know-trump-negotiations-enrichment/" target="_blank" rel="noopener">How Advanced Is Iran's Nuclear Program?</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Arms Control Association</span><a href="https://www.armscontrol.org/factsheets/status-irans-nuclear-program-1" target="_blank" rel="noopener">Status of Iran's Nuclear Program</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Bulletin of the Atomic Scientists</span><a href="https://thebulletin.org/2025/06/a-simple-timeline-of-irans-nuclear-program/" target="_blank" rel="noopener">Simple Timeline of Iran's Nuclear Program</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">IAEA</span><a href="https://www.iaea.org/newscenter/pressreleases" target="_blank" rel="noopener">IAEA Press Releases on Iran</a></div>
+      </div>
+    </div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Legal Analysis — War Powers &amp; International Law</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">The Intercept</span><a href="https://theintercept.com/2026/03/01/trump-iran-attack-war-powers-resolution-united-nations-charter-legal/" target="_blank" rel="noopener">Trump's Iran Attack Was Illegal, Former US Military Officials Allege</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Council on Foreign Relations</span><a href="https://www.cfr.org/articles/congress-declines-to-demand-a-say-in-the-iran-war" target="_blank" rel="noopener">Congress Declines to Demand a Say in the Iran War</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Lawfare</span><a href="https://www.lawfaremedia.org/article/the-law-of-going-to-war-with-iran--redux" target="_blank" rel="noopener">The Law of Going to War with Iran, Redux</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Stanford Law</span><a href="https://law.stanford.edu/2026/03/03/stanfords-allen-weiner-on-the-constitutional-and-international-law-questions-raised-by-the-iran-attack/" target="_blank" rel="noopener">Constitutional &amp; International Law Questions Raised by the Iran Attack</a></div>
+      </div>
+    </div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Strategic Analysis</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">Chatham House</span><a href="https://www.chathamhouse.org/2026/02/us-and-israel-attack-iran-early-analysis-chatham-house-experts" target="_blank" rel="noopener">Early Analysis: US and Israel Attack Iran</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Stimson Center</span><a href="https://www.stimson.org/2026/experts-react-what-the-epic-fury-iran-strikes-signal-to-the-world/" target="_blank" rel="noopener">What Operation Epic Fury Signals to the World</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Arms Control Association</span><a href="https://www.armscontrol.org/act/2026-03/focus/trumps-chaotic-and-reckless-iran-nuclear-policy" target="_blank" rel="noopener">Trump's Chaotic and Reckless Iran Nuclear Policy</a></div>
+      </div>
+    </div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Negotiations &amp; Diplomacy</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">Wikipedia</span><a href="https://en.wikipedia.org/wiki/2025%E2%80%932026_Iran%E2%80%93United_States_negotiations" target="_blank" rel="noopener">2025–2026 Iran–United States Negotiations</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">CNN</span><a href="https://www.cnn.com/2026/02/24/politics/nuclear-program-iran-trump-strike" target="_blank" rel="noopener">Trump Said Iran's Nuclear Program Was Obliterated. The IAEA Disagreed.</a></div>
+      </div>
+    </div>
+  
+    <div class="tpv-sources-category">
+      <div class="tpv-sources-category-label">Iranian Protests &amp; Domestic Context</div>
+      <div class="tpv-sources-list">
+        <div class="tpv-source-item"><span class="tpv-source-pub">Amnesty International</span><a href="https://www.amnesty.org/en/latest/news/2026/01/iran-deaths-injuries-authorities-protest-bloodshed/" target="_blank" rel="noopener">Deaths and Injuries Rise Amid Renewed Cycle of Protest Bloodshed</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Iran International</span><a href="https://www.iranintl.com/en/202601223433" target="_blank" rel="noopener">Iran Protest Crackdown Toll May Top 20,000</a></div>
+        <div class="tpv-source-item"><span class="tpv-source-pub">Rasmussen Reports</span><a href="https://www.rasmussenreports.com" target="_blank" rel="noopener">May 2025 Iran War Polling</a></div>
+      </div>
+    </div>
+  </div>

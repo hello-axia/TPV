@@ -1,6 +1,10 @@
-// components/ArticleShell.tsx
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
+
+export type GlossaryEntry = {
+  term: string;
+  definition: string;
+};
 
 function ReadingProgress() {
   const [progress, setProgress] = useState(0);
@@ -18,20 +22,34 @@ function ReadingProgress() {
 
   return (
     <div style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 2,
-      zIndex: 100,
-      background: "var(--border)",
+      position: "fixed", top: 0, left: 0, right: 0,
+      height: 2, zIndex: 100, background: "var(--border)",
     }}>
       <div style={{
-        height: "100%",
-        width: `${progress}%`,
-        background: "var(--gold)",
-        transition: "width 0.1s linear",
+        height: "100%", width: `${progress}%`,
+        background: "var(--gold)", transition: "width 0.1s linear",
       }} />
+    </div>
+  );
+}
+
+function GlossarySection({ entries }: { entries: GlossaryEntry[] }) {
+  if (!entries || entries.length === 0) return null;
+  return (
+    <div className="tpv-glossary" id="tpv-glossary">
+      <div className="tpv-glossary-title">Key Terms</div>
+      <div className="tpv-glossary-list">
+        {entries.map((entry) => (
+          <div
+            key={entry.term}
+            id={`gloss-${entry.term.toLowerCase().replace(/\s+/g, "-")}`}
+            className="tpv-glossary-item"
+          >
+            <div className="tpv-glossary-term">{entry.term}</div>
+            <div className="tpv-glossary-def">{entry.definition}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -49,6 +67,7 @@ export default function ArticleShell({
   tldr,
   keyTension,
   showSummary = true,
+  glossary,
 }: {
   type: "Verdict" | "Briefing";
   title: string;
@@ -59,10 +78,116 @@ export default function ArticleShell({
   children: ReactNode;
   rightRail?: ReactNode;
   readerCount?: number | null;
-  tldr?: string[];
-  keyTension?: string;
+  tldr?: string[] | null;
+  keyTension?: string | null;
   showSummary?: boolean;
+  glossary?: GlossaryEntry[] | null;
 }) {
+
+  useEffect(() => {
+    if (!glossary || glossary.length === 0) return;
+
+    const proseEls = document.querySelectorAll<HTMLElement>(".tpv-prose");
+    if (!proseEls.length) return;
+
+    glossary.forEach(({ term, definition }) => {
+      const anchorId = `gloss-${term.toLowerCase().replace(/\s+/g, "-")}`;
+      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`\\b(${escapedTerm})\\b`, "gi");
+
+      proseEls.forEach((prose) => {
+        const walker = document.createTreeWalker(
+          prose,
+          NodeFilter.SHOW_TEXT,
+          {
+            acceptNode(node) {
+              const parent = node.parentElement;
+              if (!parent) return NodeFilter.FILTER_REJECT;
+              if (
+                parent.classList.contains("tpv-gloss-term") ||
+                parent.closest(".tpv-gloss-term") ||
+                parent.closest(".tpv-glossary") ||
+                ["H1","H2","H3","H4","SCRIPT","CODE","PRE"].includes(parent.tagName)
+              ) return NodeFilter.FILTER_REJECT;
+              return NodeFilter.FILTER_ACCEPT;
+            }
+          }
+        );
+
+        const textNodes: Text[] = [];
+        let node: Node | null;
+        while ((node = walker.nextNode())) textNodes.push(node as Text);
+
+        textNodes.forEach((textNode) => {
+          const text = textNode.nodeValue || "";
+          if (!regex.test(text)) return;
+          regex.lastIndex = 0;
+
+          const frag = document.createDocumentFragment();
+          let lastIndex = 0;
+          let match: RegExpExecArray | null;
+
+          while ((match = regex.exec(text)) !== null) {
+            if (match.index > lastIndex) {
+              frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+            }
+
+            const span = document.createElement("span");
+            span.className = "tpv-gloss-term";
+            span.style.cursor = "pointer";
+            span.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const isActive = span.classList.contains("tpv-gloss-active");
+              document.querySelectorAll(".tpv-gloss-active").forEach((el) =>
+                el.classList.remove("tpv-gloss-active")
+              );
+              if (!isActive) span.classList.add("tpv-gloss-active");
+            });
+            span.textContent = match[0];
+
+            const tooltip = document.createElement("span");
+            tooltip.className = "tpv-gloss-tooltip";
+
+            const tooltipTerm = document.createElement("div");
+            tooltipTerm.className = "tpv-gloss-tooltip-term";
+            tooltipTerm.textContent = term;
+
+            const tooltipDef = document.createElement("div");
+            tooltipDef.className = "tpv-gloss-tooltip-def";
+            tooltipDef.textContent = definition;
+
+            const tooltipLink = document.createElement("a");
+            tooltipLink.className = "tpv-gloss-tooltip-link";
+            tooltipLink.href = `#${anchorId}`;
+            tooltipLink.textContent = "See full definition ↓";
+
+            tooltip.appendChild(tooltipTerm);
+            tooltip.appendChild(tooltipDef);
+            tooltip.appendChild(tooltipLink);
+            span.appendChild(tooltip);
+            frag.appendChild(span);
+
+            lastIndex = match.index + match[0].length;
+          }
+
+          if (lastIndex < text.length) {
+            frag.appendChild(document.createTextNode(text.slice(lastIndex)));
+          }
+
+          textNode.parentNode?.replaceChild(frag, textNode);
+        });
+      });
+    });
+
+    const closeAll = () => {
+      document.querySelectorAll(".tpv-gloss-active").forEach((el) =>
+        el.classList.remove("tpv-gloss-active")
+      );
+    };
+    document.addEventListener("click", closeAll);
+    return () => document.removeEventListener("click", closeAll);
+  }, [glossary]);
+
   return (
     <>
       <ReadingProgress />
@@ -72,41 +197,23 @@ export default function ArticleShell({
         {/* ── ARTICLE HEADER ── */}
         <div className="article-header fade-up" style={{ marginBottom: "2rem", maxWidth: 720 }}>
 
-          {/* Back + meta row */}
           <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            marginBottom: "1.25rem",
-            flexWrap: "wrap",
+            display: "flex", alignItems: "center", gap: "0.75rem",
+            marginBottom: "1.25rem", flexWrap: "wrap",
           }}>
             <Link href={backHref} style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.65rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--text-faint)",
-              textDecoration: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.3rem",
-              transition: "color 0.15s ease",
-              borderBottom: "1px solid var(--border)",
-              paddingBottom: "1px",
+              fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
+              textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem",
+              transition: "color 0.15s ease", borderBottom: "1px solid var(--border)", paddingBottom: "1px",
             }}>
               ← Back
             </Link>
 
             <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
-
             <span style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.65rem",
-              fontWeight: 600,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--text-faint)",
+              fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
             }}>
               {date}
             </span>
@@ -115,12 +222,8 @@ export default function ArticleShell({
               <>
                 <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
                 <span style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.65rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--text-faint)",
+                  fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600,
+                  letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
                 }}>
                   {readTime}
                 </span>
@@ -128,19 +231,11 @@ export default function ArticleShell({
             )}
 
             <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
-
-            {/* Type badge */}
             <span style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.6rem",
-              fontWeight: 700,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              background: "var(--gold-dim)",
-              border: "1px solid var(--gold-line)",
-              borderRadius: 2,
-              padding: "2px 7px",
+              fontFamily: "var(--font-body)", fontSize: "0.6rem", fontWeight: 700,
+              letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--gold)",
+              background: "var(--gold-dim)", border: "1px solid var(--gold-line)",
+              borderRadius: 2, padding: "2px 7px",
             }}>
               {type}
             </span>
@@ -149,12 +244,8 @@ export default function ArticleShell({
               <>
                 <span style={{ color: "var(--border-light)", fontSize: "0.6rem" }}>·</span>
                 <span style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.65rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.1em",
-                  textTransform: "uppercase",
-                  color: "var(--text-faint)",
+                  fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600,
+                  letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
                 }}>
                   {readerCount} {readerCount === 1 ? "reader" : "readers"} weighed in
                 </span>
@@ -162,73 +253,49 @@ export default function ArticleShell({
             )}
           </div>
 
-          {/* Title */}
           <h1 style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
-            lineHeight: 1.1,
-            fontWeight: 400,
-            letterSpacing: "-0.02em",
-            color: "var(--text)",
-            marginBottom: "1rem",
+            fontFamily: "var(--font-display)", fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
+            lineHeight: 1.1, fontWeight: 400, letterSpacing: "-0.02em",
+            color: "var(--text)", marginBottom: "1rem",
           }}>
             {title}
           </h1>
 
-          {/* Gold divider */}
           <div className="divider" />
 
-          {/* Summary / deck */}
           {showSummary && (
             <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "1.05rem",
-              lineHeight: 1.75,
-              color: "var(--text-dim)",
-              fontStyle: "italic",
-              marginTop: "1rem",
+              fontFamily: "var(--font-body)", fontSize: "1.05rem", lineHeight: 1.75,
+              color: "var(--text-dim)", fontStyle: "italic", marginTop: "1rem",
             }}>
               {summary}
             </p>
           )}
         </div>
 
-
         {/* ── FULL DIVIDER ── */}
-        <div style={{ borderTop: "1px solid var(--border)", margin: "2rem 0 2rem" }} />
+        <div style={{ borderTop: "1px solid var(--border)", margin: "2rem 0" }} />
 
         {/* ── TL;DR ── */}
         {tldr && tldr.length > 0 && (
           <div style={{
-            maxWidth: 720,
-            marginBottom: "1.5rem",
-            padding: "1.25rem 1.5rem",
-            background: "var(--bg2)",
-            border: "1px solid var(--border-light)",
-            borderRadius: 3,
+            maxWidth: 720, marginBottom: "1.5rem", padding: "1.25rem 1.5rem",
+            background: "var(--bg2)", border: "1px solid var(--border-light)", borderRadius: 3,
           }}>
             <div className="eyebrow" style={{ marginBottom: "0.85rem" }}>30-second version</div>
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {tldr.map((item, i) => (
+              {tldr.map((item: string, i: number) => (
                 <li key={i} style={{
-                  display: "flex",
-                  gap: "0.75rem",
-                  alignItems: "flex-start",
+                  display: "flex", gap: "0.75rem", alignItems: "flex-start",
                   marginBottom: i < tldr.length - 1 ? "0.6rem" : 0,
                 }}>
                   <span style={{
-                    color: "var(--gold)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.75rem",
-                    fontWeight: 700,
-                    paddingTop: "0.2rem",
-                    flexShrink: 0,
+                    color: "var(--gold)", fontFamily: "var(--font-body)", fontSize: "0.75rem",
+                    fontWeight: 700, paddingTop: "0.2rem", flexShrink: 0,
                   }}>—</span>
                   <span style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "0.92rem",
-                    color: "var(--text-dim)",
-                    lineHeight: 1.65,
+                    fontFamily: "var(--font-body)", fontSize: "0.92rem",
+                    color: "var(--text-dim)", lineHeight: 1.65,
                   }}>{item}</span>
                 </li>
               ))}
@@ -239,66 +306,41 @@ export default function ArticleShell({
         {/* ── KEY TENSION ── */}
         {keyTension && (
           <div style={{
-            maxWidth: 720,
-            marginBottom: "2.5rem",
-            padding: "1rem 1.25rem",
-            borderLeft: "2px solid var(--gold)",
-            background: "var(--gold-dim)",
+            maxWidth: 720, marginBottom: "2.5rem", padding: "1rem 1.25rem",
+            borderLeft: "2px solid var(--gold)", background: "var(--gold-dim)",
             borderRadius: "0 3px 3px 0",
           }}>
             <div className="eyebrow" style={{ marginBottom: "0.5rem" }}>
-  {type === "Briefing" ? "TL;DR" : "The core tension"}
-</div>
+              {type === "Briefing" ? "TL;DR" : "The core tension"}
+            </div>
             <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.95rem",
-              color: "var(--text-dim)",
-              lineHeight: 1.7,
-              fontStyle: "italic",
-              margin: 0,
+              fontFamily: "var(--font-body)", fontSize: "0.95rem", color: "var(--text-dim)",
+              lineHeight: 1.7, fontStyle: "italic", margin: 0,
             }}>{keyTension}</p>
           </div>
         )}
 
- {/* ── POLL TEASER ── */}
- {readerCount != null && readerCount > 0 && (
+        {/* ── POLL TEASER ── */}
+        {readerCount != null && readerCount > 0 && (
           <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1rem",
-            padding: "0.85rem 1.1rem",
-            background: "var(--gold-dim)",
-            border: "1px solid var(--gold-line)",
-            borderRadius: 3,
-            marginTop: "1.5rem",
-            marginBottom: "0",
-            maxWidth: 720,
-            flexWrap: "wrap",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            gap: "1rem", padding: "0.85rem 1.1rem", background: "var(--gold-dim)",
+            border: "1px solid var(--gold-line)", borderRadius: 3,
+            marginTop: "1.5rem", marginBottom: "0", maxWidth: 720, flexWrap: "wrap",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <div style={{
-                width: 6, height: 6, borderRadius: "50%",
-                background: "var(--gold)", flexShrink: 0,
-              }} />
+              <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--gold)", flexShrink: 0 }} />
               <span style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.82rem",
-                color: "var(--text-dim)",
-                fontWeight: 500,
+                fontFamily: "var(--font-body)", fontSize: "0.82rem",
+                color: "var(--text-dim)", fontWeight: 500,
               }}>
                 {readerCount} {readerCount === 1 ? "reader has" : "readers have"} weighed in on this one.
               </span>
             </div>
             <a href="#tpv-question" style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              textDecoration: "none",
-              whiteSpace: "nowrap",
+              fontFamily: "var(--font-body)", fontSize: "0.72rem", fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--gold)",
+              textDecoration: "none", whiteSpace: "nowrap",
             }}>
               Where do you land? →
             </a>
@@ -309,6 +351,9 @@ export default function ArticleShell({
         <div className="tpv-article">
           <section className="prose fade-up-delay-1" style={{ minWidth: 0 }}>
             {children}
+            {glossary && glossary.length > 0 && (
+              <GlossarySection entries={glossary} />
+            )}
           </section>
           {rightRail && (
             <aside style={{ minWidth: 0 }}>
@@ -323,7 +368,6 @@ export default function ArticleShell({
             grid-template-columns: 1fr;
             gap: 2rem;
           }
-
           @media (min-width: 980px) {
             .tpv-article {
               grid-template-columns: 1.35fr 0.65fr;
@@ -331,11 +375,8 @@ export default function ArticleShell({
               align-items: start;
             }
           }
-
           @media (max-width: 600px) {
-            .article-header {
-              margin-bottom: 1.5rem !important;
-            }
+            .article-header { margin-bottom: 1.5rem !important; }
           }
         `}</style>
       </main>

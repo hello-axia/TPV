@@ -2,6 +2,11 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 
+export type GlossaryEntry = {
+  term: string;
+  definition: string;
+};
+
 export type BriefingMeta = {
   slug: string;
   title: string;
@@ -9,30 +14,49 @@ export type BriefingMeta = {
   summary: string;
   readTime?: string;
   questionId?: string;
+  tldr?: string[];
+  keyTension?: string;
+  glossary?: GlossaryEntry[];
 };
 
 const briefingsDir = path.join(process.cwd(), "content", "briefings");
 
 function normalizeDateForSort(date: string) {
-  // Supports "YYYY-MM-DD" or "MM-DD-YYYY"
   const d = String(date || "").trim();
-  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d; // already sortable
+  if (/^\d{4}-\d{2}-\d{2}$/.test(d)) return d;
   if (/^\d{2}-\d{2}-\d{4}$/.test(d)) {
     const [mm, dd, yyyy] = d.split("-");
     return `${yyyy}-${mm}-${dd}`;
   }
-  return d; // fallback
+  return d;
 }
 
 export function getAllBriefingsMeta(): BriefingMeta[] {
-  const files = fs.readdirSync(briefingsDir).filter((f) => f.endsWith(".md"));
+  const files = fs.readdirSync(briefingsDir).filter(
+    (f) => f.endsWith(".md") || f.endsWith(".html")
+  );
 
   const items = files.map((filename) => {
-    const slug = filename.replace(/\.md$/, "");
+    const slug = filename.replace(/\.(md|html)$/, "");
     const fullPath = path.join(briefingsDir, filename);
     const raw = fs.readFileSync(fullPath, "utf8");
-    const { data } = matter(raw);
 
+    if (filename.endsWith(".html")) {
+      const metaMatch = raw.match(
+        /<script[^>]+id="tpv-meta"[^>]*>([\s\S]*?)<\/script>/
+      );
+      const meta = metaMatch ? JSON.parse(metaMatch[1]) : {};
+      return {
+        slug,
+        title: String(meta.title ?? slug),
+        date: String(meta.date ?? ""),
+        summary: String(meta.summary ?? ""),
+        readTime: meta.readTime ? String(meta.readTime) : undefined,
+        questionId: meta.questionId ? String(meta.questionId) : undefined,
+      };
+    }
+
+    const { data } = matter(raw);
     return {
       slug,
       title: String(data.title ?? slug),
@@ -43,7 +67,6 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
     };
   });
 
-  // Newest first (handles both YYYY-MM-DD and MM-DD-YYYY)
   items.sort((a, b) => {
     const ad = normalizeDateForSort(a.date);
     const bd = normalizeDateForSort(b.date);
@@ -54,12 +77,56 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
 }
 
 export function getBriefingBySlug(slug: string) {
-  const fullPath = path.join(briefingsDir, `${slug}.md`);
+  const htmlPath = path.join(briefingsDir, `${slug}.html`);
+  const mdPath = path.join(briefingsDir, `${slug}.md`);
+  const isHtml = fs.existsSync(htmlPath);
+  const fullPath = isHtml ? htmlPath : mdPath;
   const raw = fs.readFileSync(fullPath, "utf8");
+
+  if (isHtml) {
+    const metaMatch = raw.match(
+      /<script[^>]+id="tpv-meta"[^>]*>([\s\S]*?)<\/script>/
+    );
+    const meta = metaMatch ? JSON.parse(metaMatch[1]) : {};
+    const content = raw
+      .replace(/<script[^>]+id="tpv-meta"[^>]*>[\s\S]*?<\/script>/, "")
+      .trim();
+
+    const glossary: GlossaryEntry[] = Array.isArray(meta.glossary)
+      ? meta.glossary.filter(
+          (g: any) =>
+            g && typeof g.term === "string" && typeof g.definition === "string"
+        )
+      : [];
+
+    return {
+      slug,
+      isHtml: true,
+      meta: {
+        title: String(meta.title ?? slug),
+        date: String(meta.date ?? ""),
+        summary: String(meta.summary ?? ""),
+        readTime: meta.readTime ? String(meta.readTime) : undefined,
+        questionId: meta.questionId ? String(meta.questionId) : undefined,
+        tldr: Array.isArray(meta.tldr) ? meta.tldr : null,
+        keyTension: meta.keyTension ? String(meta.keyTension) : null,
+        glossary: glossary.length > 0 ? glossary : null,
+      },
+      content,
+    };
+  }
+
   const { data, content } = matter(raw);
+  const glossary: GlossaryEntry[] = Array.isArray(data.glossary)
+    ? data.glossary.filter(
+        (g: any) =>
+          g && typeof g.term === "string" && typeof g.definition === "string"
+      )
+    : [];
 
   return {
     slug,
+    isHtml: false,
     meta: {
       title: String(data.title ?? slug),
       date: String(data.date ?? ""),
@@ -67,7 +134,8 @@ export function getBriefingBySlug(slug: string) {
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
       tldr: Array.isArray(data.tldr) ? data.tldr : null,
-keyTension: data.keyTension ? String(data.keyTension) : null,
+      keyTension: data.keyTension ? String(data.keyTension) : null,
+      glossary: glossary.length > 0 ? glossary : null,
     },
     content,
   };
