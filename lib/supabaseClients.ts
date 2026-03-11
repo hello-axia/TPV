@@ -20,7 +20,12 @@ function makeBrowserClient() {
     );
   }
 
-  return createClient(url, anon);
+  return createClient(url, anon, {
+    auth: {
+      detectSessionInUrl: true,
+      persistSession: true,
+    }
+  });
 }
 
 /**
