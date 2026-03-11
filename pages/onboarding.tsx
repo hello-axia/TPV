@@ -320,13 +320,13 @@ export default function OnboardingPage() {
     setSaving(true);
     const result = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
         ...data,
         committed,
         onboarding_complete: true,
-      })
-      .eq("id", user.id);
-    console.log("update result:", result);
+      });
+    console.log("upsert result:", result);
     setSaving(false);
     router.replace("/");
   }
@@ -335,9 +335,8 @@ export default function OnboardingPage() {
     if (!user) return;
     setSaving(true);
     await supabase
-      .from("profiles")
-      .update({ onboarding_complete: true, committed: false })
-      .eq("id", user.id);
+    .from("profiles")
+    .upsert({ id: user.id, onboarding_complete: true, committed: false });
     setSaving(false);
     router.replace("/");
   }
