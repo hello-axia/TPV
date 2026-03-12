@@ -356,10 +356,10 @@ export default function ArticleShell({
             )}
           </section>
           {rightRail && (
-            <aside style={{ minWidth: 0 }}>
-              {rightRail}
-            </aside>
-          )}
+  <aside className="right-rail" style={{ minWidth: 0 }}>
+    {rightRail}
+  </aside>
+)}
         </div>
 
         <style jsx>{`
@@ -375,6 +375,11 @@ export default function ArticleShell({
               align-items: start;
             }
           }
+            @media (max-width: 979px) {
+  .right-rail {
+    order: -1;
+  }
+}
           @media (max-width: 600px) {
             .article-header { margin-bottom: 1.5rem !important; }
           }
