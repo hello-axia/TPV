@@ -6,6 +6,7 @@ import rehypeStringify from "rehype-stringify";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { getAllVerdictsMeta, getVerdictBySlug } from "../../lib/verdicts";
+import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 import { useEffect, useState } from "react";
 import GlobalQuestion from "../../components/GlobalQuestion";
 import ArticleShell, { GlossaryEntry } from "../../components/ArticleShell";
@@ -216,6 +217,12 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       .use(rehypeStringify, { allowDangerousHtml: true })
       .process(contentWithDiv);
     html = processed.toString();
+  }
+
+  // Inject glossary spans at build time — before React ever touches the HTML.
+  // This avoids dangerouslySetInnerHTML re-renders wiping client-side DOM mutations.
+  if (meta.glossary && meta.glossary.length > 0) {
+    html = injectGlossarySpans(html, meta.glossary);
   }
 
   const splitIndex = html.indexOf(POLL_DIV);

@@ -61,11 +61,12 @@ function SmallCard({ kicker, title, desc, href }: {
 }) {
   return (
     <Link href={href} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
-      <div style={{
-        borderTop: "1px solid var(--border)",
-        paddingTop: "1.1rem",
-        transition: "opacity 0.15s ease",
-      }}
+      <div
+        style={{
+          borderTop: "1px solid var(--border)",
+          paddingTop: "1.1rem",
+          transition: "opacity 0.15s ease",
+        }}
         className="small-card"
       >
         <div style={{
@@ -265,43 +266,44 @@ export default function HomePage({
           }}>
             TPV breaks every political issue into its real components, values, facts, and incentives, so you can form an opinion that's actually yours.
           </p>
-          
+
           {communityCount !== null && (
-  <div style={{
-    display: "flex",
-    alignItems: "center",
-    gap: "0.5rem",
-    marginBottom: "1.25rem",
-  }}>
-    <span style={{
-      width: 6,
-      height: 6,
-      borderRadius: "50%",
-      background: "var(--gold)",
-      flexShrink: 0,
-      display: "inline-block",
-    }} />
-    <span style={{
-      fontFamily: "var(--font-body)",
-      fontSize: "0.78rem",
-      color: "var(--text-faint)",
-      fontWeight: 500,
-    }}>
-      {communityCount} readers committed to independent thinking
-    </span>
-  </div>
-)}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              marginBottom: "1.25rem",
+            }}>
+              <span style={{
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: "var(--gold)",
+                flexShrink: 0,
+                display: "inline-block",
+              }} />
+              <span style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.78rem",
+                color: "var(--text-faint)",
+                fontWeight: 500,
+              }}>
+                {communityCount} readers committed to independent thinking
+              </span>
+            </div>
+          )}
 
           {/* CTAs */}
-          <div style={{
+          <div className="cta-row" style={{
             display: "flex",
             alignItems: "center",
-            gap: "1rem",
+            gap: "0.75rem",
             flexWrap: "wrap",
           }}>
-            <Link href="/verdicts" style={{
+            <Link href="/verdicts" className="cta-primary" style={{
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "0.4rem",
               fontFamily: "var(--font-body)",
               fontSize: "0.72rem",
@@ -311,16 +313,17 @@ export default function HomePage({
               color: "var(--bg)",
               background: "var(--gold)",
               textDecoration: "none",
-              padding: "10px 16px",
+              padding: "11px 18px",
               borderRadius: 3,
               transition: "opacity 0.15s ease",
             }}>
               Read a Verdict →
             </Link>
 
-            <Link href="/briefings" style={{
+            <Link href="/briefings" className="cta-secondary" style={{
               display: "inline-flex",
               alignItems: "center",
+              justifyContent: "center",
               gap: "0.4rem",
               fontFamily: "var(--font-body)",
               fontSize: "0.72rem",
@@ -329,7 +332,7 @@ export default function HomePage({
               textTransform: "uppercase",
               color: "var(--text-dim)",
               textDecoration: "none",
-              padding: "10px 16px",
+              padding: "11px 18px",
               border: "1px solid var(--border-light)",
               borderRadius: 3,
               transition: "opacity 0.15s ease",
@@ -340,14 +343,15 @@ export default function HomePage({
         </div>
 
         {/* Format explainer — right column */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: "1rem",
-          borderLeft: "1px solid var(--border)",
-          paddingLeft: "2rem",
-          paddingTop: "0.25rem",
-        }}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: "1rem",
+            borderLeft: "1px solid var(--border)",
+            paddingLeft: "2rem",
+            paddingTop: "0.25rem",
+          }}
           className="format-grid"
         >
           {[
@@ -365,13 +369,14 @@ export default function HomePage({
             },
           ].map((item) => (
             <Link key={item.label} href={item.href} style={{ textDecoration: "none" }}>
-              <div style={{
-                padding: "1.1rem",
-                border: "1px solid var(--border-light)",
-                borderRadius: 4,
-                background: "var(--bg2)",
-                transition: "border-color 0.15s ease",
-              }}
+              <div
+                style={{
+                  padding: "1.1rem",
+                  border: "1px solid var(--border-light)",
+                  borderRadius: 4,
+                  background: "var(--bg2)",
+                  transition: "border-color 0.15s ease",
+                }}
                 className="format-card"
               >
                 <div style={{
@@ -428,7 +433,7 @@ export default function HomePage({
         <Hero post={hero} />
 
         {/* Recent sidebar */}
-        <div style={{ display: "grid", gap: "1.25rem" }}>
+        <div className="recent-sidebar" style={{ display: "grid", gap: "1.25rem" }}>
           <div style={{
             display: "flex",
             alignItems: "baseline",
@@ -486,12 +491,15 @@ export default function HomePage({
         .small-card:hover { opacity: 0.75; }
         .format-card:hover { border-color: var(--gold-line) !important; }
 
+        /* ── 900px: masthead and homegrid collapse to single column ── */
         @media (max-width: 900px) {
           .homegrid {
             grid-template-columns: 1fr !important;
           }
           .masthead {
             grid-template-columns: 1fr !important;
+            gap: 1.5rem !important;
+            margin-bottom: 1.75rem !important;
           }
           .format-grid {
             grid-template-columns: 1fr 1fr !important;
@@ -500,12 +508,54 @@ export default function HomePage({
             border-top: 1px solid var(--border) !important;
             padding-top: 1.5rem !important;
           }
+          /* recent sidebar gets a top separator when it drops below the hero */
+          .recent-sidebar {
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+            margin-top: 0.25rem;
+          }
         }
 
+        /* ── 600px: tighten spacing, stack format cards, full-width CTAs ── */
         @media (max-width: 600px) {
           main {
-            padding-top: 2rem !important;
+            padding-top: 1.5rem !important;
             padding-bottom: 4rem !important;
+          }
+          .masthead {
+            margin-bottom: 1.25rem !important;
+          }
+          /* format cards go single column — two cards side by side is too cramped */
+          .format-grid {
+            grid-template-columns: 1fr !important;
+          }
+          /* CTA buttons go full width and stack */
+          .cta-row {
+            flex-direction: column;
+            align-items: stretch !important;
+            gap: 0.6rem !important;
+          }
+          .cta-primary,
+          .cta-secondary {
+            width: 100%;
+            justify-content: center;
+            padding: 13px 18px !important;
+          }
+          /* homegrid tighter gap */
+          .homegrid {
+            gap: 0 !important;
+          }
+          /* hero title slightly tighter on small screens */
+          .homegrid h2 {
+            font-size: clamp(1.6rem, 6vw, 2.75rem) !important;
+          }
+        }
+
+        /* ── 480px: minor polish for very small phones ── */
+        @media (max-width: 480px) {
+          main {
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
           }
         }
       `}</style>

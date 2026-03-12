@@ -1,3 +1,4 @@
+// components/ArticleShell.tsx
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
 
@@ -84,108 +85,48 @@ export default function ArticleShell({
   glossary?: GlossaryEntry[] | null;
 }) {
 
+  // Global click handler for glossary tooltips.
+  // The spans are injected into HTML at build time (getStaticProps),
+  // so we just need to manage the active state here.
   useEffect(() => {
     if (!glossary || glossary.length === 0) return;
 
-    const proseEls = document.querySelectorAll<HTMLElement>(".tpv-prose");
-    if (!proseEls.length) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      const term = target.closest(".tpv-gloss-term");
 
-    glossary.forEach(({ term, definition }) => {
-      const anchorId = `gloss-${term.toLowerCase().replace(/\s+/g, "-")}`;
-      const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      const regex = new RegExp(`\\b(${escapedTerm})\\b`, "gi");
-
-      proseEls.forEach((prose) => {
-        const walker = document.createTreeWalker(
-          prose,
-          NodeFilter.SHOW_TEXT,
-          {
-            acceptNode(node) {
-              const parent = node.parentElement;
-              if (!parent) return NodeFilter.FILTER_REJECT;
-              if (
-                parent.classList.contains("tpv-gloss-term") ||
-                parent.closest(".tpv-gloss-term") ||
-                parent.closest(".tpv-glossary") ||
-                ["H1","H2","H3","H4","SCRIPT","CODE","PRE"].includes(parent.tagName)
-              ) return NodeFilter.FILTER_REJECT;
-              return NodeFilter.FILTER_ACCEPT;
-            }
-          }
-        );
-
-        const textNodes: Text[] = [];
-        let node: Node | null;
-        while ((node = walker.nextNode())) textNodes.push(node as Text);
-
-        textNodes.forEach((textNode) => {
-          const text = textNode.nodeValue || "";
-          if (!regex.test(text)) return;
-          regex.lastIndex = 0;
-
-          const frag = document.createDocumentFragment();
-          let lastIndex = 0;
-          let match: RegExpExecArray | null;
-
-          while ((match = regex.exec(text)) !== null) {
-            if (match.index > lastIndex) {
-              frag.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
-            }
-
-            const span = document.createElement("span");
-            span.className = "tpv-gloss-term";
-            span.style.cursor = "pointer";
-            span.addEventListener("click", (e) => {
-              e.stopPropagation();
-              const isActive = span.classList.contains("tpv-gloss-active");
-              document.querySelectorAll(".tpv-gloss-active").forEach((el) =>
-                el.classList.remove("tpv-gloss-active")
-              );
-              if (!isActive) span.classList.add("tpv-gloss-active");
-            });
-            span.textContent = match[0];
-
-            const tooltip = document.createElement("span");
-            tooltip.className = "tpv-gloss-tooltip";
-
-            const tooltipTerm = document.createElement("div");
-            tooltipTerm.className = "tpv-gloss-tooltip-term";
-            tooltipTerm.textContent = term;
-
-            const tooltipDef = document.createElement("div");
-            tooltipDef.className = "tpv-gloss-tooltip-def";
-            tooltipDef.textContent = definition;
-
-            const tooltipLink = document.createElement("a");
-            tooltipLink.className = "tpv-gloss-tooltip-link";
-            tooltipLink.href = `#${anchorId}`;
-            tooltipLink.textContent = "See full definition ↓";
-
-            tooltip.appendChild(tooltipTerm);
-            tooltip.appendChild(tooltipDef);
-            tooltip.appendChild(tooltipLink);
-            span.appendChild(tooltip);
-            frag.appendChild(span);
-
-            lastIndex = match.index + match[0].length;
-          }
-
-          if (lastIndex < text.length) {
-            frag.appendChild(document.createTextNode(text.slice(lastIndex)));
-          }
-
-          textNode.parentNode?.replaceChild(frag, textNode);
-        });
-      });
-    });
-
-    const closeAll = () => {
+      // Close all open tooltips
       document.querySelectorAll(".tpv-gloss-active").forEach((el) =>
         el.classList.remove("tpv-gloss-active")
       );
+
+      // If click was on a term, open it (unless we just closed it)
+      if (term) {
+        e.stopPropagation();
+        // We already closed it above — re-open only if it wasn't active before
+        const wasActive = term.getAttribute("data-was-active") === "1";
+        if (!wasActive) term.classList.add("tpv-gloss-active");
+      }
+    }
+
+    // Track which term was active before the click so we can toggle
+    function handleMouseDown(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      const term = target.closest(".tpv-gloss-term");
+      document.querySelectorAll(".tpv-gloss-term").forEach((el) =>
+        el.removeAttribute("data-was-active")
+      );
+      if (term?.classList.contains("tpv-gloss-active")) {
+        term.setAttribute("data-was-active", "1");
+      }
+    }
+
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("click", handleClick);
     };
-    document.addEventListener("click", closeAll);
-    return () => document.removeEventListener("click", closeAll);
   }, [glossary]);
 
   return (
@@ -356,10 +297,10 @@ export default function ArticleShell({
             )}
           </section>
           {rightRail && (
-  <aside className="right-rail" style={{ minWidth: 0 }}>
-    {rightRail}
-  </aside>
-)}
+            <aside className="right-rail" style={{ minWidth: 0 }}>
+              {rightRail}
+            </aside>
+          )}
         </div>
 
         <style jsx>{`
@@ -375,11 +316,9 @@ export default function ArticleShell({
               align-items: start;
             }
           }
-            @media (max-width: 979px) {
-  .right-rail {
-    order: -1;
-  }
-}
+          @media (max-width: 979px) {
+            .right-rail { order: -1; }
+          }
           @media (max-width: 600px) {
             .article-header { margin-bottom: 1.5rem !important; }
           }
