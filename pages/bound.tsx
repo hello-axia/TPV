@@ -1,5 +1,11 @@
 // pages/bound.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 type TierEmoji = "🟦" | "🟨" | "🟧" | "🟥";
 type TierName = "Instant" | "Fast" | "Moderate" | "Slow";
@@ -111,16 +117,19 @@ function formatSubmittedAt(iso: string | null) {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   return d.toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+    month: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit",
   });
 }
 
-function buildShareText(puzzleNumber: number, timeSec: number, tierEmoji: TierEmoji) {
-  return `Bound #${puzzleNumber}\nTime: ${timeSec}s\n${tierEmoji}`;
+function buildShareText(
+  puzzleNumber: number,
+  timeSec: number,
+  tierEmoji: TierEmoji,
+  streak: number
+) {
+  const streakLine = streak > 1 ? `\n🔥 ${streak}-day streak` : "";
+  return `Bound #${puzzleNumber}${streakLine}\nTime: ${timeSec}s\n${tierEmoji}`;
 }
 
 function MetaKicker({ children }: { children: React.ReactNode }) {
@@ -130,17 +139,10 @@ function MetaKicker({ children }: { children: React.ReactNode }) {
 function Pill({ children }: { children: React.ReactNode }) {
   return (
     <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 8,
-      padding: "6px 10px",
-      border: "1px solid var(--border-light)",
-      background: "var(--bg2)",
-      color: "var(--text-dim)",
-      fontSize: 13,
-      borderRadius: 999,
-      whiteSpace: "nowrap",
-      fontWeight: 700,
+      display: "inline-flex", alignItems: "center", gap: 8,
+      padding: "6px 10px", border: "1px solid var(--border-light)",
+      background: "var(--bg2)", color: "var(--text-dim)", fontSize: 13,
+      borderRadius: 999, whiteSpace: "nowrap", fontWeight: 700,
       fontFamily: "var(--font-body)",
     }}>
       {children}
@@ -170,16 +172,117 @@ type StoredSubmission = {
 function startedKey(puzzleNumber: number) {
   return `bound:v3:startedAt:${puzzleNumber}`;
 }
+
 function submissionKey(puzzleNumber: number) {
   return `bound:v3:submission:${puzzleNumber}`;
 }
 
+// ── Streak helpers ──────────────────────────────────────────────────
+
+function daysBetween(a: string, b: string): number {
+  const da = new Date(a).getTime();
+  const db = new Date(b).getTime();
+  return Math.round(Math.abs(da - db) / (24 * 60 * 60 * 1000));
+}
+
+function prevDayKey(dayKey: string): string {
+  const d = new Date(dayKey);
+  d.setDate(d.getDate() - 1);
+  return localDateKey(d);
+}
+
+async function fetchStreak(userId: string): Promise<number> {
+  const { data } = await supabase
+    .from("bound_progress")
+    .select("streak, last_played_day")
+    .eq("user_id", userId)
+    .single();
+  return data?.streak ?? 0;
+}
+
+async function saveSubmissionAndUpdateStreak(
+  userId: string,
+  puzzleNumber: number,
+  word: string,
+  seconds: number,
+  tier: TierEmoji,
+  localDayKey: string
+): Promise<number> {
+  // 1. Insert submission (ignore duplicate — user can only submit once per puzzle)
+  await supabase.from("bound_submissions").upsert(
+    {
+      puzzle_id: puzzleNumber,
+      user_id: userId,
+      word,
+      score: 0,
+      seconds,
+      local_day_key: localDayKey,
+    },
+    { onConflict: "puzzle_id,user_id", ignoreDuplicates: true }
+  );
+
+  // 2. Fetch current progress row
+  const { data: progress } = await supabase
+    .from("bound_progress")
+    .select("streak, last_played_day, games_played, best_score")
+    .eq("user_id", userId)
+    .single();
+
+  const prevPlayed = progress?.last_played_day ?? null;
+  const currentStreak = progress?.streak ?? 0;
+  const gamesPlayed = progress?.games_played ?? 0;
+  const bestScore = progress?.best_score ?? null;
+
+  // 3. Compute new streak
+  let newStreak: number;
+  if (!prevPlayed) {
+    // First ever play
+    newStreak = 1;
+  } else if (prevPlayed === localDayKey) {
+    // Already played today — don't change streak
+    newStreak = currentStreak;
+  } else if (daysBetween(prevPlayed, localDayKey) === 1) {
+    // Consecutive day
+    newStreak = currentStreak + 1;
+  } else {
+    // Missed a day — reset
+    newStreak = 1;
+  }
+
+  // 4. Upsert progress row
+  await supabase.from("bound_progress").upsert(
+    {
+      user_id: userId,
+      streak: newStreak,
+      last_played_day: localDayKey,
+      games_played: gamesPlayed + (prevPlayed === localDayKey ? 0 : 1),
+      best_score:
+        bestScore === null
+          ? seconds
+          : Math.min(bestScore, seconds),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: "user_id" }
+  );
+
+  return newStreak;
+}
+
+// ── Main page ───────────────────────────────────────────────────────
+
 export default function BoundPage() {
   const [localDayKeyState, setLocalDayKeyState] = useState(() => localDateKey());
-  const puzzleNumber = useMemo(() => puzzleNumberFromLocalDate(localDayKeyState), [localDayKeyState]);
+  const puzzleNumber = useMemo(
+    () => puzzleNumberFromLocalDate(localDayKeyState),
+    [localDayKeyState]
+  );
 
   const [patternBank, setPatternBank] = useState<BoundPatternEntry[] | null>(null);
   const [patternLoadError, setPatternLoadError] = useState(false);
+
+  // Auth + streak state
+  const [userId, setUserId] = useState<string | null>(null);
+  const [streak, setStreak] = useState<number>(0);
 
   const pattern = useMemo(() => {
     if (!patternBank?.length) return "_ _ _ _ _";
@@ -213,10 +316,44 @@ export default function BoundPage() {
   const [error, setError] = useState<string | null>(null);
   const [revealAnimKey, setRevealAnimKey] = useState(0);
   const [resultAnimKey, setResultAnimKey] = useState(0);
-
   const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
   const autoFocusRef = useRef<(() => void) | undefined>(undefined);
 
+  // ── Load auth session + streak on mount ──
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!alive) return;
+      if (session?.user) {
+        setUserId(session.user.id);
+        const s = await fetchStreak(session.user.id);
+        if (alive) setStreak(s);
+      }
+    })();
+
+    // Listen for auth changes (sign-in/out while on page)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        if (!alive) return;
+        if (session?.user) {
+          setUserId(session.user.id);
+          const s = await fetchStreak(session.user.id);
+          if (alive) setStreak(s);
+        } else {
+          setUserId(null);
+          setStreak(0);
+        }
+      }
+    );
+
+    return () => {
+      alive = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  // ── Load pattern bank ──
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -232,6 +369,7 @@ export default function BoundPage() {
     return () => { alive = false; };
   }, []);
 
+  // ── Midnight rollover ──
   useEffect(() => {
     const now = new Date();
     const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -240,6 +378,7 @@ export default function BoundPage() {
     return () => window.clearTimeout(t);
   }, [localDayKeyState]);
 
+  // ── Live timer ──
   useEffect(() => {
     if (!startedAtMs) return;
     if (locked) return;
@@ -257,6 +396,7 @@ export default function BoundPage() {
     return speedLabelFromSeconds(elapsedSec);
   }, [revealed, submitted, elapsedSec]);
 
+  // ── Restore local state on puzzle change ──
   useEffect(() => {
     setRevealed(false);
     setStartedAtMs(null);
@@ -269,13 +409,19 @@ export default function BoundPage() {
     setShowShare(false);
     if (typeof window === "undefined") return;
     try {
-      for (let i = 0; i < puzzleNumber; i++) { localStorage.removeItem(startedKey(i)); }
+      for (let i = 0; i < puzzleNumber; i++) {
+        localStorage.removeItem(startedKey(i));
+      }
     } catch { /* ignore */ }
     try {
       const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
       if (rawSub) {
         const parsed = JSON.parse(rawSub) as StoredSubmission;
-        if (parsed && parsed.v === 3 && parsed.puzzleNumber === puzzleNumber && parsed.localDayKey === localDayKeyState) {
+        if (
+          parsed && parsed.v === 3 &&
+          parsed.puzzleNumber === puzzleNumber &&
+          parsed.localDayKey === localDayKeyState
+        ) {
           setRevealed(true);
           setStartedAtMs(parsed.startedAtMs ?? null);
           setWord(parsed.word ?? "");
@@ -307,7 +453,9 @@ export default function BoundPage() {
       for (const k of Object.keys(json)) map[onlyLettersUpper(k)] = 1;
       wordbankCacheRef.current = map;
       return map;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   }
 
   function validateInstant(raw: string) {
@@ -319,7 +467,11 @@ export default function BoundPage() {
     return { ok: true, word: w, msg: null };
   }
 
-  const instant = useMemo(() => validateInstant(word), [word, revealed, len, pattern]);
+  const instant = useMemo(
+    () => validateInstant(word),
+    [word, revealed, len, pattern]
+  );
+
   useEffect(() => { setError(instant.msg); }, [instant.msg]);
 
   const canSubmit = useMemo(() => {
@@ -348,13 +500,7 @@ export default function BoundPage() {
     if (!canSubmit) return;
     setShowShare(false);
     const w = onlyLettersUpper(word);
-
-    // Double-check length
-    if (w.length !== len) {
-      setError("Word length doesn't match the pattern.");
-      return;
-    }
-
+    if (w.length !== len) { setError("Word length doesn't match the pattern."); return; }
     const wb = await loadWordbank();
     if (!wb) { setError("Word list not loaded. Refresh and try again."); return; }
     if (!(w in wb)) { setError("I don't think that one's in the dictionary..."); return; }
@@ -362,16 +508,20 @@ export default function BoundPage() {
     const tSec = elapsedSec;
     const tierEmoji = tierFromSeconds(tSec);
     const tierName = TIER_LABELS[tierEmoji];
-    const shareText = buildShareText(puzzleNumber, tSec, tierEmoji);
 
-    const result: ScoreResult = {
-      tierEmoji,
-      tierName,
-      timeSec: tSec,
-      shareText,
-    };
+    // Compute streak before building share text
+    let newStreak = streak;
+    if (userId) {
+      newStreak = await saveSubmissionAndUpdateStreak(
+        userId, puzzleNumber, w, tSec, tierEmoji, localDayKeyState
+      );
+      setStreak(newStreak);
+    }
 
+    const shareText = buildShareText(puzzleNumber, tSec, tierEmoji, newStreak);
+    const result: ScoreResult = { tierEmoji, tierName, timeSec: tSec, shareText };
     const submittedIso = new Date().toISOString();
+
     setSubmitted(true);
     setLocked(true);
     setScoreResult(result);
@@ -380,8 +530,11 @@ export default function BoundPage() {
 
     try {
       const payload: StoredSubmission = {
-        v: 3, puzzleNumber, localDayKey: localDayKeyState, pattern, length: len,
-        startedAtMs: startedAtMs ?? Date.now(), submittedAt: submittedIso, word: w, scoreResult: result,
+        v: 3, puzzleNumber, localDayKey: localDayKeyState,
+        pattern, length: len,
+        startedAtMs: startedAtMs ?? Date.now(),
+        submittedAt: submittedIso, word: w,
+        scoreResult: result,
       };
       localStorage.setItem(submissionKey(puzzleNumber), JSON.stringify(payload));
       localStorage.removeItem(startedKey(puzzleNumber));
@@ -390,53 +543,60 @@ export default function BoundPage() {
 
   async function onCopyShare() {
     if (!submitted || !scoreResult) return;
-    const text = buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji);
-    try { await navigator.clipboard.writeText(text); setShowShare(true); }
-    catch { setShowShare(false); }
+    const text = buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, streak);
+    try {
+      await navigator.clipboard.writeText(text);
+      setShowShare(true);
+    } catch {
+      setShowShare(false);
+    }
   }
 
   return (
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
       <div style={{ display: "grid", gap: 10 }}>
         <MetaKicker>TPV Games</MetaKicker>
-
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 14, flexWrap: "wrap" }}>
+        <div style={{
+          display: "flex", alignItems: "baseline",
+          justifyContent: "space-between", gap: 14, flexWrap: "wrap",
+        }}>
           <h1 style={{
-            margin: 0,
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.2rem, 6vw, 3.5rem)",
-            fontWeight: 400,
-            letterSpacing: "-0.03em",
-            color: "var(--text)",
-            lineHeight: 1.05,
+            margin: 0, fontFamily: "var(--font-display)",
+            fontSize: "clamp(2.2rem, 6vw, 3.5rem)", fontWeight: 400,
+            letterSpacing: "-0.03em", color: "var(--text)", lineHeight: 1.05,
           }}>
             Bound
           </h1>
-
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
             <Pill>
               <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Puzzle</span>
               <span style={{ fontWeight: 700, color: "var(--text)" }}>#{puzzleNumber}</span>
             </Pill>
 
+            {/* Streak pill — only show if logged in and streak > 0 */}
+            {userId && streak > 0 && (
+              <Pill>
+                <span style={{ fontSize: 14 }}>🔥</span>
+                <span style={{ fontWeight: 700, color: "var(--text)" }}>{streak}</span>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>
+                  {streak === 1 ? "day" : "days"}
+                </span>
+              </Pill>
+            )}
+
             <span style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "6px 10px",
-              border: "1px solid var(--border-light)",
-              background: "var(--bg2)",
-              color: "var(--text-dim)",
-              fontSize: 13,
-              borderRadius: 999,
-              whiteSpace: "nowrap",
-              fontWeight: 700,
+              display: "inline-flex", alignItems: "center", gap: 10,
+              padding: "6px 10px", border: "1px solid var(--border-light)",
+              background: "var(--bg2)", color: "var(--text-dim)", fontSize: 13,
+              borderRadius: 999, whiteSpace: "nowrap", fontWeight: 700,
               fontFamily: "var(--font-body)",
             }}>
               <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Timer</span>
               <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
                 <span style={{ fontWeight: 700, color: "var(--text)" }}>
-                  {submitted && scoreResult ? `${scoreResult.timeSec}s` : revealed ? `${elapsedSec}s` : "—"}
+                  {submitted && scoreResult
+                    ? `${scoreResult.timeSec}s`
+                    : revealed ? `${elapsedSec}s` : "—"}
                 </span>
                 {revealed && !submitted && liveSpeedLabel ? (
                   <span style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, letterSpacing: 0.2 }}>
@@ -447,18 +607,13 @@ export default function BoundPage() {
             </span>
           </div>
         </div>
-
         <p style={{
-          margin: "2px 0 0",
-          color: "var(--text-dim)",
-          fontSize: "1rem",
-          lineHeight: 1.7,
-          maxWidth: 900,
-          fontFamily: "var(--font-body)",
+          margin: "2px 0 0", color: "var(--text-dim)", fontSize: "1rem",
+          lineHeight: 1.7, maxWidth: 900, fontFamily: "var(--font-body)",
         }}>
-          Reveal the puzzle, then submit <strong style={{ color: "var(--text)" }}>one word</strong> that fits. Faster is better.
+          Reveal the puzzle, then submit{" "}
+          <strong style={{ color: "var(--text)" }}>one word</strong> that fits. Faster is better.
         </p>
-
         <div style={{ borderTop: "1px solid var(--border)", margin: "12px 0 4px" }} />
       </div>
 
@@ -468,7 +623,10 @@ export default function BoundPage() {
       >
         {/* Left */}
         <section className="boundleft" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{
+            display: "flex", alignItems: "baseline",
+            justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+          }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-body)" }}>
               {revealed ? "Today's pattern" : "Today's puzzle"}
             </div>
@@ -476,7 +634,6 @@ export default function BoundPage() {
               {revealed ? `${len} letters` : "Pattern hidden"}
             </div>
           </div>
-
           <div
             key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
             className={revealed ? "pop" : undefined}
@@ -484,50 +641,39 @@ export default function BoundPage() {
           >
             {revealed ? (
               <WordInput
-              label="1"
-              value={word}
-              onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
-              disabled={locked}
-              error={error}
-              placeholder="TYPE WORD…"
-              pattern={pattern}
-              autoFocusRef={autoFocusRef}
-            />
+                label="1"
+                value={word}
+                onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
+                disabled={locked}
+                error={error}
+                placeholder="TYPE WORD…"
+                pattern={pattern}
+                autoFocusRef={autoFocusRef}
+              />
             ) : (
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 {new Array(5).fill("?").map((_, i) => (
                   <div key={i} style={{
-                    width: 46, height: 50,
-                    border: "1px solid var(--border-light)",
-                    background: "var(--bg2)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontWeight: 700, fontSize: 18, color: "var(--text-faint)",
-                    fontFamily: "var(--font-body)",
+                    width: 46, height: 50, border: "1px solid var(--border-light)",
+                    background: "var(--bg2)", display: "flex", alignItems: "center",
+                    justifyContent: "center", fontWeight: 700, fontSize: 18,
+                    color: "var(--text-faint)", fontFamily: "var(--font-body)",
                   }}>?</div>
                 ))}
               </div>
             )}
           </div>
-
           <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
             {!revealed ? (
               <button
                 onClick={onReveal}
                 disabled={!puzzleReady}
                 style={{
-                  border: "none",
-                  background: "var(--gold)",
-                  color: "var(--bg)",
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
+                  border: "none", background: "var(--gold)", color: "var(--bg)",
+                  padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
+                  fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
                   cursor: puzzleReady ? "pointer" : "not-allowed",
-                  opacity: puzzleReady ? 1 : 0.5,
-                  borderRadius: 3,
-                  transition: "opacity 0.15s ease",
+                  opacity: puzzleReady ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
                 }}
               >
                 Reveal &amp; start
@@ -539,7 +685,6 @@ export default function BoundPage() {
               </Pill>
             )}
           </div>
-
           {patternLoadError && (
             <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 700, marginTop: 8, fontFamily: "var(--font-body)" }}>
               Failed to load puzzle. Please refresh.
@@ -557,11 +702,8 @@ export default function BoundPage() {
 
           {submitted && scoreResult ? (
             <div style={{
-              marginTop: 14,
-              border: "1px solid var(--border-light)",
-              background: "var(--bg2)",
-              padding: 14,
-              borderRadius: 4,
+              marginTop: 14, border: "1px solid var(--border-light)",
+              background: "var(--bg2)", padding: 14, borderRadius: 4,
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <div style={{
@@ -576,7 +718,6 @@ export default function BoundPage() {
                   </div>
                 ) : null}
               </div>
-
               <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Word</div>
                 <div style={{
@@ -586,9 +727,11 @@ export default function BoundPage() {
                   {onlyLettersUpper(word)}
                 </div>
               </div>
-
               <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{
+                  display: "flex", justifyContent: "space-between",
+                  gap: 12, alignItems: "center", flexWrap: "wrap",
+                }}>
                   <div style={{
                     color: "var(--text-faint)", fontSize: "0.65rem", fontWeight: 700,
                     letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-body)",
@@ -601,21 +744,34 @@ export default function BoundPage() {
                     style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}
                   >
                     <span style={{
-                      display: "inline-block",
-                      width: 12,
-                      height: 12,
-                      borderRadius: 2,
-                      background: TIER_COLOR[scoreResult.tierEmoji],
-                      verticalAlign: "middle",
+                      display: "inline-block", width: 12, height: 12, borderRadius: 2,
+                      background: TIER_COLOR[scoreResult.tierEmoji], verticalAlign: "middle",
                     }} />
                     <span style={{ color: "var(--text-faint)" }}>•</span>
                     <span>{scoreResult.tierName}</span>
                   </div>
                 </div>
-
                 <div style={{ marginTop: 6, color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6, fontFamily: "var(--font-body)" }}>
                   Time: <strong style={{ color: "var(--text)" }}>{scoreResult.timeSec}s</strong>
                 </div>
+                {/* Streak callout after submit */}
+                {userId && streak > 1 && (
+                  <div style={{
+                    marginTop: 10, display: "flex", alignItems: "center", gap: 6,
+                    fontSize: 12, color: "var(--gold)", fontFamily: "var(--font-body)", fontWeight: 700,
+                  }}>
+                    <span>🔥</span>
+                    <span>{streak}-day streak — keep it going!</span>
+                  </div>
+                )}
+                {userId && streak === 1 && (
+                  <div style={{
+                    marginTop: 10, fontSize: 12, color: "var(--text-faint)",
+                    fontFamily: "var(--font-body)", fontWeight: 700,
+                  }}>
+                    🔥 Streak started — come back tomorrow!
+                  </div>
+                )}
               </div>
             </div>
           ) : null}
@@ -629,16 +785,10 @@ export default function BoundPage() {
                   border: "none",
                   background: canSubmit ? "var(--gold)" : "var(--bg3)",
                   color: canSubmit ? "var(--bg)" : "var(--text-faint)",
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
+                  padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
+                  fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
                   cursor: canSubmit ? "pointer" : "not-allowed",
-                  opacity: canSubmit ? 1 : 0.5,
-                  borderRadius: 3,
-                  transition: "opacity 0.15s ease",
+                  opacity: canSubmit ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
                 }}
               >
                 Submit
@@ -647,17 +797,10 @@ export default function BoundPage() {
               <button
                 onClick={onCopyShare}
                 style={{
-                  border: "1px solid var(--border-light)",
-                  background: "var(--bg2)",
-                  color: "var(--gold)",
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "0.72rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  borderRadius: 3,
+                  border: "1px solid var(--border-light)", background: "var(--bg2)",
+                  color: "var(--gold)", padding: "10px 16px", fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
+                  textTransform: "uppercase", cursor: "pointer", borderRadius: 3,
                 }}
               >
                 Copy share
@@ -674,18 +817,11 @@ export default function BoundPage() {
                 Copied to clipboard
               </div>
               <pre style={{
-                marginTop: 10,
-                whiteSpace: "pre-wrap",
-                fontSize: 14,
-                lineHeight: 1.6,
-                color: "var(--text)",
-                border: "1px solid var(--border-light)",
-                background: "var(--bg3)",
-                padding: 12,
-                fontFamily: "var(--font-body)",
-                borderRadius: 3,
+                marginTop: 10, whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6,
+                color: "var(--text)", border: "1px solid var(--border-light)",
+                background: "var(--bg3)", padding: 12, fontFamily: "var(--font-body)", borderRadius: 3,
               }}>
-                {buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji)}
+                {buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, streak)}
               </pre>
             </div>
           ) : null}
@@ -699,16 +835,15 @@ export default function BoundPage() {
           }}>
             Legend
           </div>
-
           <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
             <LegendRow emoji="🟦" label="Instant" time="under 30s" />
             <LegendRow emoji="🟨" label="Fast" time="30–90s" />
             <LegendRow emoji="🟧" label="Moderate" time="90–180s" />
             <LegendRow emoji="🟥" label="Slow" time="180s+" />
           </div>
-
           <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
-            The faster you find a word, <strong style={{ color: "var(--text-dim)" }}>the better.</strong> No second chances.
+            The faster you find a word,{" "}
+            <strong style={{ color: "var(--text-dim)" }}>the better.</strong> No second chances.
           </div>
         </section>
       </div>
@@ -718,9 +853,9 @@ export default function BoundPage() {
           animation: pop 220ms ease-out both;
         }
         @keyframes pop {
-          0% { transform: scale(0.97); opacity: 0.7; }
-          60% { transform: scale(1.02); opacity: 1; }
-          100% { transform: scale(1); }
+          0%   { transform: scale(0.97); opacity: 0.7; }
+          60%  { transform: scale(1.02); opacity: 1;   }
+          100% { transform: scale(1);    }
         }
         .boundlegend {
           grid-column: 1 / 2;
@@ -729,7 +864,7 @@ export default function BoundPage() {
         @media (max-width: 980px) {
           .boundgrid { grid-template-columns: 1fr !important; }
           .boundright { order: 1; }
-          .boundleft { order: 0; }
+          .boundleft  { order: 0; }
           .boundlegend { order: 2; margin-top: 22px !important; }
         }
       `}</style>
@@ -738,12 +873,7 @@ export default function BoundPage() {
 }
 
 function WordInput({
-  value,
-  onChange,
-  disabled,
-  error,
-  pattern,
-  autoFocusRef,
+  value, onChange, disabled, error, pattern, autoFocusRef,
 }: {
   label: string;
   value: string;
@@ -755,29 +885,25 @@ function WordInput({
   autoFocusRef?: React.MutableRefObject<(() => void) | undefined>;
 }) {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
-
   const pc = (pattern || "").replace(/\s/g, "").toUpperCase();
   const totalLen = pc.length;
-
   const fixedAt = (i: number) => pc[i] !== "_";
   const freeIdxs: number[] = [];
-  for (let i = 0; i < totalLen; i++) { if (!fixedAt(i)) freeIdxs.push(i); }
+  for (let i = 0; i < totalLen; i++) {
+    if (!fixedAt(i)) freeIdxs.push(i);
+  }
 
   useEffect(() => {
     if (autoFocusRef) {
-      autoFocusRef.current = () => {
-        hiddenInputRef.current?.focus();
-      };
+      autoFocusRef.current = () => { hiddenInputRef.current?.focus(); };
     }
   });
 
-  
   function handleHiddenKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (disabled) return;
     if (e.key === "Backspace") {
       e.preventDefault();
       const v = (value || "").padEnd(totalLen, " ");
-      // find last filled free slot and clear it
       for (let i = freeIdxs.length - 1; i >= 0; i--) {
         const idx = freeIdxs[i];
         if (/[A-Z]/i.test(v[idx] ?? " ")) {
@@ -797,7 +923,6 @@ function WordInput({
       e.preventDefault();
       const ch = e.key.toUpperCase();
       const v = (value || "").padEnd(totalLen, " ");
-      // find first empty free slot
       for (let i = 0; i < freeIdxs.length; i++) {
         const idx = freeIdxs[i];
         if (!/[A-Z]/i.test(v[idx] ?? " ")) {
@@ -811,7 +936,6 @@ function WordInput({
           return;
         }
       }
-      // all slots full — do nothing (user must backspace)
       return;
     }
   }
@@ -819,8 +943,9 @@ function WordInput({
   function getDisplay(): string[] {
     const d: string[] = [];
     for (let i = 0; i < totalLen; i++) {
-      if (fixedAt(i)) { d.push(pc[i]); }
-      else {
+      if (fixedAt(i)) {
+        d.push(pc[i]);
+      } else {
         const v = (value || "").padEnd(totalLen, " ");
         const ch = v[i] ?? " ";
         d.push(/[A-Z]/i.test(ch) ? ch.toUpperCase() : "");
@@ -840,15 +965,7 @@ function WordInput({
         onKeyDown={handleHiddenKeyDown}
         onChange={() => {}}
         value=""
-        style={{
-          position: "fixed",
-          opacity: 0,
-          pointerEvents: "none",
-          width: 0,
-          height: 0,
-          top: 0,
-          left: 0,
-        }}
+        style={{ position: "fixed", opacity: 0, pointerEvents: "none", width: 0, height: 0, top: 0, left: 0 }}
         inputMode="text"
         autoCapitalize="characters"
         autoCorrect="off"
@@ -860,31 +977,26 @@ function WordInput({
           const letter = display[i];
           const borderColor = hasError ? "#ef4444" : fixed ? "var(--border-light)" : "var(--gold)";
           return (
-            <div
-              key={i}
-              style={{
-                width: `min(46px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen}))`,
-                height: `min(50px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 1.09))`,
-                border: `1.5px solid ${borderColor}`,
-                background: fixed ? "var(--bg3)" : "var(--bg2)",
-                color: fixed ? "var(--gold)" : "var(--text)",
-                fontSize: `min(20px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 0.43))`,
-                fontWeight: 700,
-                fontFamily: "var(--font-body)",
-                textAlign: "center",
-                textTransform: "uppercase",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                userSelect: "none",
-              }}
-            >
+            <div key={i} style={{
+              width: `min(46px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen}))`,
+              height: `min(50px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 1.09))`,
+              border: `1.5px solid ${borderColor}`,
+              background: fixed ? "var(--bg3)" : "var(--bg2)",
+              color: fixed ? "var(--gold)" : "var(--text)",
+              fontSize: `min(20px, calc((100vw - 28px - ${(totalLen - 1) * 8}px) / ${totalLen} * 0.43))`,
+              fontWeight: 700, fontFamily: "var(--font-body)", textAlign: "center",
+              textTransform: "uppercase", display: "flex", alignItems: "center",
+              justifyContent: "center", userSelect: "none",
+            }}>
               {letter}
             </div>
           );
         })}
       </div>
-      <div style={{ minHeight: 16, fontSize: 12, marginTop: 6, color: hasError ? "#ef4444" : "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+      <div style={{
+        minHeight: 16, fontSize: 12, marginTop: 6,
+        color: hasError ? "#ef4444" : "var(--text-faint)", fontFamily: "var(--font-body)",
+      }}>
         {hasError ? error : " "}
       </div>
     </div>
@@ -895,12 +1007,8 @@ function LegendRow({ emoji, label, time }: { emoji: TierEmoji; label: string; ti
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14 }}>
       <span style={{
-        display: "inline-block",
-        width: 14,
-        height: 14,
-        borderRadius: 3,
-        background: TIER_COLOR[emoji],
-        flexShrink: 0,
+        display: "inline-block", width: 14, height: 14, borderRadius: 3,
+        background: TIER_COLOR[emoji], flexShrink: 0,
       }} />
       <span style={{ color: "var(--text)", fontWeight: 700, fontFamily: "var(--font-body)" }}>{label}</span>
       <span style={{ color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>

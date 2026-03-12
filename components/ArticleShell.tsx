@@ -103,9 +103,33 @@ export default function ArticleShell({
       // If click was on a term, open it (unless we just closed it)
       if (term) {
         e.stopPropagation();
-        // We already closed it above — re-open only if it wasn't active before
         const wasActive = term.getAttribute("data-was-active") === "1";
-        if (!wasActive) term.classList.add("tpv-gloss-active");
+        if (!wasActive) {
+          term.classList.add("tpv-gloss-active");
+
+          // On mobile: nudge tooltip so it never bleeds off screen edges
+          const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
+          if (tooltip) {
+            // Reset any previous nudge
+            tooltip.style.left = "";
+            tooltip.style.transform = "";
+            tooltip.style.right = "";
+
+            const tr = tooltip.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const PAD = 12; // px from screen edge
+
+            if (tr.left < PAD) {
+              // Bleeding off left — shift right
+              const nudge = PAD - tr.left;
+              tooltip.style.left = `calc(50% + ${nudge}px)`;
+            } else if (tr.right > vw - PAD) {
+              // Bleeding off right — shift left
+              const nudge = tr.right - (vw - PAD);
+              tooltip.style.left = `calc(50% - ${nudge}px)`;
+            }
+          }
+        }
       }
     }
 
