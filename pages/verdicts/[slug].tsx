@@ -10,6 +10,7 @@ import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 import { useEffect, useState } from "react";
 import GlobalQuestion from "../../components/GlobalQuestion";
 import ArticleShell, { GlossaryEntry } from "../../components/ArticleShell";
+import OgHead from "../../components/OgHead";
 
 type VerdictMeta = {
   title: string;
@@ -36,6 +37,8 @@ const VERDICT_TOC_ORDER: TocItem[] = [
   { id: "the-persuasion-point", label: "The persuasion point" },
   { id: "the-conclusion",       label: "The conclusion" },
 ];
+
+
 
 function extractPresentHeadingIds(html: string): Set<string> {
   const ids = new Set<string>();
@@ -142,18 +145,16 @@ function useReaderCount(questionId?: string): number | null {
   return count;
 }
 
-export default function VerdictPostPage({
-  meta, contentHtmlParts, toc, hasPoll,
-}: {
-  meta: VerdictMeta;
-  contentHtmlParts: HtmlParts;
-  toc: TocItem[];
-  hasPoll: boolean;
+export default function VerdictPostPage({ meta, contentHtmlParts, toc, hasPoll, slug }: {
+  meta: VerdictMeta; contentHtmlParts: HtmlParts; toc: TocItem[]; hasPoll: boolean; slug: string;
+
 }) {
   const readerCount = useReaderCount(meta.questionId);
   const hasGlossary = !!(meta.glossary && meta.glossary.length > 0);
 
   return (
+    <>
+    <OgHead title={meta.title} date={meta.date} type="verdict" slug={`verdicts/${slug}`} />
     <ArticleShell
       type="Verdict"
       readerCount={readerCount}
@@ -177,6 +178,7 @@ export default function VerdictPostPage({
       )}
       <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.after }} />
     </ArticleShell>
+    </>
   );
 }
 
@@ -232,12 +234,5 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const toc = VERDICT_TOC_ORDER.filter((item) => presentIds.has(item.id));
   const hasPoll = splitIndex >= 0 && !!(meta as any).questionId;
 
-  return {
-    props: {
-      meta,
-      contentHtmlParts: { before, after, hasMarker: splitIndex >= 0 },
-      toc,
-      hasPoll,
-    },
-  };
+  return { props: { meta, contentHtmlParts: { before, after, hasMarker: splitIndex >= 0 }, toc, hasPoll, slug }, };
 };

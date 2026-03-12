@@ -9,6 +9,7 @@ import { getAllBriefingsMeta, getBriefingBySlug } from "../../lib/briefings";
 import { useEffect, useState } from "react";
 import GlobalQuestion from "../../components/GlobalQuestion";
 import ArticleShell, { GlossaryEntry } from "../../components/ArticleShell";
+import OgHead from "../../components/OgHead";
 
 type BriefingMeta = {
   title: string;
@@ -139,17 +140,20 @@ function useReaderCount(questionId?: string): number | null {
 }
 
 export default function BriefingPostPage({
-  meta, contentHtmlParts, toc, hasPoll,
+  meta, contentHtmlParts, toc, hasPoll, slug,
 }: {
   meta: BriefingMeta;
   contentHtmlParts: HtmlParts;
   toc: TocItem[];
   hasPoll: boolean;
+  slug: string;
 }) {
   const readerCount = useReaderCount(meta.questionId);
   const hasGlossary = !!(meta.glossary && meta.glossary.length > 0);
 
   return (
+    <>
+      <OgHead title={meta.title} date={meta.date} type="briefing" slug={`briefings/${slug}`} />
     <ArticleShell
       type="Briefing"
       readerCount={readerCount}
@@ -172,6 +176,7 @@ export default function BriefingPostPage({
       )}
       <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.after }} />
     </ArticleShell>
+    </>
   );
 }
 
@@ -224,6 +229,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       meta,
+      slug,
       contentHtmlParts: { before, after, hasMarker: splitIndex >= 0 },
       toc,
       hasPoll,

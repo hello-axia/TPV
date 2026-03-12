@@ -1,6 +1,8 @@
 // pages/bound.tsx
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
+import OgHead from "../components/OgHead";
+
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -553,6 +555,8 @@ export default function BoundPage() {
   }
 
   return (
+    <>
+    <OgHead title="Bound" type="bound" slug="bound" />
     <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
       <div style={{ display: "grid", gap: 10 }}>
         <MetaKicker>TPV Games</MetaKicker>
@@ -869,6 +873,7 @@ export default function BoundPage() {
         }
       `}</style>
     </main>
+    </>
   );
 }
 

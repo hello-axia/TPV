@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import GlobalQuestion from "../components/GlobalQuestion";
 import { getAllVerdictsMeta, VerdictMeta } from "../lib/verdicts";
 import { getAllBriefingsMeta, BriefingMeta } from "../lib/briefings";
+import OgHead from "../components/OgHead";
 
 type Post = {
   type: "Verdict" | "Briefing";
@@ -230,6 +231,8 @@ export default function HomePage({
   const communityCount = useCommunityCount();
 
   return (
+    <>
+      <OgHead title="The People's Verdict" type="default" />
     <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 5rem" }}>
 
       {/* ── MASTHEAD ── */}
@@ -560,6 +563,7 @@ export default function HomePage({
         }
       `}</style>
     </main>
+    </>
   );
 }
 
