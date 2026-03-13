@@ -1,6 +1,8 @@
 // components/ArticleShell.tsx
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
+import { addBookmark, removeBookmark, isBookmarked } from "../lib/bookmarks";
+import { supabase } from "../lib/supabaseClients";
 
 export type GlossaryEntry = {
   term: string;
@@ -69,6 +71,7 @@ export default function ArticleShell({
   keyTension,
   showSummary = true,
   glossary,
+  slug,
 }: {
   type: "Verdict" | "Briefing";
   title: string;
@@ -83,11 +86,38 @@ export default function ArticleShell({
   keyTension?: string | null;
   showSummary?: boolean;
   glossary?: GlossaryEntry[] | null;
+  slug?: string;
 }) {
 
   // Global click handler for glossary tooltips.
   // The spans are injected into HTML at build time (getStaticProps),
   // so we just need to manage the active state here.
+  const [userId, setUserId] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      const uid = data.session?.user?.id ?? null;
+      setUserId(uid);
+      if (uid && slug) {
+        isBookmarked(uid, slug).then(setBookmarked);
+      }
+    });
+  }, [slug]);
+
+  async function toggleBookmark() {
+    if (!userId || !slug) return;
+    setBookmarkLoading(true);
+    if (bookmarked) {
+      await removeBookmark(userId, slug);
+      setBookmarked(false);
+    } else {
+      await addBookmark(userId, slug, type.toLowerCase() as "verdict" | "briefing", title);
+      setBookmarked(true);
+    }
+    setBookmarkLoading(false);
+  }
   useEffect(() => {
     if (!glossary || glossary.length === 0) return;
 
@@ -109,26 +139,45 @@ export default function ArticleShell({
 
           // On mobile: nudge tooltip so it never bleeds off screen edges
           const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
-          if (tooltip) {
-            // Reset any previous nudge
-            tooltip.style.left = "";
-            tooltip.style.transform = "";
-            tooltip.style.right = "";
+if (tooltip) {
+  // Reset previous positioning
+  tooltip.style.left = "";
+  tooltip.style.transform = "";
+  tooltip.style.right = "";
+  tooltip.style.bottom = "";
+  tooltip.style.top = "";
 
-            const tr = tooltip.getBoundingClientRect();
-            const vw = window.innerWidth;
-            const PAD = 12; // px from screen edge
+  const termRect = (term as HTMLElement).getBoundingClientRect();
+  const tooltipHeight = 160; // estimated tooltip height in px
+  const PAD = 12;
+  const spaceAbove = termRect.top;
+  const spaceBelow = window.innerHeight - termRect.bottom;
 
-            if (tr.left < PAD) {
-              // Bleeding off left — shift right
-              const nudge = PAD - tr.left;
-              tooltip.style.left = `calc(50% + ${nudge}px)`;
-            } else if (tr.right > vw - PAD) {
-              // Bleeding off right — shift left
-              const nudge = tr.right - (vw - PAD);
-              tooltip.style.left = `calc(50% - ${nudge}px)`;
-            }
-          }
+  // Vertical: spawn below if not enough room above
+  if (spaceAbove < tooltipHeight + 16) {
+    tooltip.style.bottom = "auto";
+    tooltip.style.top = "calc(100% + 8px)";
+  } else {
+    tooltip.style.top = "auto";
+    tooltip.style.bottom = "calc(100% + 8px)";
+  }
+
+  // Horizontal: center it, then nudge if it bleeds off screen
+  tooltip.style.left = "50%";
+  tooltip.style.transform = "translateX(-50%)";
+
+  // Need a tick for the browser to apply positioning before measuring
+  requestAnimationFrame(() => {
+    const tr = tooltip.getBoundingClientRect();
+    if (tr.left < PAD) {
+      const nudge = PAD - tr.left;
+      tooltip.style.transform = `translateX(calc(-50% + ${nudge}px))`;
+    } else if (tr.right > window.innerWidth - PAD) {
+      const nudge = tr.right - (window.innerWidth - PAD);
+      tooltip.style.transform = `translateX(calc(-50% - ${nudge}px))`;
+    }
+  });
+}
         }
       }
     }
@@ -226,7 +275,34 @@ export default function ArticleShell({
             {title}
           </h1>
 
-          <div className="divider" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+            <div className="divider" style={{ margin: 0 }} />
+            {userId && slug && (
+              <button
+                onClick={toggleBookmark}
+                disabled={bookmarkLoading}
+                title={bookmarked ? "Remove bookmark" : "Bookmark this article"}
+                style={{
+                  border: `1px solid ${bookmarked ? "var(--gold-line)" : "var(--border-light)"}`,
+                  background: bookmarked ? "var(--gold-dim)" : "transparent",
+                  borderRadius: 3,
+                  padding: "5px 10px",
+                  cursor: bookmarkLoading ? "default" : "pointer",
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontFamily: "var(--font-body)", fontSize: "0.65rem",
+                  fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase",
+                  color: bookmarked ? "var(--gold)" : "var(--text-faint)",
+                  transition: "all 0.15s ease",
+                  opacity: bookmarkLoading ? 0.5 : 1,
+                }}
+              >
+                <svg width="11" height="14" viewBox="0 0 11 14" fill={bookmarked ? "var(--gold)" : "none"} stroke={bookmarked ? "var(--gold)" : "var(--text-faint)"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M1 1h9v12l-4.5-3L1 13V1z"/>
+                </svg>
+                {bookmarked ? "Saved" : "Save"}
+              </button>
+            )}
+          </div>
 
           {showSummary && (
             <p style={{

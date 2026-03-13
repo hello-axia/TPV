@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import OgHead from "../components/OgHead";
 
-
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -128,10 +127,10 @@ function buildShareText(
   puzzleNumber: number,
   timeSec: number,
   tierEmoji: TierEmoji,
-  streak: number
+  percentile: number | null
 ) {
-  const streakLine = streak > 1 ? `\n🔥 ${streak}-day streak` : "";
-  return `Bound #${puzzleNumber}${streakLine}\nTime: ${timeSec}s\n${tierEmoji}`;
+  const percentileLine = percentile !== null ? `\n${percentile}th percentile` : "";
+  return `Bound #${puzzleNumber}\nTime: ${timeSec}s${percentileLine}\n${tierEmoji}`;
 }
 
 function MetaKicker({ children }: { children: React.ReactNode }) {
@@ -171,6 +170,12 @@ type StoredSubmission = {
   scoreResult: ScoreResult;
 };
 
+type LeaderboardEntry = {
+  rank: number;
+  username: string;
+  seconds: number;
+};
+
 function startedKey(puzzleNumber: number) {
   return `bound:v3:startedAt:${puzzleNumber}`;
 }
@@ -179,27 +184,10 @@ function submissionKey(puzzleNumber: number) {
   return `bound:v3:submission:${puzzleNumber}`;
 }
 
-// ── Streak helpers ──────────────────────────────────────────────────
-
 function daysBetween(a: string, b: string): number {
   const da = new Date(a).getTime();
   const db = new Date(b).getTime();
   return Math.round(Math.abs(da - db) / (24 * 60 * 60 * 1000));
-}
-
-function prevDayKey(dayKey: string): string {
-  const d = new Date(dayKey);
-  d.setDate(d.getDate() - 1);
-  return localDateKey(d);
-}
-
-async function fetchStreak(userId: string): Promise<number> {
-  const { data } = await supabase
-    .from("bound_progress")
-    .select("streak, last_played_day")
-    .eq("user_id", userId)
-    .single();
-  return data?.streak ?? 0;
 }
 
 async function saveSubmissionAndUpdateStreak(
@@ -209,21 +197,12 @@ async function saveSubmissionAndUpdateStreak(
   seconds: number,
   tier: TierEmoji,
   localDayKey: string
-): Promise<number> {
-  // 1. Insert submission (ignore duplicate — user can only submit once per puzzle)
+): Promise<void> {
   await supabase.from("bound_submissions").upsert(
-    {
-      puzzle_id: puzzleNumber,
-      user_id: userId,
-      word,
-      score: 0,
-      seconds,
-      local_day_key: localDayKey,
-    },
+    { puzzle_id: puzzleNumber, user_id: userId, word, score: 0, seconds, local_day_key: localDayKey },
     { onConflict: "puzzle_id,user_id", ignoreDuplicates: true }
   );
 
-  // 2. Fetch current progress row
   const { data: progress } = await supabase
     .from("bound_progress")
     .select("streak, last_played_day, games_played, best_score")
@@ -235,39 +214,28 @@ async function saveSubmissionAndUpdateStreak(
   const gamesPlayed = progress?.games_played ?? 0;
   const bestScore = progress?.best_score ?? null;
 
-  // 3. Compute new streak
   let newStreak: number;
   if (!prevPlayed) {
-    // First ever play
     newStreak = 1;
   } else if (prevPlayed === localDayKey) {
-    // Already played today — don't change streak
     newStreak = currentStreak;
   } else if (daysBetween(prevPlayed, localDayKey) === 1) {
-    // Consecutive day
     newStreak = currentStreak + 1;
   } else {
-    // Missed a day — reset
     newStreak = 1;
   }
 
-  // 4. Upsert progress row
   await supabase.from("bound_progress").upsert(
     {
       user_id: userId,
       streak: newStreak,
       last_played_day: localDayKey,
       games_played: gamesPlayed + (prevPlayed === localDayKey ? 0 : 1),
-      best_score:
-        bestScore === null
-          ? seconds
-          : Math.min(bestScore, seconds),
+      best_score: bestScore === null ? seconds : Math.min(bestScore, seconds),
       updated_at: new Date().toISOString(),
     },
     { onConflict: "user_id" }
   );
-
-  return newStreak;
 }
 
 // ── Main page ───────────────────────────────────────────────────────
@@ -282,9 +250,10 @@ export default function BoundPage() {
   const [patternBank, setPatternBank] = useState<BoundPatternEntry[] | null>(null);
   const [patternLoadError, setPatternLoadError] = useState(false);
 
-  // Auth + streak state
   const [userId, setUserId] = useState<string | null>(null);
-  const [streak, setStreak] = useState<number>(0);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [percentile, setPercentile] = useState<number | null>(null);
+  const [percentileTotal, setPercentileTotal] = useState<number>(0);
 
   const pattern = useMemo(() => {
     if (!patternBank?.length) return "_ _ _ _ _";
@@ -321,41 +290,47 @@ export default function BoundPage() {
   const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
   const autoFocusRef = useRef<(() => void) | undefined>(undefined);
 
-  // ── Load auth session + streak on mount ──
+  async function fetchLeaderboardAndPercentile(sec?: number) {
+    try {
+      const lb = await fetch(`/api/bound/leaderboard?day=${localDayKeyState}`);
+      if (lb.ok) {
+        const j = await lb.json();
+        setLeaderboard(j.leaderboard ?? []);
+      }
+    } catch { /* ignore */ }
+
+    if (sec !== undefined) {
+      try {
+        const pc = await fetch(`/api/bound/percentile?day=${localDayKeyState}&seconds=${sec}`);
+        if (pc.ok) {
+          const j = await pc.json();
+          setPercentile(j.percentile ?? null);
+          setPercentileTotal(j.total ?? 0);
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
+  // ── Load auth session on mount ──
   useEffect(() => {
     let alive = true;
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!alive) return;
-      if (session?.user) {
-        setUserId(session.user.id);
-        const s = await fetchStreak(session.user.id);
-        if (alive) setStreak(s);
-      }
+      if (session?.user) setUserId(session.user.id);
     })();
 
-    // Listen for auth changes (sign-in/out while on page)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         if (!alive) return;
-        if (session?.user) {
-          setUserId(session.user.id);
-          const s = await fetchStreak(session.user.id);
-          if (alive) setStreak(s);
-        } else {
-          setUserId(null);
-          setStreak(0);
-        }
+        setUserId(session?.user?.id ?? null);
       }
     );
 
-    return () => {
-      alive = false;
-      subscription.unsubscribe();
-    };
+    return () => { alive = false; subscription.unsubscribe(); };
   }, []);
 
-  // ── Load pattern bank ──
+  // ── Load pattern bank + initial leaderboard ──
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -368,6 +343,7 @@ export default function BoundPage() {
         if (alive) setPatternLoadError(true);
       }
     })();
+    fetchLeaderboardAndPercentile();
     return () => { alive = false; };
   }, []);
 
@@ -409,6 +385,8 @@ export default function BoundPage() {
     setSubmittedAt(null);
     setScoreResult(null);
     setShowShare(false);
+    setPercentile(null);
+    setPercentileTotal(0);
     if (typeof window === "undefined") return;
     try {
       for (let i = 0; i < puzzleNumber; i++) {
@@ -431,6 +409,7 @@ export default function BoundPage() {
           setSubmittedAt(parsed.submittedAt ?? null);
           setSubmitted(true);
           setLocked(true);
+          fetchLeaderboardAndPercentile(parsed.scoreResult?.timeSec);
           return;
         }
       }
@@ -511,16 +490,11 @@ export default function BoundPage() {
     const tierEmoji = tierFromSeconds(tSec);
     const tierName = TIER_LABELS[tierEmoji];
 
-    // Compute streak before building share text
-    let newStreak = streak;
     if (userId) {
-      newStreak = await saveSubmissionAndUpdateStreak(
-        userId, puzzleNumber, w, tSec, tierEmoji, localDayKeyState
-      );
-      setStreak(newStreak);
+      await saveSubmissionAndUpdateStreak(userId, puzzleNumber, w, tSec, tierEmoji, localDayKeyState);
     }
 
-    const shareText = buildShareText(puzzleNumber, tSec, tierEmoji, newStreak);
+    const shareText = buildShareText(puzzleNumber, tSec, tierEmoji, null);
     const result: ScoreResult = { tierEmoji, tierName, timeSec: tSec, shareText };
     const submittedIso = new Date().toISOString();
 
@@ -529,6 +503,8 @@ export default function BoundPage() {
     setScoreResult(result);
     setSubmittedAt(submittedIso);
     setResultAnimKey((k) => k + 1);
+
+    fetchLeaderboardAndPercentile(tSec);
 
     try {
       const payload: StoredSubmission = {
@@ -545,7 +521,7 @@ export default function BoundPage() {
 
   async function onCopyShare() {
     if (!submitted || !scoreResult) return;
-    const text = buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, streak);
+    const text = buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, percentile);
     try {
       await navigator.clipboard.writeText(text);
       setShowShare(true);
@@ -556,323 +532,352 @@ export default function BoundPage() {
 
   return (
     <>
-    <OgHead title="Bound" type="bound" slug="bound" />
-    <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
-      <div style={{ display: "grid", gap: 10 }}>
-        <MetaKicker>TPV Games</MetaKicker>
-        <div style={{
-          display: "flex", alignItems: "baseline",
-          justifyContent: "space-between", gap: 14, flexWrap: "wrap",
-        }}>
-          <h1 style={{
-            margin: 0, fontFamily: "var(--font-display)",
-            fontSize: "clamp(2.2rem, 6vw, 3.5rem)", fontWeight: 400,
-            letterSpacing: "-0.03em", color: "var(--text)", lineHeight: 1.05,
-          }}>
-            Bound
-          </h1>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
-            <Pill>
-              <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Puzzle</span>
-              <span style={{ fontWeight: 700, color: "var(--text)" }}>#{puzzleNumber}</span>
-            </Pill>
-
-            {/* Streak pill — only show if logged in and streak > 0 */}
-            {userId && streak > 0 && (
-              <Pill>
-                <span style={{ fontSize: 14 }}>🔥</span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{streak}</span>
-                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>
-                  {streak === 1 ? "day" : "days"}
-                </span>
-              </Pill>
-            )}
-
-            <span style={{
-              display: "inline-flex", alignItems: "center", gap: 10,
-              padding: "6px 10px", border: "1px solid var(--border-light)",
-              background: "var(--bg2)", color: "var(--text-dim)", fontSize: 13,
-              borderRadius: 999, whiteSpace: "nowrap", fontWeight: 700,
-              fontFamily: "var(--font-body)",
-            }}>
-              <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Timer</span>
-              <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>
-                  {submitted && scoreResult
-                    ? `${scoreResult.timeSec}s`
-                    : revealed ? `${elapsedSec}s` : "—"}
-                </span>
-                {revealed && !submitted && liveSpeedLabel ? (
-                  <span style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, letterSpacing: 0.2 }}>
-                    {liveSpeedLabel}
-                  </span>
-                ) : null}
-              </span>
-            </span>
-          </div>
-        </div>
-        <p style={{
-          margin: "2px 0 0", color: "var(--text-dim)", fontSize: "1rem",
-          lineHeight: 1.7, maxWidth: 900, fontFamily: "var(--font-body)",
-        }}>
-          Reveal the puzzle, then submit{" "}
-          <strong style={{ color: "var(--text)" }}>one word</strong> that fits. Faster is better.
-        </p>
-        <div style={{ borderTop: "1px solid var(--border)", margin: "12px 0 4px" }} />
-      </div>
-
-      <div
-        style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 18, alignItems: "start" }}
-        className="boundgrid"
-      >
-        {/* Left */}
-        <section className="boundleft" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+      <OgHead title="Bound" type="bound" slug="bound" />
+      <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
+        <div style={{ display: "grid", gap: 10 }}>
+          <MetaKicker>TPV Games</MetaKicker>
           <div style={{
             display: "flex", alignItems: "baseline",
-            justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+            justifyContent: "space-between", gap: 14, flexWrap: "wrap",
           }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-body)" }}>
-              {revealed ? "Today's pattern" : "Today's puzzle"}
-            </div>
-            <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
-              {revealed ? `${len} letters` : "Pattern hidden"}
+            <h1 style={{
+              margin: 0, fontFamily: "var(--font-display)",
+              fontSize: "clamp(2.2rem, 6vw, 3.5rem)", fontWeight: 400,
+              letterSpacing: "-0.03em", color: "var(--text)", lineHeight: 1.05,
+            }}>
+              Bound
+            </h1>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              <Pill>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Puzzle</span>
+                <span style={{ fontWeight: 700, color: "var(--text)" }}>#{puzzleNumber}</span>
+              </Pill>
+
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 10,
+                padding: "6px 10px", border: "1px solid var(--border-light)",
+                background: "var(--bg2)", color: "var(--text-dim)", fontSize: 13,
+                borderRadius: 999, whiteSpace: "nowrap", fontWeight: 700,
+                fontFamily: "var(--font-body)",
+              }}>
+                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Timer</span>
+                <span style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", lineHeight: 1.05 }}>
+                  <span style={{ fontWeight: 700, color: "var(--text)" }}>
+                    {submitted && scoreResult
+                      ? `${scoreResult.timeSec}s`
+                      : revealed ? `${elapsedSec}s` : "—"}
+                  </span>
+                  {revealed && !submitted && liveSpeedLabel ? (
+                    <span style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, letterSpacing: 0.2 }}>
+                      {liveSpeedLabel}
+                    </span>
+                  ) : null}
+                </span>
+              </span>
             </div>
           </div>
-          <div
-            key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
-            className={revealed ? "pop" : undefined}
-            style={{ marginTop: 14 }}
-          >
-            {revealed ? (
-              <WordInput
-                label="1"
-                value={word}
-                onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
-                disabled={locked}
-                error={error}
-                placeholder="TYPE WORD…"
-                pattern={pattern}
-                autoFocusRef={autoFocusRef}
-              />
-            ) : (
-              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                {new Array(5).fill("?").map((_, i) => (
-                  <div key={i} style={{
-                    width: 46, height: 50, border: "1px solid var(--border-light)",
-                    background: "var(--bg2)", display: "flex", alignItems: "center",
-                    justifyContent: "center", fontWeight: 700, fontSize: 18,
-                    color: "var(--text-faint)", fontFamily: "var(--font-body)",
-                  }}>?</div>
-                ))}
+          <p style={{
+            margin: "2px 0 0", color: "var(--text-dim)", fontSize: "1rem",
+            lineHeight: 1.7, maxWidth: 900, fontFamily: "var(--font-body)",
+          }}>
+            Reveal the puzzle, then submit{" "}
+            <strong style={{ color: "var(--text)" }}>one word</strong> that fits. Any word that fits works. Faster is better.
+          </p>
+          <div style={{ borderTop: "1px solid var(--border)", margin: "12px 0 4px" }} />
+        </div>
+
+        <div
+          style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 18, alignItems: "start" }}
+          className="boundgrid"
+        >
+          {/* Left */}
+          <section className="boundleft" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div style={{
+              display: "flex", alignItems: "baseline",
+              justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-body)" }}>
+                {revealed ? "Today's pattern" : "Today's puzzle"}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
+                {revealed ? `${len} letters` : "Pattern hidden"}
+              </div>
+            </div>
+            <div
+              key={revealed ? `reveal-${revealAnimKey}` : "hidden"}
+              className={revealed ? "pop" : undefined}
+              style={{ marginTop: 14 }}
+            >
+              {revealed ? (
+                <WordInput
+                  label="1"
+                  value={word}
+                  onChange={(v) => { setWord(v); setShowShare(false); setError(null); }}
+                  disabled={locked}
+                  error={error}
+                  placeholder="TYPE WORD…"
+                  pattern={pattern}
+                  autoFocusRef={autoFocusRef}
+                />
+              ) : (
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  {new Array(5).fill("?").map((_, i) => (
+                    <div key={i} style={{
+                      width: 46, height: 50, border: "1px solid var(--border-light)",
+                      background: "var(--bg2)", display: "flex", alignItems: "center",
+                      justifyContent: "center", fontWeight: 700, fontSize: 18,
+                      color: "var(--text-faint)", fontFamily: "var(--font-body)",
+                    }}>?</div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
+              {!revealed ? (
+                <button
+                  onClick={onReveal}
+                  disabled={!puzzleReady}
+                  style={{
+                    border: "none", background: "var(--gold)", color: "var(--bg)",
+                    padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
+                    fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                    cursor: puzzleReady ? "pointer" : "not-allowed",
+                    opacity: puzzleReady ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
+                  }}
+                >
+                  Reveal &amp; start
+                </button>
+              ) : (
+                <Pill>
+                  <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Length</span>
+                  <span style={{ fontWeight: 700, color: "var(--text)" }}>{len}</span>
+                </Pill>
+              )}
+            </div>
+            {patternLoadError && (
+              <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 700, marginTop: 8, fontFamily: "var(--font-body)" }}>
+                Failed to load puzzle. Please refresh.
               </div>
             )}
-          </div>
-          <div style={{ marginTop: 14, display: "flex", gap: 10, flexWrap: "wrap" }}>
-            {!revealed ? (
-              <button
-                onClick={onReveal}
-                disabled={!puzzleReady}
-                style={{
-                  border: "none", background: "var(--gold)", color: "var(--bg)",
-                  padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
-                  fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                  cursor: puzzleReady ? "pointer" : "not-allowed",
-                  opacity: puzzleReady ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
-                }}
-              >
-                Reveal &amp; start
-              </button>
-            ) : (
-              <Pill>
-                <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Length</span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{len}</span>
-              </Pill>
-            )}
-          </div>
-          {patternLoadError && (
-            <div style={{ color: "#ef4444", fontSize: 13, fontWeight: 700, marginTop: 8, fontFamily: "var(--font-body)" }}>
-              Failed to load puzzle. Please refresh.
-            </div>
-          )}
-        </section>
+          </section>
 
-        {/* Right */}
-        <section className="boundright" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "flex-end", gap: 12 }}>
-            <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
-              {locked ? "Locked" : submitted ? "Submitted" : "One try"}
+          {/* Right */}
+          <section className="boundright" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "flex-end", gap: 12 }}>
+              <div style={{ fontSize: 13, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
+                {locked ? "Locked" : submitted ? "Submitted" : "One try"}
+              </div>
             </div>
-          </div>
 
-          {submitted && scoreResult ? (
-            <div style={{
-              marginTop: 14, border: "1px solid var(--border-light)",
-              background: "var(--bg2)", padding: 14, borderRadius: 4,
-            }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            {submitted && scoreResult ? (
+              <div style={{
+                marginTop: 14, border: "1px solid var(--border-light)",
+                background: "var(--bg2)", padding: 14, borderRadius: 4,
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                  <div style={{
+                    fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+                    color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
+                  }}>
+                    Your submission
+                  </div>
+                  {formatSubmittedAt(submittedAt) && (
+                    <div style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
+                      {formatSubmittedAt(submittedAt)}
+                    </div>
+                  )}
+                </div>
+                <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
+                  <div style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Word</div>
+                  <div style={{ flex: 1, textAlign: "right", fontWeight: 700, letterSpacing: "0.1em", color: "var(--text)", fontFamily: "var(--font-body)" }}>
+                    {onlyLettersUpper(word)}
+                  </div>
+                </div>
+                <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Time</span>
+                    <span style={{ fontWeight: 700, color: "var(--text)", fontFamily: "var(--font-body)" }}>{scoreResult.timeSec}s</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Tier</span>
+                    <div
+                      key={`result-${resultAnimKey}`}
+                      className="pop"
+                      style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, fontFamily: "var(--font-body)" }}
+                    >
+                      <span style={{ display: "inline-block", width: 12, height: 12, borderRadius: 2, background: TIER_COLOR[scoreResult.tierEmoji] }} />
+                      <span style={{ color: "var(--text)" }}>{scoreResult.tierName}</span>
+                    </div>
+                  </div>
+                  {percentile !== null && (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Percentile</span>
+                      <span style={{ fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}>
+                      {percentile}th percentile
+                      </span>
+                    </div>
+                  )}
+                  {percentile === null && submitted && (
+                    <div style={{ fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                      Percentile updates as more people play today.
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
+
+            <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
+              {!submitted ? (
+                <button
+                  onClick={onSubmit}
+                  disabled={!canSubmit}
+                  style={{
+                    border: "none",
+                    background: canSubmit ? "var(--gold)" : "var(--bg3)",
+                    color: canSubmit ? "var(--bg)" : "var(--text-faint)",
+                    padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
+                    fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
+                    cursor: canSubmit ? "pointer" : "not-allowed",
+                    opacity: canSubmit ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
+                  }}
+                >
+                  Submit
+                </button>
+              ) : (
+                <button
+                  onClick={onCopyShare}
+                  style={{
+                    border: "1px solid var(--border-light)", background: "var(--bg2)",
+                    color: "var(--gold)", padding: "10px 16px", fontFamily: "var(--font-body)",
+                    fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
+                    textTransform: "uppercase", cursor: "pointer", borderRadius: 3,
+                  }}
+                >
+                  Copy share
+                </button>
+              )}
+            </div>
+
+            {showShare && submitted && scoreResult ? (
+              <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
                 <div style={{
                   fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
                   color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
                 }}>
-                  Your submission
+                  Copied to clipboard
                 </div>
-                {formatSubmittedAt(submittedAt) ? (
-                  <div style={{ fontSize: 12, color: "var(--text-faint)", fontWeight: 700, fontFamily: "var(--font-body)" }}>
-                    {formatSubmittedAt(submittedAt)}
-                  </div>
-                ) : null}
-              </div>
-              <div style={{ marginTop: 10, display: "flex", justifyContent: "space-between", gap: 12 }}>
-                <div style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Word</div>
-                <div style={{
-                  flex: 1, textAlign: "right", fontWeight: 700, letterSpacing: "0.1em",
-                  color: "var(--text)", fontFamily: "var(--font-body)",
+                <pre style={{
+                  marginTop: 10, whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6,
+                  color: "var(--text)", border: "1px solid var(--border-light)",
+                  background: "var(--bg3)", padding: 12, fontFamily: "var(--font-body)", borderRadius: 3,
                 }}>
-                  {onlyLettersUpper(word)}
-                </div>
+                  {buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, percentile)}
+                </pre>
               </div>
-              <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-                <div style={{
-                  display: "flex", justifyContent: "space-between",
-                  gap: 12, alignItems: "center", flexWrap: "wrap",
-                }}>
-                  <div style={{
-                    color: "var(--text-faint)", fontSize: "0.65rem", fontWeight: 700,
-                    letterSpacing: "0.1em", textTransform: "uppercase", fontFamily: "var(--font-body)",
-                  }}>
-                    Result
-                  </div>
-                  <div
-                    key={`result-${resultAnimKey}`}
-                    className="pop"
-                    style={{ display: "flex", alignItems: "center", gap: 6, fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}
-                  >
-                    <span style={{
-                      display: "inline-block", width: 12, height: 12, borderRadius: 2,
-                      background: TIER_COLOR[scoreResult.tierEmoji], verticalAlign: "middle",
-                    }} />
-                    <span style={{ color: "var(--text-faint)" }}>•</span>
-                    <span>{scoreResult.tierName}</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: 6, color: "var(--text-dim)", fontSize: 12, lineHeight: 1.6, fontFamily: "var(--font-body)" }}>
-                  Time: <strong style={{ color: "var(--text)" }}>{scoreResult.timeSec}s</strong>
-                </div>
-                {/* Streak callout after submit */}
-                {userId && streak > 1 && (
-                  <div style={{
-                    marginTop: 10, display: "flex", alignItems: "center", gap: 6,
-                    fontSize: 12, color: "var(--gold)", fontFamily: "var(--font-body)", fontWeight: 700,
-                  }}>
-                    <span>🔥</span>
-                    <span>{streak}-day streak — keep it going!</span>
-                  </div>
-                )}
-                {userId && streak === 1 && (
-                  <div style={{
-                    marginTop: 10, fontSize: 12, color: "var(--text-faint)",
-                    fontFamily: "var(--font-body)", fontWeight: 700,
-                  }}>
-                    🔥 Streak started — come back tomorrow!
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : null}
+            ) : null}
+          </section>
 
-          <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end", gap: 10, flexWrap: "wrap" }}>
-            {!submitted ? (
-              <button
-                onClick={onSubmit}
-                disabled={!canSubmit}
-                style={{
-                  border: "none",
-                  background: canSubmit ? "var(--gold)" : "var(--bg3)",
-                  color: canSubmit ? "var(--bg)" : "var(--text-faint)",
-                  padding: "10px 16px", fontFamily: "var(--font-body)", fontSize: "0.72rem",
-                  fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase",
-                  cursor: canSubmit ? "pointer" : "not-allowed",
-                  opacity: canSubmit ? 1 : 0.5, borderRadius: 3, transition: "opacity 0.15s ease",
-                }}
-              >
-                Submit
-              </button>
+         {/* Leaderboard */}
+         <section className="boundleaderboard" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div style={{
+              fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+              color: "var(--gold)", textTransform: "uppercase", fontFamily: "var(--font-body)", marginBottom: 12,
+            }}>
+              Today's leaderboard
+            </div>
+            {leaderboard.length === 0 ? (
+              <div style={{ fontSize: 13, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                No submissions yet — be the first!
+              </div>
             ) : (
-              <button
-                onClick={onCopyShare}
-                style={{
-                  border: "1px solid var(--border-light)", background: "var(--bg2)",
-                  color: "var(--gold)", padding: "10px 16px", fontFamily: "var(--font-body)",
-                  fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.12em",
-                  textTransform: "uppercase", cursor: "pointer", borderRadius: 3,
-                }}
-              >
-                Copy share
-              </button>
-            )}
-          </div>
-
-          {showShare && submitted && scoreResult ? (
-            <div style={{ marginTop: 14, borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-              <div style={{
-                fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
-                color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
-              }}>
-                Copied to clipboard
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {leaderboard.map((entry, i) => (
+                  <div key={entry.rank} style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "10px 14px",
+                    background: entry.rank === 1 ? "var(--gold-dim)" : "var(--bg2)",
+                    border: `1px solid ${entry.rank === 1 ? "var(--gold-line)" : "var(--border-light)"}`,
+                    borderRadius: 4,
+                    fontFamily: "var(--font-body)",
+                  }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, minWidth: 20, textAlign: "center",
+                      color: entry.rank === 1 ? "var(--gold)" : "var(--text-faint)",
+                      fontFamily: "var(--font-body)",
+                    }}>
+                      #{entry.rank}
+                    </span>
+                    <span style={{
+                      flex: 1, fontSize: 13, fontWeight: 700,
+                      color: entry.rank === 1 ? "var(--text)" : "var(--text-dim)",
+                    }}>
+                      {entry.username}
+                    </span>
+                    <span style={{
+                      fontSize: 13, fontWeight: 700,
+                      color: entry.rank === 1 ? "var(--gold)" : "var(--text-faint)",
+                    }}>
+                      {entry.seconds}s
+                    </span>
+                    <span style={{
+                      width: 10, height: 10, borderRadius: 2, flexShrink: 0,
+                      background: TIER_COLOR[tierFromSeconds(entry.seconds)],
+                      display: "inline-block",
+                    }} />
+                  </div>
+                ))}
               </div>
-              <pre style={{
-                marginTop: 10, whiteSpace: "pre-wrap", fontSize: 14, lineHeight: 1.6,
-                color: "var(--text)", border: "1px solid var(--border-light)",
-                background: "var(--bg3)", padding: 12, fontFamily: "var(--font-body)", borderRadius: 3,
-              }}>
-                {buildShareText(puzzleNumber, scoreResult.timeSec, scoreResult.tierEmoji, streak)}
-              </pre>
+            )}
+            {!userId && (
+              <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                <a href="/auth" style={{ color: "var(--gold)" }}>Sign in</a> to appear on the leaderboard.
+              </div>
+            )}
+          </section>
+
+          {/* Legend */}
+          <section className="boundlegend" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div style={{
+              fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+              color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
+            }}>
+              Legend
             </div>
-          ) : null}
-        </section>
+            <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
+              <LegendRow emoji="🟦" label="Instant" time="under 30s" />
+              <LegendRow emoji="🟨" label="Fast" time="30–90s" />
+              <LegendRow emoji="🟧" label="Moderate" time="90–180s" />
+              <LegendRow emoji="🟥" label="Slow" time="180s+" />
+            </div>
+            <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
+              The faster you find a word,{" "}
+              <strong style={{ color: "var(--text-dim)" }}>the better.</strong> No second chances.
+            </div>
+          </section>
+        </div>
 
-        {/* Legend */}
-        <section className="boundlegend" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
-          <div style={{
-            fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
-            color: "var(--text-faint)", textTransform: "uppercase", fontFamily: "var(--font-body)",
-          }}>
-            Legend
-          </div>
-          <div style={{ marginTop: 10, display: "grid", gap: 8, fontSize: 14 }}>
-            <LegendRow emoji="🟦" label="Instant" time="under 30s" />
-            <LegendRow emoji="🟨" label="Fast" time="30–90s" />
-            <LegendRow emoji="🟧" label="Moderate" time="90–180s" />
-            <LegendRow emoji="🟥" label="Slow" time="180s+" />
-          </div>
-          <div style={{ marginTop: 12, color: "var(--text-faint)", fontSize: 13, lineHeight: 1.65, fontFamily: "var(--font-body)" }}>
-            The faster you find a word,{" "}
-            <strong style={{ color: "var(--text-dim)" }}>the better.</strong> No second chances.
-          </div>
-        </section>
-      </div>
-
-      <style jsx>{`
-        .pop {
-          animation: pop 220ms ease-out both;
-        }
-        @keyframes pop {
-          0%   { transform: scale(0.97); opacity: 0.7; }
-          60%  { transform: scale(1.02); opacity: 1;   }
-          100% { transform: scale(1);    }
-        }
-        .boundlegend {
-          grid-column: 1 / 2;
-          margin-top: 18px;
-        }
-        @media (max-width: 980px) {
-          .boundgrid { grid-template-columns: 1fr !important; }
-          .boundright { order: 1; }
-          .boundleft  { order: 0; }
-          .boundlegend { order: 2; margin-top: 22px !important; }
-        }
-      `}</style>
-    </main>
+        <style jsx>{`
+          .pop {
+            animation: pop 220ms ease-out both;
+          }
+          @keyframes pop {
+            0%   { transform: scale(0.97); opacity: 0.7; }
+            60%  { transform: scale(1.02); opacity: 1;   }
+            100% { transform: scale(1);    }
+          }
+          .boundlegend {
+            grid-column: 1 / 2;
+            margin-top: 18px;
+          }
+          @media (max-width: 980px) {
+            .boundgrid { grid-template-columns: 1fr !important; }
+            .boundright { order: 1; }
+            .boundleft  { order: 0; }
+            .boundleaderboard { order: 2; margin-top: 22px !important; }
+            .boundlegend { order: 3; margin-top: 22px !important; }
+          }
+        `}</style>
+      </main>
     </>
   );
 }

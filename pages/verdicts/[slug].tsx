@@ -156,6 +156,7 @@ export default function VerdictPostPage({ meta, contentHtmlParts, toc, hasPoll, 
     <>
     <OgHead title={meta.title} date={meta.date} type="verdict" slug={`verdicts/${slug}`} />
     <ArticleShell
+    slug={`verdicts/${slug}`}
       type="Verdict"
       readerCount={readerCount}
       title={meta.title}

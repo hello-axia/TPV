@@ -13,9 +13,9 @@
     --bg-hover:     #1e1e1c;
   
     /* Text — bumped up significantly for readability */
-    --text:         #e8e4dd;
-    --text-dim:     #a09a90;
-    --text-faint:   #5c5750;
+    --text:         #f5f2ec;
+--text-dim:     #d8d0c6;
+--text-faint:   #a89f96;
   
     /* Accent */
     --gold:         #c8a96e;
@@ -722,7 +722,8 @@
 
 .tpv-gloss-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
+  bottom: calc(100% + 8px); /* default: above — JS overrides when needed */
+  top: auto;
   left: 50%;
   transform: translateX(-50%);
   background: var(--bg3);

@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "../lib/supabaseClients";
+import { fetchBookmarks, type Bookmark } from "../lib/bookmarks";
 
 function initialsFromUser(u: User | null) {
   if (!u) return "•";
@@ -34,6 +35,7 @@ export default function Nav() {
   const [user, setUser] = useState<User | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -41,9 +43,13 @@ export default function Nav() {
       const { data } = await supabase.auth.getSession();
       if (!mounted) return;
       setUser(data.session?.user ?? null);
+      if (data.session?.user) fetchBookmarks(data.session.user.id).then(setBookmarks);
     })();
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) fetchBookmarks(u.id).then(setBookmarks);
+      else setBookmarks([]);
     });
     return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
@@ -414,13 +420,44 @@ export default function Nav() {
           <div className="divider-full" />
 
           {/* For you */}
-          <div className="eyebrow" style={{ marginBottom: "0.75rem", marginTop: "1rem" }}>For You</div>
-          <div style={{ marginBottom: "0.4rem", fontFamily: "var(--font-body)", fontWeight: 500, color: "var(--text)", fontSize: "0.9rem" }}>
-            Bookmarks
-          </div>
-          <div style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-faint)", lineHeight: 1.5 }}>
-            Coming soon — saved articles and Bound progress.
-          </div>
+          <div className="eyebrow" style={{ marginBottom: "0.75rem", marginTop: "1rem" }}>Bookmarks</div>
+          {!user ? (
+            <div style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-faint)", lineHeight: 1.5 }}>
+              Sign in to save articles.
+            </div>
+          ) : bookmarks.length === 0 ? (
+            <div style={{ fontFamily: "var(--font-body)", fontSize: "0.8rem", color: "var(--text-faint)", lineHeight: 1.5 }}>
+              No saved articles yet. Hit the bookmark button on any Verdict or Briefing.
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {bookmarks.map((b) => (
+                <Link
+                  key={b.id}
+                  href={`/${b.type}s/${b.slug.replace(/^(verdicts|briefings)\//, "")}`}
+                  style={{
+                    textDecoration: "none", padding: "8px 10px",
+                    borderRadius: 3, background: "var(--bg3)",
+                    display: "flex", flexDirection: "column", gap: 3,
+                    border: "1px solid var(--border)",
+                  }}
+                >
+                  <span style={{
+                    fontFamily: "var(--font-body)", fontSize: "0.62rem", fontWeight: 700,
+                    letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--gold)",
+                  }}>
+                    {b.type}
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-display)", fontSize: "0.9rem",
+                    color: "var(--text)", lineHeight: 1.3,
+                  }}>
+                    {b.title}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="divider-full" />
 

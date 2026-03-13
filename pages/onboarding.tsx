@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabaseClients";
 import type { User } from "@supabase/supabase-js";
 
 type ProfileData = {
+  username: string;
   birth_year: string;
   gender: string;
   race_ethnicity: string;
@@ -14,6 +15,7 @@ type ProfileData = {
 };
 
 const EMPTY: ProfileData = {
+  username: "",
   birth_year: "",
   gender: "",
   race_ethnicity: "",
@@ -231,7 +233,7 @@ function PoliticalScale({ value, onChange }: {
   );
 }
 
-const STEPS = ["About you", "Background", "Politics", "Commitment"];
+const STEPS = ["Username", "About you", "Background", "Politics", "Commitment"];
 
 function StepIndicator({ current }: { current: number }) {
   return (
@@ -323,6 +325,7 @@ export default function OnboardingPage() {
       .upsert({
         id: user.id,
         ...data,
+        username: data.username.trim() || null,
         committed,
         onboarding_complete: true,
       });
@@ -374,8 +377,41 @@ export default function OnboardingPage() {
 
       <StepIndicator current={step} />
 
-      {/* ── STEP 0: About you ── */}
+      {/* ── STEP 0: Username ── */}
       {step === 0 && (
+        <div style={{ display: "grid", gap: "1.25rem" }}>
+          <label style={{ display: "grid", gap: "0.5rem" }}>
+            <span style={{
+              fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
+            }}>
+              Display name
+            </span>
+            <input
+              type="text"
+              value={data.username}
+              onChange={(e) => set("username", e.target.value.replace(/\s/g, ""))}
+              placeholder="e.g. enoch"
+              maxLength={24}
+              style={{
+                border: "1px solid var(--border-light)", borderRadius: 3,
+                padding: "0.8rem 1rem", fontSize: "0.9rem",
+                background: "var(--bg3)", color: "var(--text)",
+                fontFamily: "var(--font-body)", outline: "none",
+              }}
+            />
+            <span style={{
+              fontFamily: "var(--font-body)", fontSize: "0.75rem",
+              color: "var(--text-faint)", fontStyle: "italic",
+            }}>
+              This is shown on the Bound leaderboard. No spaces, max 24 characters. You can skip this.
+            </span>
+          </label>
+        </div>
+      )}
+
+      {/* ── STEP 1: About you ── */}
+      {step === 1 && (
         <div style={{ display: "grid", gap: "1.25rem" }}>
           <label style={{ display: "grid", gap: "0.5rem" }}>
             <span style={{
@@ -435,8 +471,8 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* ── STEP 1: Background ── */}
-      {step === 1 && (
+      {/* ── STEP 2: Background ── */}
+      {step === 2 && (
         <div style={{ display: "grid", gap: "1.25rem" }}>
           <Select
             label="Race / ethnicity"
@@ -483,16 +519,16 @@ export default function OnboardingPage() {
         </div>
       )}
 
-      {/* ── STEP 2: Politics ── */}
-      {step === 2 && (
+      {/* ── STEP 3: Politics ── */}
+      {step === 3 && (
         <PoliticalScale
           value={data.political_affiliation}
           onChange={(v) => set("political_affiliation", v)}
         />
       )}
 
-      {/* ── STEP 3: Commitment ── */}
-      {step === 3 && (
+      {/* ── STEP 4: Commitment ── */}
+      {step === 4 && (
         <div>
           <div style={{
             padding: "2rem",
@@ -592,7 +628,7 @@ export default function OnboardingPage() {
       )}
 
       {/* ── NAV ── */}
-      {step < 3 && (
+      {step < 4 && (
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -625,7 +661,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             onClick={() => {
-                if (step === 0 && data.birth_year) {
+              if (step === 1 && data.birth_year) {
                   const age = new Date().getFullYear() - parseInt(data.birth_year);
                   if (age < 13) {
                     setAgeError("You must be 13 or older to create a TPV account.");

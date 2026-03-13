@@ -155,6 +155,7 @@ export default function BriefingPostPage({
     <>
       <OgHead title={meta.title} date={meta.date} type="briefing" slug={`briefings/${slug}`} />
     <ArticleShell
+    slug={`briefings/${slug}`}
       type="Briefing"
       readerCount={readerCount}
       title={meta.title}
