@@ -53,7 +53,7 @@ export default function AboutPage() {
               lineHeight: 1.2,
               marginBottom: "1rem",
             }}>
-              A community build on writing.
+              A community built on writing.
             </h2>
             <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
               TPV is text-only by design. Video and short form content is optimized for dopamine rushes — it can make a bad argument sound compelling and a good one seem boring. Writing can't hide behind delivery. Every claim has to stand on its own, every argument has to be precise enough to put into words, and every reader has to slow down enough to actually follow it. That's not a limitation. That's the point. The people who read TPV are here because they chose depth, and that shared choice is what makes this a community worth being part of.
