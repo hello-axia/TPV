@@ -731,6 +731,7 @@ export default function BoundPage() {
                 <button
                   onClick={onSubmit}
                   disabled={!canSubmit}
+                  data-submit="bound"
                   style={{
                     border: "none",
                     background: canSubmit ? "var(--gold)" : "var(--bg3)",
@@ -927,6 +928,12 @@ function WordInput({
           return;
         }
       }
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const submitBtn = document.querySelector<HTMLButtonElement>('button[data-submit="bound"]');
+      submitBtn?.click();
       return;
     }
     if (e.key.length === 1 && /[a-zA-Z]/.test(e.key)) {
