@@ -269,6 +269,16 @@ export default function HomePage({
           }}>
             TPV breaks every political issue into its real components, values, facts, and incentives, so you can form an opinion that's actually yours.
           </p>
+          <p style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "1rem",
+            lineHeight: 1.75,
+            color: "var(--text-dim)",
+            maxWidth: 520,
+            marginBottom: "1.5rem",
+          }}>
+            Committed to text. Built for a community who want depth.
+          </p>
 
           {communityCount !== null && (
             <div style={{

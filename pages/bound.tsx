@@ -830,7 +830,7 @@ export default function BoundPage() {
             )}
             {!userId && (
               <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
-                <a href="/auth" style={{ color: "var(--gold)" }}>Sign in</a> to appear on the leaderboard.
+                <a href="/signin" style={{ color: "var(--gold)" }}>Sign in</a> to appear on the leaderboard.
               </div>
             )}
           </section>
