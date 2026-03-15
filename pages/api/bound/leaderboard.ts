@@ -14,7 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { data: submissions, error } = await supabase
     .from("bound_submissions")
-    .select("seconds, user_id")
+    .select("seconds, user_id, word")
     .eq("local_day_key", day)
     .order("seconds", { ascending: true })
     .limit(5);
@@ -38,6 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     rank: i + 1,
     username: usernameMap[row.user_id] ?? "Anonymous",
     seconds: row.seconds,
+    word: row.word ?? null,
   }));
 
   res.status(200).json({ leaderboard });

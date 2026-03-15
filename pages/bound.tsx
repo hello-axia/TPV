@@ -174,6 +174,7 @@ type LeaderboardEntry = {
   rank: number;
   username: string;
   seconds: number;
+  word?: string | null;
 };
 
 function startedKey(puzzleNumber: number) {
@@ -808,11 +809,22 @@ export default function BoundPage() {
                     }}>
                       #{entry.rank}
                     </span>
-                    <span style={{
-                      flex: 1, fontSize: 13, fontWeight: 700,
-                      color: entry.rank === 1 ? "var(--text)" : "var(--text-dim)",
-                    }}>
-                      {entry.username}
+                    <span style={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+                      <span style={{
+                        fontSize: 13, fontWeight: 700,
+                        color: entry.rank === 1 ? "var(--text)" : "var(--text-dim)",
+                      }}>
+                        {entry.username}
+                      </span>
+                      {submitted && entry.word && (
+                        <span style={{
+                          fontSize: 11, fontWeight: 700, letterSpacing: "0.08em",
+                          color: "var(--text-faint)", textTransform: "uppercase",
+                          fontFamily: "var(--font-body)",
+                        }}>
+                          {entry.word}
+                        </span>
+                      )}
                     </span>
                     <span style={{
                       fontSize: 13, fontWeight: 700,
@@ -829,6 +841,16 @@ export default function BoundPage() {
                 ))}
               </div>
             )}
+            {submitted && leaderboard.length > 0 && (() => {
+              const freq: Record<string, number> = {};
+              leaderboard.forEach(e => { if (e.word) freq[e.word] = (freq[e.word] ?? 0) + 1; });
+              const top = Object.entries(freq).sort((a, b) => b[1] - a[1])[0];
+              return top ? (
+                <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                  Most common: <strong style={{ color: "var(--text)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{top[0]}</strong>
+                </div>
+              ) : null;
+            })()}
             {!userId && (
               <div style={{ marginTop: 10, fontSize: 12, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
                 <a href="/signin" style={{ color: "var(--gold)" }}>Sign in</a> to appear on the leaderboard.
