@@ -619,17 +619,6 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
                 <div className="peer-text">{peerMessage}</div>
               </div>
             )}
-
-            {/* Breakdown nudge */}
-            <div className="breakdown-nudge">
-              <div className="breakdown-label">Want to understand the split?</div>
-              <div className="breakdown-text">
-                Here's why people disagree on this one.
-              </div>
-              <a href="#the-overview" className="breakdown-link">
-                See why people disagree &rarr;
-              </a>
-            </div>
           </>
         )}
       </div>
