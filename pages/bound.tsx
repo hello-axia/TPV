@@ -291,6 +291,31 @@ export default function BoundPage() {
   const wordbankCacheRef = useRef<Record<string, 1> | null>(null);
   const autoFocusRef = useRef<(() => void) | undefined>(undefined);
 
+  async function fetchExistingSubmission(uid: string): Promise<void> {
+    const { data } = await supabase
+      .from("bound_submissions")
+      .select("word, seconds, local_day_key, puzzle_id")
+      .eq("user_id", uid)
+      .eq("local_day_key", localDayKeyState)
+      .eq("puzzle_id", puzzleNumber)
+      .single();
+
+    if (!data) return;
+
+    const tierEmoji = tierFromSeconds(data.seconds);
+    const tierName = TIER_LABELS[tierEmoji];
+    const shareText = buildShareText(puzzleNumber, data.seconds, tierEmoji, null);
+    const result: ScoreResult = { tierEmoji, tierName, timeSec: data.seconds, shareText };
+
+    setRevealed(true);
+    setWord(data.word ?? "");
+    setScoreResult(result);
+    setSubmitted(true);
+    setLocked(true);
+    setSubmittedAt(null); // we don't store this in bound_submissions
+    fetchLeaderboardAndPercentile(data.seconds);
+  }
+
   async function fetchLeaderboardAndPercentile(sec?: number) {
     try {
       const lb = await fetch(`/api/bound/leaderboard?day=${localDayKeyState}`);
@@ -318,13 +343,18 @@ export default function BoundPage() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!alive) return;
-      if (session?.user) setUserId(session.user.id);
+      if (session?.user) {
+        setUserId(session.user.id);
+        fetchExistingSubmission(session.user.id);
+      }
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!alive) return;
-        setUserId(session?.user?.id ?? null);
+        const uid = session?.user?.id ?? null;
+        setUserId(uid);
+        if (uid) fetchExistingSubmission(uid);
       }
     );
 
