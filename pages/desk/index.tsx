@@ -25,40 +25,30 @@ export default function DeskIndexPage({ items }: { items: DeskMeta[] }) {
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 6rem" }}>
 
         {/* ── HEADER ── */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          gap: "2rem",
-          alignItems: "end",
-          marginBottom: "2.5rem",
-          flexWrap: "wrap",
-        }}>
-          <div style={{ maxWidth: 640 }}>
-            <div className="eyebrow" style={{ marginBottom: "1rem" }}>
-              The People's Verdict
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
-              fontWeight: 400,
-              lineHeight: 1.05,
-              letterSpacing: "-0.02em",
-              color: "var(--text)",
-              marginBottom: "1rem",
-            }}>
-              The Desk
-            </h1>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "1rem",
-              lineHeight: 1.75,
-              color: "var(--text-dim)",
-              marginBottom: "0.5rem",
-            }}>
-              Reader questions answered on demand. Good questions get a full breakdown. Great ones become Verdicts or Briefings.
-            </p>
+        <div style={{ maxWidth: 640, marginBottom: "2.5rem" }}>
+          <div className="eyebrow" style={{ marginBottom: "1rem" }}>
+            The People's Verdict
           </div>
-
+          <h1 style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(2.25rem, 5vw, 3.5rem)",
+            fontWeight: 400,
+            lineHeight: 1.05,
+            letterSpacing: "-0.02em",
+            color: "var(--text)",
+            marginBottom: "1rem",
+          }}>
+            The Desk
+          </h1>
+          <p style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "1rem",
+            lineHeight: 1.75,
+            color: "var(--text-dim)",
+            marginBottom: "1.5rem",
+          }}>
+            Reader questions answered on demand. Good questions get a full breakdown. Great ones become Verdicts or Briefings.
+          </p>
           <Link href="/desk/ask" style={{
             display: "inline-flex",
             alignItems: "center",
