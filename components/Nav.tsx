@@ -26,10 +26,10 @@ const links = [
   { href: "/", label: "Home", sub: null },
   { href: "/verdicts", label: "Verdicts", sub: "Deep issue breakdowns" },
   { href: "/briefings", label: "Briefings", sub: "Quick context on what's trending" },
+  { href: "/desk", label: "The Desk", sub: "Reader questions answered" },
   { href: "/about", label: "About", sub: null },
   { href: "/contact", label: "Contact", sub: null },
 ];
-
 export default function Nav() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);

@@ -285,6 +285,7 @@ export default function BoundPage() {
   const [submittedAt, setSubmittedAt] = useState<string | null>(null);
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null);
   const [showShare, setShowShare] = useState(false);
+  const [streak, setStreak] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revealAnimKey, setRevealAnimKey] = useState(0);
   const [resultAnimKey, setResultAnimKey] = useState(0);
@@ -300,21 +301,28 @@ export default function BoundPage() {
       .eq("puzzle_id", puzzleNumber)
       .single();
 
-    if (!data) return;
+      if (!data) return;
 
-    const tierEmoji = tierFromSeconds(data.seconds);
-    const tierName = TIER_LABELS[tierEmoji];
-    const shareText = buildShareText(puzzleNumber, data.seconds, tierEmoji, null);
-    const result: ScoreResult = { tierEmoji, tierName, timeSec: data.seconds, shareText };
-
-    setRevealed(true);
-    setWord(data.word ?? "");
-    setScoreResult(result);
-    setSubmitted(true);
-    setLocked(true);
-    setSubmittedAt(null); // we don't store this in bound_submissions
-    fetchLeaderboardAndPercentile(data.seconds);
-  }
+      const tierEmoji = tierFromSeconds(data.seconds);
+      const tierName = TIER_LABELS[tierEmoji];
+      const shareText = buildShareText(puzzleNumber, data.seconds, tierEmoji, null);
+      const result: ScoreResult = { tierEmoji, tierName, timeSec: data.seconds, shareText };
+  
+      setRevealed(true);
+      setWord(data.word ?? "");
+      setScoreResult(result);
+      setSubmitted(true);
+      setLocked(true);
+      setSubmittedAt(null);
+      fetchLeaderboardAndPercentile(data.seconds);
+  
+      const { data: progress } = await supabase
+        .from("bound_progress")
+        .select("streak")
+        .eq("user_id", uid)
+        .single();
+      if (progress?.streak) setStreak(progress.streak);
+    }
 
   async function fetchLeaderboardAndPercentile(sec?: number) {
     try {
@@ -350,14 +358,37 @@ export default function BoundPage() {
     })();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         if (!alive) return;
         const uid = session?.user?.id ?? null;
         setUserId(uid);
-        if (uid) fetchExistingSubmission(uid);
+        if (uid) {
+          // Check if there's a local submission not yet saved to Supabase
+          try {
+            const rawSub = localStorage.getItem(submissionKey(puzzleNumber));
+            if (rawSub) {
+              const parsed = JSON.parse(rawSub) as StoredSubmission;
+              if (
+                parsed?.v === 3 &&
+                parsed.puzzleNumber === puzzleNumber &&
+                parsed.localDayKey === localDayKeyState
+              ) {
+                // Save it to Supabase retroactively
+                await saveSubmissionAndUpdateStreak(
+                  uid,
+                  puzzleNumber,
+                  parsed.word,
+                  parsed.scoreResult.timeSec,
+                  parsed.scoreResult.tierEmoji,
+                  parsed.localDayKey
+                );
+              }
+            }
+          } catch { /* ignore */ }
+          fetchExistingSubmission(uid);
+        }
       }
     );
-
     return () => { alive = false; subscription.unsubscribe(); };
   }, []);
 
@@ -537,6 +568,15 @@ export default function BoundPage() {
 
     fetchLeaderboardAndPercentile(tSec);
 
+    if (userId) {
+      const { data: progress } = await supabase
+        .from("bound_progress")
+        .select("streak")
+        .eq("user_id", userId)
+        .single();
+      if (progress?.streak) setStreak(progress.streak);
+    }
+
     try {
       const payload: StoredSubmission = {
         v: 3, puzzleNumber, localDayKey: localDayKeyState,
@@ -583,6 +623,13 @@ export default function BoundPage() {
                 <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Puzzle</span>
                 <span style={{ fontWeight: 700, color: "var(--text)" }}>#{puzzleNumber}</span>
               </Pill>
+
+              {streak !== null && streak > 1 && (
+                <Pill>
+                  <span style={{ color: "var(--text-faint)", fontWeight: 700 }}>Streak</span>
+                  <span style={{ fontWeight: 700, color: "var(--gold)" }}>🔥 {streak}</span>
+                </Pill>
+              )}
 
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: 10,
@@ -743,7 +790,7 @@ export default function BoundPage() {
                   {percentile !== null && (
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <span style={{ color: "var(--text-faint)", fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)" }}>Percentile</span>
-                      <span style={{ fontWeight: 700, color: "var(--gold)", fontFamily: "var(--font-body)" }}>
+                      <span style={{ fontWeight: 700, color: scoreResult ? TIER_COLOR[scoreResult.tierEmoji] : "var(--gold)", fontFamily: "var(--font-body)" }}>
                       {percentile}th percentile
                       </span>
                     </div>

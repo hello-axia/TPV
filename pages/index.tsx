@@ -307,51 +307,51 @@ export default function HomePage({
           )}
 
           {/* CTAs */}
-          <div className="cta-row" style={{
+          <div style={{
             display: "flex",
             alignItems: "center",
             gap: "0.75rem",
             flexWrap: "wrap",
           }}>
-            <Link href="/verdicts" className="cta-primary" style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.4rem",
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--bg)",
-              background: "var(--gold)",
-              textDecoration: "none",
-              padding: "11px 18px",
-              borderRadius: 3,
-              transition: "opacity 0.15s ease",
-            }}>
-              Read a Verdict →
-            </Link>
-
-            <Link href="/briefings" className="cta-secondary" style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.4rem",
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--text-dim)",
-              textDecoration: "none",
-              padding: "11px 18px",
-              border: "1px solid var(--border-light)",
-              borderRadius: 3,
-              transition: "opacity 0.15s ease",
-            }}>
-              Read a Briefing
-            </Link>
+            {[
+              { href: "/verdicts", label: "Read a Verdict →" },
+              { href: "/briefings", label: "Read a Briefing" },
+              { href: "/desk", label: "Ask the Desk" },
+            ].map((btn) => (
+              <Link
+                key={btn.href}
+                href={btn.href}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.72rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                  padding: "11px 18px",
+                  borderRadius: 3,
+                  border: "1px solid var(--border-light)",
+                  color: "var(--text-dim)",
+                  background: "transparent",
+                  transition: "background 0.2s ease, color 0.2s ease, border-color 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "var(--gold)";
+                  e.currentTarget.style.color = "var(--bg)";
+                  e.currentTarget.style.borderColor = "var(--gold)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = "var(--text-dim)";
+                  e.currentTarget.style.borderColor = "var(--border-light)";
+                }}
+              >
+                {btn.label}
+              </Link>
+            ))}
           </div>
         </div>
 
@@ -379,6 +379,12 @@ export default function HomePage({
               freq: "Every Tuesday",
               desc: "Institutional and policy stories structured as: what happened, why it matters, what changes, what to watch.",
               href: "/briefings",
+            },
+            {
+              label: "The Desk",
+              freq: "On demand",
+              desc: "Got a question about a policy or current event? Submit it. Good questions get answered. Great ones become Verdicts.",
+              href: "/desk",
             },
           ].map((item) => (
             <Link key={item.label} href={item.href} style={{ textDecoration: "none" }}>
@@ -502,6 +508,31 @@ export default function HomePage({
 
       <style jsx>{`
         .small-card:hover { opacity: 0.75; }
+        .cta-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem;
+          font-family: var(--font-body);
+          font-size: 0.72rem;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          text-decoration: none;
+          padding: 11px 18px;
+          border-radius: 3px;
+          border: 1px solid var(--border-light);
+          color: var(--text-dim);
+          background: transparent;
+          transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        @media (hover: hover) {
+          .cta-btn:hover {
+            background: var(--gold);
+            color: var(--bg);
+            border-color: var(--gold);
+          }
+        }
         .format-card:hover { border-color: var(--gold-line) !important; }
 
         /* ── 900px: masthead and homegrid collapse to single column ── */
@@ -548,8 +579,7 @@ export default function HomePage({
             align-items: stretch !important;
             gap: 0.6rem !important;
           }
-          .cta-primary,
-          .cta-secondary {
+          .cta-btn {
             width: 100%;
             justify-content: center;
             padding: 13px 18px !important;
@@ -571,6 +601,7 @@ export default function HomePage({
             padding-right: 1rem !important;
           }
         }
+          
       `}</style>
     </main>
     </>

@@ -1,8 +1,18 @@
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const ADMIN_EMAIL = "ello.axia@gmail.com";
 
 const mainLinks = [
   { href: "/verdicts", label: "Verdicts" },
   { href: "/briefings", label: "Briefings" },
+  { href: "/desk", label: "The Desk" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/privacy", label: "Privacy" },
@@ -10,6 +20,18 @@ const mainLinks = [
 ];
 
 export default function Footer() {
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setIsAdmin(data.session?.user?.email === ADMIN_EMAIL);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAdmin(session?.user?.email === ADMIN_EMAIL);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <footer style={{
       borderTop: "1px solid var(--border)",
@@ -126,14 +148,33 @@ export default function Footer() {
             ))}
           </div>
 
-          {/* Copyright */}
-          <div style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.72rem",
-            color: "var(--text-faint)",
-            letterSpacing: "0.04em",
-          }}>
-            © {new Date().getFullYear()} The People's Verdict
+          {/* Copyright + admin */}
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
+            {isAdmin && (
+              <Link href="/admin/desk" style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--gold)",
+                textDecoration: "none",
+                padding: "4px 10px",
+                border: "1px solid var(--gold-line)",
+                borderRadius: 2,
+                background: "var(--gold-dim)",
+              }}>
+                Desk Admin
+              </Link>
+            )}
+            <div style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              color: "var(--text-faint)",
+              letterSpacing: "0.04em",
+            }}>
+              © {new Date().getFullYear()} The People's Verdict
+            </div>
           </div>
         </div>
       </div>

@@ -69,6 +69,7 @@ export default function ArticleShell({
   readerCount,
   tldr,
   keyTension,
+  promotedFrom,
   showSummary = true,
   glossary,
   slug,
@@ -85,6 +86,7 @@ export default function ArticleShell({
   tldr?: string[] | null;
   keyTension?: string | null;
   showSummary?: boolean;
+  promotedFrom?: string | null;
   glossary?: GlossaryEntry[] | null;
   slug?: string;
 }) {
@@ -341,6 +343,24 @@ if (tooltip) {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+
+{/* ── FROM THE DESK ── */}
+{promotedFrom && (
+          <div style={{
+            maxWidth: 720, marginBottom: "1.5rem", padding: "0.85rem 1.25rem",
+            borderLeft: "2px solid var(--border-light)",
+            background: "var(--bg2)", borderRadius: "0 3px 3px 0",
+          }}>
+            <div className="eyebrow" style={{ marginBottom: "0.4rem" }}>From the Desk</div>
+            <p style={{
+              fontFamily: "var(--font-body)", fontSize: "0.88rem",
+              color: "var(--text-faint)", fontStyle: "italic", margin: 0,
+              lineHeight: 1.65,
+            }}>
+              "{promotedFrom}"
+            </p>
           </div>
         )}
 
