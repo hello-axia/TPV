@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import GlobalQuestion from "../../components/GlobalQuestion";
 import ArticleShell, { GlossaryEntry } from "../../components/ArticleShell";
 import OgHead from "../../components/OgHead";
+import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 
 type BriefingMeta = {
   title: string;
@@ -218,6 +219,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       .use(rehypeStringify, { allowDangerousHtml: true })
       .process(contentWithDiv);
     html = processed.toString();
+  }
+
+  if (meta.glossary && meta.glossary.length > 0) {
+    html = injectGlossarySpans(html, meta.glossary);
   }
 
   const splitIndex = html.indexOf(POLL_DIV);

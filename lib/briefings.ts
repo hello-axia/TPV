@@ -17,6 +17,7 @@ export type BriefingMeta = {
   tldr?: string[];
   keyTension?: string;
   glossary?: GlossaryEntry[];
+  publishAt?: string | null
 };
 
 const briefingsDir = path.join(process.cwd(), "content", "briefings");
@@ -53,6 +54,7 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
         summary: String(meta.summary ?? ""),
         readTime: meta.readTime ? String(meta.readTime) : undefined,
         questionId: meta.questionId ? String(meta.questionId) : undefined,
+        publishAt: meta.publishAt ? String(meta.publishAt) : null,
       };
     }
 
@@ -64,16 +66,23 @@ export function getAllBriefingsMeta(): BriefingMeta[] {
       summary: String(data.summary ?? ""),
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
+      publishAt: data.publishAt ? String(data.publishAt) : null,
     };
   });
 
-  items.sort((a, b) => {
+  
+  const now = new Date();
+  const filtered = items.filter((item: any) =>
+    !item.publishAt || now >= new Date(item.publishAt)
+  );
+
+  filtered.sort((a, b) => {
     const ad = normalizeDateForSort(a.date);
     const bd = normalizeDateForSort(b.date);
     return ad < bd ? 1 : -1;
   });
 
-  return items;
+  return filtered;
 }
 
 export function getBriefingBySlug(slug: string) {
@@ -111,6 +120,7 @@ export function getBriefingBySlug(slug: string) {
         tldr: Array.isArray(meta.tldr) ? meta.tldr : null,
         keyTension: meta.keyTension ? String(meta.keyTension) : null,
         glossary: glossary.length > 0 ? glossary : null,
+        publishAt: meta.publishAt ? String(meta.publishAt) : null,
       },
       content,
     };
@@ -136,6 +146,7 @@ export function getBriefingBySlug(slug: string) {
       tldr: Array.isArray(data.tldr) ? data.tldr : null,
       keyTension: data.keyTension ? String(data.keyTension) : null,
       glossary: glossary.length > 0 ? glossary : null,
+      publishAt: data.publishAt ? String(data.publishAt) : null,
     },
     content,
   };

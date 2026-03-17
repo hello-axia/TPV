@@ -17,8 +17,8 @@ export type VerdictMeta = {
   tldr?: string[];
   keyTension?: string;
   glossary?: GlossaryEntry[];
+  publishAt?: string | null;
 };
-
 const verdictsDir = path.join(process.cwd(), "content", "verdicts");
 
 export function getAllVerdictsMeta(): VerdictMeta[] {
@@ -43,6 +43,7 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
         summary: String(meta.summary ?? ""),
         readTime: meta.readTime ? String(meta.readTime) : undefined,
         questionId: meta.questionId ? String(meta.questionId) : undefined,
+        publishAt: meta.publishAt ? String(meta.publishAt) : null,
       };
     }
 
@@ -54,11 +55,16 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
       summary: String(data.summary ?? ""),
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
+      publishAt: data.publishAt ? String(data.publishAt) : null,
     };
   });
 
-  items.sort((a, b) => (a.date < b.date ? 1 : -1));
-  return items;
+  const now = new Date();
+  const filtered = items.filter((item: any) =>
+    !item.publishAt || now >= new Date(item.publishAt)
+  );
+  filtered.sort((a, b) => (a.date < b.date ? 1 : -1));
+  return filtered;
 }
 
 export function getVerdictBySlug(slug: string) {

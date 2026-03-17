@@ -1,0 +1,420 @@
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<script type="application/json" id="tpv-meta">
+{
+  "title": "What the Iran War Is Actually Doing to Gas Prices",
+  "date": "03-17-2026",
+  "readTime": "8 min read",
+  "summary": "On February 28, 2026, the US and Israel launched strikes on Iran. Iran closed the Strait of Hormuz. Gas prices rose 65 cents a gallon in under two weeks. This is a full breakdown of how oil markets work, why the Strait matters more than most people realize, and what different scenarios mean for what you pay at the pump.",
+  "tldr": [
+    "The US and Israel launched ~900 strikes on Iran on Feb 28, 2026. Iran closed the Strait of Hormuz — through which 20% of the world's daily oil supply passes.",
+    "Gas prices rose from $2.98 to $3.63/gallon in under two weeks. California is at $5.34. Brent crude peaked at $120/barrel.",
+    "Oil is a global commodity. The US being the world's largest oil producer does not insulate Americans from foreign oil disruptions.",
+    "The IEA released 400M emergency barrels — the largest in history — but this covers only ~15% of the daily supply disruption.",
+    "The duration of the conflict is the only variable that matters. Every other policy lever is a temporary patch."
+  ],
+  "keyTension": "The Strait of Hormuz closure is not a normal oil price spike — it is a near-total interruption of 20% of the world's daily oil supply at the source. The ripple effects extend far beyond the pump, from food prices to recession risk to mortgage rates.",
+  "questionId": "iran-gas-prices-personal-impact",
+  "glossary": [
+    { "term": "IRGC", "definition": "Islamic Revolutionary Guard Corps — Iran's elite paramilitary force, separate from the regular military. It controls Iran's proxy network, including Hezbollah and the Houthis, and declared the Strait of Hormuz closed after the US-Israel strikes." },
+    { "term": "Crude oil", "definition": "Unrefined petroleum extracted from the ground. It is the primary input for gasoline, diesel, jet fuel, and many petrochemicals. Crude oil accounts for approximately 51% of the retail price of a gallon of gasoline." },
+    { "term": "Brent Crude", "definition": "The international benchmark price for crude oil, used by most oil-producing and oil-consuming countries worldwide. American refineries purchase crude at prices linked to Brent, not just domestic US prices — which is why global disruptions affect US gas prices." },
+    { "term": "Refineries", "definition": "Industrial facilities that process crude oil into usable products — gasoline, diesel, jet fuel, heating oil, and others. Gulf Coast refineries process the majority of US gasoline and purchase crude at Brent-linked prices." },
+    { "term": "Terminal infrastructure", "definition": "The loading and unloading facilities at the end of pipelines — including pumps, storage tanks, and port equipment. Even if a pipeline has high theoretical capacity, bottlenecks at terminals can limit how much oil actually moves through it." },
+    { "term": "Houthi", "definition": "An Iran-backed armed movement controlling large parts of Yemen. After the US-Israel strikes on Iran, Houthi-controlled Yemen announced it would resume attacks on commercial ships in the Red Sea — closing a key alternative oil route." },
+    { "term": "IEA", "definition": "International Energy Agency — a Paris-based intergovernmental organization that coordinates energy policy among major consuming nations. It manages emergency oil reserves that member states can release during major supply disruptions." },
+    { "term": "SPR", "definition": "Strategic Petroleum Reserve — the US government's emergency crude oil stockpile, stored in underground salt caverns along the Gulf Coast. As of early 2026, it held approximately 415 million barrels before the war-related release." },
+    { "term": "Economic contraction", "definition": "A sustained decline in economic activity — typically defined as two consecutive quarters of negative GDP growth, which constitutes a recession. Oxford Economics modeled $140/barrel oil as sufficient to push the eurozone, UK, and Japan into contraction." },
+    { "term": "Maritime", "definition": "Relating to the sea or ocean-based shipping. A maritime chokepoint is a narrow waterway through which a disproportionate share of the world's sea trade must pass — making it strategically critical and highly vulnerable." }
+  ],
+  "publishAt": "2026-03-17T12:00:00Z"
+}
+</script>
+
+<style>
+  .tpv-prose .section-marker {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    font-weight: 600;
+    margin-bottom: 10px;
+    margin-top: 72px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tpv-prose h2 {
+    font-family: 'DM Serif Display', serif !important;
+    font-size: 1.75rem !important;
+    font-weight: 400 !important;
+    color: #ffffff !important;
+    line-height: 1.25 !important;
+    margin-bottom: 24px !important;
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid #272727 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    letter-spacing: normal !important;
+    scroll-margin-top: 120px;
+  }
+
+  .tpv-prose p {
+    margin: 0 0 20px 0;
+    color: #d4cec8;
+    font-size: 17px;
+    line-height: 1.75;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .tpv-prose strong { color: #ffffff; font-weight: 600; }
+
+  .tpv-sub-label {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #c8a96e;
+    font-weight: 600;
+    margin-bottom: 12px;
+    margin-top: 36px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    margin: 32px 0;
+    background: #1e1e1e;
+    border: 1px solid #222;
+  }
+  .fact-item { background: #161616; padding: 18px 20px; }
+  .fact-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5c5750; margin-bottom: 6px; font-family: 'DM Sans', sans-serif; }
+  .fact-value { font-size: 1rem; color: #ffffff; font-weight: 500; line-height: 1.4; font-family: 'DM Sans', sans-serif; }
+  .fact-value.up { color: #e74c3c; }
+  .fact-value.down { color: #2ecc71; }
+
+  .price-breakdown { margin: 2rem 0; background: #161616; border: 1px solid #323230; border-radius: 4px; overflow: hidden; }
+  .pb-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.25rem; border-bottom: 1px solid #252523; }
+  .pb-row:last-child { border-bottom: none; }
+  .pb-label { font-size: 0.82rem; font-weight: 500; color: #a09a90; min-width: 180px; font-family: 'DM Sans', sans-serif; }
+  .pb-bar-wrap { flex: 1; height: 6px; background: #1c1c1c; border-radius: 3px; overflow: hidden; }
+  .pb-bar { height: 100%; border-radius: 3px; background: #c8a96e; }
+  .pb-pct { font-size: 0.75rem; font-weight: 700; color: #c8a96e; min-width: 36px; text-align: right; font-family: 'DM Sans', sans-serif; }
+
+  .scenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 2rem 0; background: #1e1e1e; }
+  .scenario-card { background: #161616; padding: 1.25rem 1.4rem; }
+  .scenario-label { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.6rem; font-family: 'DM Sans', sans-serif; }
+  .scenario-price { font-family: 'DM Serif Display', serif; font-size: 1.6rem; color: #ffffff; margin-bottom: 0.4rem; }
+  .scenario-desc { font-size: 0.83rem; color: #a09a90; line-height: 1.6; font-family: 'DM Sans', sans-serif; }
+  .scenario-card.optimistic .scenario-label { color: #2ecc71; }
+  .scenario-card.base .scenario-label { color: #2980b9; }
+  .scenario-card.bad .scenario-label { color: #e67e22; }
+  .scenario-card.severe .scenario-label { color: #e74c3c; }
+
+  .callout { border-left: 3px solid #c8a96e; background: rgba(200,169,110,0.10); padding: 18px 22px; margin: 32px 0; font-style: italic; font-size: 1rem; line-height: 1.7; color: #f5f0e8; font-family: 'DM Sans', sans-serif; }
+  .callout strong { font-style: normal; }
+  .callout-red { border-left: 3px solid #e74c3c; background: rgba(231,76,60,0.07); padding: 18px 22px; margin: 32px 0; font-size: 0.95rem; line-height: 1.75; color: #a09a90; font-family: 'DM Sans', sans-serif; }
+  .callout-red strong { color: #ffffff; font-style: normal; }
+
+  .ripple-list { margin: 1.5rem 0; }
+  .ripple-item { display: flex; gap: 1rem; align-items: flex-start; padding: 0.85rem 0; border-bottom: 1px solid #252523; }
+  .ripple-item:last-child { border-bottom: none; }
+  .ripple-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 0.1rem; }
+  .ripple-title { font-size: 0.82rem; font-weight: 600; color: #ffffff; margin-bottom: 0.3rem; font-family: 'DM Sans', sans-serif; }
+  .ripple-desc { font-size: 0.82rem; color: #a09a90; line-height: 1.6; font-family: 'DM Sans', sans-serif; }
+
+  .tpv-sources { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #272727; }
+  .tpv-sources-title { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #5c5750; margin-bottom: 1.5rem; font-family: 'DM Sans', sans-serif; }
+  .tpv-sources-category { margin-bottom: 1.5rem; }
+  .tpv-sources-category-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #c8a96e; margin-bottom: 0.6rem; font-family: 'DM Sans', sans-serif; }
+  .tpv-sources-list { display: flex; flex-direction: column; border: 1px solid #272727; border-radius: 3px; overflow: hidden; }
+  .tpv-source-item { display: flex; align-items: baseline; gap: 0.75rem; padding: 0.6rem 0.85rem; border-bottom: 1px solid #272727; font-size: 0.82rem; color: #a09a90; line-height: 1.5; }
+  .tpv-source-item:last-child { border-bottom: none; }
+  .tpv-source-item a { color: #c8a96e; text-decoration: none; border-bottom: 1px solid rgba(200,169,110,0.25); }
+  .tpv-source-item a:hover { border-color: #c8a96e; }
+  .tpv-source-pub { color: #5c5750; font-size: 0.75rem; flex-shrink: 0; min-width: 120px; font-family: 'DM Sans', sans-serif; }
+
+  @media (max-width: 600px) {
+    .fact-grid { grid-template-columns: 1fr; }
+    .scenarios { grid-template-columns: 1fr; }
+    .pb-label { min-width: 110px; font-size: 0.75rem; }
+  }
+</style>
+
+<!-- I. THE RECAP -->
+<span class="section-marker">I. The Recap</span>
+<h2 id="the-recap">What Happened, Briefly</h2>
+
+<p>On February 28, 2026, the US and Israel launched 900 strikes on Iran. Almost immediately after, Iran's IRGC declared the Strait of Hormuz — the narrow 21 mile-wide waterway through which approximately 20% of the world's daily oil supply passes — closed. Major shipping companies who usually use the strait suspended all transits.</p>
+
+<p>The energy market reaction was severe. Crude oil, which was trading at approximately $58 per barrel at the start of 2026, surged past $100, peaking near $120 in the days following the strikes. These surges in prices have brought up the US national average price per gallon of regular gasoline: from $2.98 a gallon to approximately $3.63.</p>
+
+<div class="fact-grid">
+  <div class="fact-item"><div class="fact-label">Gas price, Feb 27 (pre-war)</div><div class="fact-value">$2.98 / gallon</div></div>
+  <div class="fact-item"><div class="fact-label">Gas price, March 14 (today)</div><div class="fact-value up">$3.63 / gallon</div></div>
+  <div class="fact-item"><div class="fact-label">Brent crude, pre-war</div><div class="fact-value">~$73 / barrel</div></div>
+  <div class="fact-item"><div class="fact-label">Brent crude, peak (March 3)</div><div class="fact-value up">~$120 / barrel</div></div>
+  <div class="fact-item"><div class="fact-label">Brent crude, today</div><div class="fact-value up">~$100 / barrel</div></div>
+  <div class="fact-item"><div class="fact-label">Diesel price increase (1 week)</div><div class="fact-value up">+$1.00 / gallon</div></div>
+  <div class="fact-item"><div class="fact-label">California gas today</div><div class="fact-value up">$5.34 / gallon</div></div>
+  <div class="fact-item"><div class="fact-label">Louisiana gas today</div><div class="fact-value">$3.20 / gallon</div></div>
+  <div class="fact-item"><div class="fact-label">Tanker traffic through Hormuz</div><div class="fact-value up">Near zero</div></div>
+  <div class="fact-item"><div class="fact-label">IEA emergency reserve release</div><div class="fact-value">400M barrels (announced)</div></div>
+</div>
+
+<div class="callout-red">
+  <strong>The IRGC's stated position as of March 11:</strong> "You will not be able to artificially lower the price of oil. Expect oil at $200 per barrel. The price of oil depends on regional security, and you are the main source of insecurity in the region." — IRGC spokesperson
+</div>
+
+<!-- II. THE SIGNIFICANCE -->
+<span class="section-marker">II. The Significance</span>
+<h2 id="the-significance">Why This Is Not a Normal Oil Price Spike</h2>
+
+<p>Many news sites describe this crisis as "the largest disruption to the energy supply since the 1970s oil crises and the largest in the history of the global oil market." The 1973 oil crisis reshaped the US economy, triggered a recession, and led to inflation that took almost a decade to fully slow. The current conditions are not identical, as the US is far less energy-dependent today, but the structural similarity is something to take note of.</p>
+
+<!-- III. THE CONTEXT -->
+<span class="section-marker">III. The Context</span>
+<h2 id="the-context">How Gas Prices Actually Work</h2>
+
+<p>To understand the Iran war's effect on gas prices, we have to understand how gas prices are determined in the first place.</p>
+
+<span class="tpv-sub-label">The Four Components that make up the cost of a Gallon of Gas</span>
+
+<p>Every gallon of regular gasoline you buy breaks down into roughly four cost components. Crude oil is by far the largest and most volatile.</p>
+
+<div class="price-breakdown">
+  <div class="pb-row">
+    <div class="pb-label">Crude oil</div>
+    <div class="pb-bar-wrap"><div class="pb-bar" style="width:51%"></div></div>
+    <div class="pb-pct">~51%</div>
+  </div>
+  <div class="pb-row">
+    <div class="pb-label">Refining</div>
+    <div class="pb-bar-wrap"><div class="pb-bar" style="width:20%; background:#5c5750;"></div></div>
+    <div class="pb-pct" style="color:#5c5750">~20%</div>
+  </div>
+  <div class="pb-row">
+    <div class="pb-label">Taxes (federal + state)</div>
+    <div class="pb-bar-wrap"><div class="pb-bar" style="width:18%; background:#5c5750;"></div></div>
+    <div class="pb-pct" style="color:#5c5750">~18%</div>
+  </div>
+  <div class="pb-row">
+    <div class="pb-label">Distribution &amp; marketing</div>
+    <div class="pb-bar-wrap"><div class="pb-bar" style="width:11%; background:#5c5750;"></div></div>
+    <div class="pb-pct" style="color:#5c5750">~11%</div>
+  </div>
+</div>
+
+<p>The practical implication: because crude oil is ~51% of the pump price, a large change in crude prices translates fairly directly to a large change at the pump. A general rule of thumb: <strong>every $10 increase in the price of a barrel of crude translates to roughly 25 cents added to the retail price of a gallon of gasoline.</strong> Brent crude has gone from $73 to roughly $100 in two weeks — a $27 increase. That alone would predict about a 67-cent increase at the pump. The actual observed increase is about 65 cents, which tracks closely.</p>
+
+<span class="tpv-sub-label">Why the US isn't insulated even though we produce our own oil</span>
+
+<p>The US is actually the world's largest oil producer, producing a record 13.6 million barrels per day in 2025. One might expect this to insulate American consumers from foreign oil disruptions, but it does not for this reason: <strong>oil is a global commodity priced on a global market.</strong></p>
+
+<p>American refineries purchase crude oil at prices linked to Brent Crude, the international benchmark, as we also participate in the sales of oil. When international prices increase, the price for US citizens also rises, as the US sells on the international stage.</p>
+
+<!-- IV. THE MECHANISMS -->
+<span class="section-marker">IV. The Mechanisms</span>
+<h2 id="the-mechanisms">How the Strait of Hormuz Actually Works, and What Closing It Does</h2>
+
+<p>The Strait of Hormuz connects the Persian Gulf to the Gulf of Oman, and from there, the open ocean. Iran controls the northern shore. Every tanker carrying oil from Kuwait, Iraq, Saudi Arabia, UAE, Qatar, or Bahrain to the outside world must go through it. There is no practical alternative at this time.</p>
+
+<span class="tpv-sub-label">Why it Can't Simply be Rerouted</span>
+
+<p>There are two partial pipeline alternatives near the Strait. One is the East-West Pipeline, operated by Saudi Arabia, with the capacity to transport 7 million barrels per day. Another pipeline is on UAE's Fujairah Port. These together could theoretically carry a portion of displaced oil. But the problem with these alternatives is that terminal infrastructure at both endpoints limits actual throughput well below their theoretical capacity.</p>
+
+<p>Another alternative is the Red Sea route via the Suez Canal, which is westward of the Strait of Hormuz. This route is also under threat as Houthi-controlled Yemen announced on February 28 that it would resume attacks on commercial ships in the Red Sea, forcing reroute to go all the way around Africa's Cape of Good Hope. This would add weeks of transit times that would increase fuel and insurance costs, further increasing the price of oil.</p>
+
+<span class="tpv-sub-label">The Emergency Reserve System: What it is, and Why it Can Only Do So Much</span>
+
+<p>On March 11, the IEA took the unprecedented step of announcing a coordinated release of 400 million barrels of emergency oil from member states' strategic reserves, surpassing the 182 million barrels released during the 2022 Ukraine crisis. But this stockpile does not cover the disrupted oil supply. The US SPR said the stockpile only covers about 15% of the shortage.</p>
+
+<div class="fact-grid">
+  <div class="fact-item"><div class="fact-label">Oil through Hormuz (daily)</div><div class="fact-value">~13M barrels/day</div></div>
+  <div class="fact-item"><div class="fact-label">Supply disrupted (est.)</div><div class="fact-value up">11–16M barrels/day</div></div>
+  <div class="fact-item"><div class="fact-label">IEA total release (announced)</div><div class="fact-value">400M barrels (over ~120 days)</div></div>
+  <div class="fact-item"><div class="fact-label">IEA release rate (daily)</div><div class="fact-value">~3.3M barrels/day</div></div>
+  <div class="fact-item"><div class="fact-label">SPR pre-war inventory</div><div class="fact-value">415M barrels</div></div>
+  <div class="fact-item"><div class="fact-label">SPR after release (est.)</div><div class="fact-value up">~243M barrels</div></div>
+  <div class="fact-item"><div class="fact-label">Gulf production cut (March 13)</div><div class="fact-value up">−10M barrels/day</div></div>
+  <div class="fact-item"><div class="fact-label">Saudi production reduction</div><div class="fact-value up">−20% (March 13)</div></div>
+</div>
+
+<!-- V. THE STAKES -->
+<span class="section-marker">V. The Stakes</span>
+<h2 id="the-stakes">What This Actually Costs: At the Pump, in Groceries, and Across the Entire Economy</h2>
+
+<span class="tpv-sub-label">At the pump, right now</span>
+
+<p>The national average price of gasoline as of March 14, 2026 is $3.63 a gallon. This is a 65 cent increase from before the war, sitting at $2.98. But this obscures significant regional variation. California drivers, for example, who rely heavily on imported gas, are paying around $5.30 per gallon, with San Francisco reporting some stations at $6.50 a gallon. Louisiana, which has significant domestic oil production, is paying $3.20, well below the national average.</p>
+
+<p>More significantly, every one-cent increase in the cost of a gallon of gasoline increases the total US spending on gas by $1.4 billion over the course of a year. This current 65 cent increase, if sustained, may imply an additional <strong>$91 billion in annual gasoline spending</strong>.</p>
+
+<span class="tpv-sub-label">The Recession Risk</span>
+
+<p>Goldman Sachs raised its probability of a US recession in 2026 by 5%, to 25%, due to the rising oil costs. Oxford Economics modeled a scenario in which global oil averages were sustained at $140 a barrel for two months. The model showed that these prices were sufficient to push the eurozone, UK, and Japan into economic contraction and cause an economic standstill in the US.</p>
+
+<span class="tpv-sub-label">Beyond the pump — the ripple effects</span>
+
+<div class="ripple-list">
+  <div class="ripple-item">
+    <div class="ripple-icon">🚚</div>
+    <div>
+      <div class="ripple-title">Trucking and logistics</div>
+      <div class="ripple-desc">Diesel powers the 18-wheelers that move virtually all consumer goods in America. Higher diesel prices mean higher shipping costs for everything from groceries to electronics — costs that will be passed on to consumers.</div>
+    </div>
+  </div>
+  <div class="ripple-item">
+    <div class="ripple-icon">🌾</div>
+    <div>
+      <div class="ripple-title">Food prices — the fertilizer chain</div>
+      <div class="ripple-desc">Natural gas is the primary feedstock for nitrogen fertilizer. Iran, Qatar, Saudi Arabia, and the UAE — countries disrupted by the war — are among the world's top fertilizer producers, and one-third of global fertilizer supply travels through the Strait of Hormuz. The American Farm Bureau Federation warned of potential US crop shortfalls and higher food prices.</div>
+    </div>
+  </div>
+  <div class="ripple-item">
+    <div class="ripple-icon">✈️</div>
+    <div>
+      <div class="ripple-title">Airfare</div>
+      <div class="ripple-desc">Jet fuel is refined from crude oil. Higher crude prices translate fairly directly into higher airfare, with a typical lag of 4–8 weeks as hedging contracts run out. Spring and summer travel is likely to see a further price increase.</div>
+    </div>
+  </div>
+  <div class="ripple-item">
+    <div class="ripple-icon">🏭</div>
+    <div>
+      <div class="ripple-title">Plastics and manufacturing</div>
+      <div class="ripple-desc">About 85% of polyethylene exports from the Middle East transit the Strait of Hormuz. Polyethylene is a feedstock for plastics, which go into packaging, automotive components, medical supplies, and consumer goods of every kind.</div>
+    </div>
+  </div>
+  <div class="ripple-item">
+    <div class="ripple-icon">🏠</div>
+    <div>
+      <div class="ripple-title">Electricity and home heating</div>
+      <div class="ripple-desc">Qatar has halted LNG production following Iranian attacks on its Ras Laffan facility. Qatar supplies roughly 20% of global LNG. European and Asian natural gas benchmark prices have doubled.</div>
+    </div>
+  </div>
+  <div class="ripple-item">
+    <div class="ripple-icon">🏦</div>
+    <div>
+      <div class="ripple-title">Inflation and mortgage rates</div>
+      <div class="ripple-desc">Goldman Sachs raised its 2026 US inflation forecast by 0.8 percentage points to 2.9% in their base scenario. Higher inflation complicates the Federal Reserve's rate decisions and puts upward pressure on mortgage rates.</div>
+    </div>
+  </div>
+</div>
+
+<!-- VI. NEXT STEPS -->
+<span class="section-marker">VI. The Next Steps to Watch</span>
+<h2 id="the-next-steps-to-watch-for">What Happens to Prices Depends Entirely on These Variables</h2>
+
+<p>The most honest assessment about gas prices is that no one actually knows how prices will end up. Prices are dependent on military decisions, diplomatic developments, and infrastructure conditions that are daily changing. That said, there are identifiable scenarios with different outcomes.</p>
+
+<div class="scenarios">
+  <div class="scenario-card optimistic">
+    <div class="scenario-label">Optimistic scenario</div>
+    <div class="scenario-price">~$3.20</div>
+    <div class="scenario-desc">A ceasefire or diplomatic resolution within 2–3 weeks. The Strait reopens, shipping insurance normalizes, tanker traffic resumes. SPR releases provide a bridge. Prices return toward pre-war levels but not fully, given residual uncertainty premium. Crude settles back near $75–80. The June 2025 12-Day War offers precedent: prices spiked ~10% and returned to prior levels within weeks.</div>
+  </div>
+  <div class="scenario-card base">
+    <div class="scenario-label">Base case (Goldman Sachs)</div>
+    <div class="scenario-price">~$3.80–4.20</div>
+    <div class="scenario-desc">Conflict continues through March-April with partial Hormuz disruption. Brent averages ~$98 in March and April, then gradually declines. GasBuddy had forecast diesel could rise to $4.25–4.45 from the pre-war $3.71. US inflation rises ~0.8 pp. GDP growth trims ~0.3 pp. Recession odds elevated but not realized.</div>
+  </div>
+  <div class="scenario-card bad">
+    <div class="scenario-label">Severe scenario (Oxford Economics)</div>
+    <div class="scenario-price">~$4.50–5.50</div>
+    <div class="scenario-desc">Hormuz remains effectively closed for 4–8 weeks. Crude averages $110–$140. Global inflation "second wave" materializes. Eurozone, UK, and Japan enter recession. US faces stagflation conditions. This scenario would likely push pump prices above $5 nationally, with California exceeding $7.</div>
+  </div>
+  <div class="scenario-card severe">
+    <div class="scenario-label">Tail risk (IRGC $200 scenario)</div>
+    <div class="scenario-price">$6–8+</div>
+    <div class="scenario-desc">The IRGC has explicitly threatened $200/barrel oil. This requires sustained infrastructure attacks on Gulf Arab production combined with prolonged Hormuz closure and failure of coordinated reserve releases. At $200/barrel, a gallon of US gasoline would likely exceed $7 nationally. This scenario implies a global recession of a severity not seen since 2008.</div>
+  </div>
+</div>
+
+<span class="tpv-sub-label">The Specific Things To Watch</span>
+
+<p><strong>Hormuz shipping status.</strong> The single most important factor. If traffic through the strait resumes, even at partial levels, oil prices will drop significantly. But if Iran escalates attacks on commercial vessels, oil prices will continue to rise.</p>
+
+<p><strong>Saudi and UAE pipeline capacity.</strong> If the two alternative pipelines improve infrastructure and expand actual capacity to ship oil, this may offset the decrease in shipping capacity from the Hormuz shutdown.</p>
+
+<p><strong>Midterm election timing.</strong> The approaching 2026 midterm elections create political incentive for the Trump administration to seek a resolution to improve Republican prospects. This may entail curtailing US involvement in the war.</p>
+
+<!-- VII. THE TAKEAWAY -->
+<span class="section-marker">VII. The Takeaway</span>
+<h2 id="the-takeaway">What This Actually Is</h2>
+
+<p>Although it might seem like the increase in gas prices due to the Iran War is a temporary inconvenience caused by the strikes, it shows a long-building structural energy vulnerability: the world's dependence on a single maritime chokepoint for a fifth of its oil supply.</p>
+
+<p>The US is more insulated than many other economies by virtue of its domestic oil production, but oil is global. The Strait of Hormuz is a shared artery, and every country that draws from it pays when it closes.</p>
+
+<p>The duration of the conflict is the only variable that matters for determining how bad it gets.</p>
+
+<div class="callout">
+  Trump said on March 3: "We might face a little high oil prices for a little while, but as soon as this ends, those prices are going to drop, I believe, lower than ever before." The accuracy of that prediction depends entirely on what "a little while" turns out to mean.
+</div>
+
+<div id="tpv-poll-marker"></div>
+
+<!-- SOURCES -->
+<div class="tpv-sources">
+  <div class="tpv-sources-title">Sources &amp; References</div>
+
+  <div class="tpv-sources-category">
+    <div class="tpv-sources-category-label">Primary Price &amp; Market Data</div>
+    <div class="tpv-sources-list">
+      <div class="tpv-source-item"><span class="tpv-source-pub">AAA Motor Club</span><a href="https://gasprices.aaa.com" target="_blank" rel="noopener">US Average Gas Price Dashboard</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">US EIA</span><a href="https://www.eia.gov/energyexplained/gasoline/factors-affecting-gasoline-prices.php" target="_blank" rel="noopener">Factors Affecting Gasoline Prices</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">US EIA</span><a href="https://www.eia.gov/todayinenergy/detail.php?id=65504" target="_blank" rel="noopener">Strait of Hormuz: Critical Oil Chokepoint</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">CBS News</span><a href="https://www.cbsnews.com/news/iran-war-gas-prices-gallon-crude-oil-chart/" target="_blank" rel="noopener">Oil accounts for half the cost of a gallon of gas</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">US News</span><a href="https://money.usnews.com/money/personal-finance/articles/crude-oil-vs-gasoline-prices-how-they-differ-and-what-rising-prices-mean-for-your-wallet" target="_blank" rel="noopener">Crude Oil vs. Gasoline Prices — March 13, 2026</a></div>
+    </div>
+  </div>
+
+  <div class="tpv-sources-category">
+    <div class="tpv-sources-category-label">War &amp; Gas Price Impact</div>
+    <div class="tpv-sources-list">
+      <div class="tpv-source-item"><span class="tpv-source-pub">AP / Chicago Tribune</span><a href="https://www.chicagotribune.com/2026/03/14/iran-war-oil-gas-prices/" target="_blank" rel="noopener">How the Iran war is affecting consumers at the pump and beyond</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">PBS NewsHour</span><a href="https://www.pbs.org/newshour/economy/experts-analyze-what-the-iran-war-could-mean-for-u-s-gasoline-prices" target="_blank" rel="noopener">Experts analyze what the Iran war could mean for US gasoline prices</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Northeastern University</span><a href="https://news.northeastern.edu/2026/03/10/oil-prices-iran-war/" target="_blank" rel="noopener">What Impact Will the Iran War Have on Gas Prices and Inflation</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Center for American Progress</span><a href="https://www.americanprogress.org/article/the-war-in-iran-will-raise-fuel-prices-and-costs-throughout-the-economy/" target="_blank" rel="noopener">The War in Iran Will Raise Fuel Prices Across the Economy</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">CNBC</span><a href="https://www.cnbc.com/2026/03/02/us-iran-war-gas-prices.html" target="_blank" rel="noopener">How a US-Iran war could 'immediately' impact gas prices</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Time</span><a href="https://time.com/article/2026/03/13/war-iran-us-israel-cost-hormuz-gas-oil-electricity/" target="_blank" rel="noopener">How Much Is the War in Iran Costing You?</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Washington Post</span><a href="https://www.washingtonpost.com/business/2026/03/12/iran-economy-oil-gas-inflation/" target="_blank" rel="noopener">What the Iran war could mean for gas prices, flights and your wallet</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">The Hill</span><a href="https://thehill.com/policy/energy-environment/5781586-gas-prices-iran-war-oil-recession-affordability/" target="_blank" rel="noopener">Iran conflict spikes gas prices, could risk US recession</a></div>
+    </div>
+  </div>
+
+  <div class="tpv-sources-category">
+    <div class="tpv-sources-category-label">Strait of Hormuz &amp; Supply Chain</div>
+    <div class="tpv-sources-list">
+      <div class="tpv-source-item"><span class="tpv-source-pub">Wikipedia</span><a href="https://en.wikipedia.org/wiki/2026_Strait_of_Hormuz_crisis" target="_blank" rel="noopener">2026 Strait of Hormuz Crisis</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Al Jazeera</span><a href="https://www.aljazeera.com/news/2026/3/11/irans-irgc-says-not-one-litre-of-oil-will-get-through-strait-of-hormuz" target="_blank" rel="noopener">Iran's IRGC: "Not one litre of oil" through Strait of Hormuz</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">CNBC</span><a href="https://www.cnbc.com/2026/03/11/strait-of-hormuz-closure-shipping-economy-oil.html" target="_blank" rel="noopener">Strait of Hormuz closure: tipping point for global economy</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">CNBC</span><a href="https://www.cnbc.com/2026/03/03/strait-of-hormuz-closure-which-countries-will-be-hit-the-most.html" target="_blank" rel="noopener">Strait of Hormuz closure: which countries will be hit the most</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Kpler</span><a href="https://www.kpler.com/blog/us-iran-conflict-strait-of-hormuz-crisis-reshapes-global-oil-markets" target="_blank" rel="noopener">US-Iran Conflict: Strait of Hormuz Crisis Reshapes Global Oil Markets</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Axios</span><a href="https://www.axios.com/2026/03/12/oil-prices-iran-strait-of-hormuz" target="_blank" rel="noopener">What happens if Strait of Hormuz stays closed</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">NBC News</span><a href="https://www.nbcnews.com/business/energy/iran-war-oil-prices-supply-trump-rcna263135" target="_blank" rel="noopener">Oil soars 10% as the 'largest supply disruption' in history worsens</a></div>
+    </div>
+  </div>
+
+  <div class="tpv-sources-category">
+    <div class="tpv-sources-category-label">Strategic Petroleum Reserve &amp; IEA Response</div>
+    <div class="tpv-sources-list">
+      <div class="tpv-source-item"><span class="tpv-source-pub">US Dept of Energy</span><a href="https://www.energy.gov/articles/united-states-release-172-million-barrels-oil-strategic-petroleum-reserve" target="_blank" rel="noopener">US to Release 172 Million Barrels from SPR (Official Statement)</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">Bloomberg</span><a href="https://www.bloomberg.com/news/articles/2026-03-11/us-to-release-172-million-barrels-for-iea-plan-to-tap-reserves" target="_blank" rel="noopener">US to Release 172 Million Barrels for IEA Plan</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">CNBC</span><a href="https://www.cnbc.com/2026/03/14/iran-war-iea-oil-stockpile-spr-strait-hormuz.html" target="_blank" rel="noopener">Biggest emergency oil stockpile release in history — why crude may keep rising</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">The World Data</span><a href="https://theworlddata.com/us-oil-reserve-statistics/" target="_blank" rel="noopener">US Oil Reserve Statistics 2026 — SPR Analysis</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">US Dept of Energy</span><a href="https://www.energy.gov/hgeo/opr/history-spr-releases" target="_blank" rel="noopener">History of SPR Releases</a></div>
+    </div>
+  </div>
+
+  <div class="tpv-sources-category">
+    <div class="tpv-sources-category-label">Pre-War Energy Trends &amp; Structural Context</div>
+    <div class="tpv-sources-list">
+      <div class="tpv-source-item"><span class="tpv-source-pub">Chatham House</span><a href="https://www.chathamhouse.org/2026/03/us-energy-prices-were-set-rise-long-iran-war" target="_blank" rel="noopener">US Energy Prices Were Set to Rise Long Before the Iran War</a></div>
+      <div class="tpv-source-item"><span class="tpv-source-pub">US EIA</span><a href="https://www.energy.gov/eere/vehicles/articles/fotw-1171-february-1-2021-crude-oil-feedstock-dominant-cost-component-retail" target="_blank" rel="noopener">Crude Oil as Dominant Cost Component in Retail Gasoline</a></div>
+    </div>
+  </div>
+</div>
