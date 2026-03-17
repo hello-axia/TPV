@@ -255,6 +255,7 @@ export default function BoundPage() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [percentile, setPercentile] = useState<number | null>(null);
   const [percentileTotal, setPercentileTotal] = useState<number>(0);
+  const [weeklyLeaderboard, setWeeklyLeaderboard] = useState<{ username: string; avg_percentile: number; days_played: number }[]>([]);
 
   const pattern = useMemo(() => {
     if (!patternBank?.length) return "_ _ _ _ _";
@@ -406,6 +407,10 @@ export default function BoundPage() {
       }
     })();
     fetchLeaderboardAndPercentile();
+    fetch("/api/bound/weekly-leaderboard")
+      .then((r) => r.json())
+      .then((j) => { if (alive) setWeeklyLeaderboard(j.leaderboard ?? []); })
+      .catch(() => {});
     return () => { alive = false; };
   }, []);
 
@@ -605,7 +610,7 @@ export default function BoundPage() {
     <>
       <OgHead title="Bound" type="bound" slug="bound" />
       <main style={{ maxWidth: 1120, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
-        <div style={{ display: "grid", gap: 10 }}>
+        <div className="fade-up" style={{ display: "grid", gap: 10 }}>
           <MetaKicker>TPV Games</MetaKicker>
           <div style={{
             display: "flex", alignItems: "baseline",
@@ -935,6 +940,53 @@ export default function BoundPage() {
             )}
           </section>
 
+{/* Weekly leaderboard */}
+<section className="boundweekly" style={{ borderTop: "1px solid var(--border)", paddingTop: 16, marginTop: 18 }}>
+            <div style={{
+              fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.1em",
+              color: "var(--gold)", textTransform: "uppercase", fontFamily: "var(--font-body)", marginBottom: 4,
+            }}>
+              This week's leaderboard
+            </div>
+            <div style={{
+              fontSize: "0.68rem", color: "var(--text-faint)", fontFamily: "var(--font-body)",
+              marginBottom: 12, fontWeight: 500,
+            }}>
+              Ranked by average percentile · Mon–Sun
+            </div>
+            {weeklyLeaderboard.length === 0 ? (
+              <div style={{ fontSize: 13, color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+                No entries yet this week.
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {weeklyLeaderboard.map((entry, i) => (
+                  <div key={entry.username} style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "10px 14px",
+                    background: i === 0 ? "var(--gold-dim)" : "var(--bg2)",
+                    border: `1px solid ${i === 0 ? "var(--gold-line)" : "var(--border-light)"}`,
+                    borderRadius: 4,
+                    fontFamily: "var(--font-body)",
+                  }}>
+                    <span style={{
+                      fontSize: 11, fontWeight: 700, minWidth: 20, textAlign: "center",
+                      color: i === 0 ? "var(--gold)" : "var(--text-faint)",
+                    }}>
+                      #{i + 1}
+                    </span>
+                    <span style={{ flex: 1, fontSize: 13, fontWeight: 700, color: i === 0 ? "var(--text)" : "var(--text-dim)" }}>
+                      {entry.username || "Anonymous"}
+                    </span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: i === 0 ? "var(--gold)" : "var(--text-faint)" }}>
+                      {entry.avg_percentile}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+
           {/* Legend */}
           <section className="boundlegend" style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
             <div style={{
@@ -974,7 +1026,8 @@ export default function BoundPage() {
             .boundright { order: 1; }
             .boundleft  { order: 0; }
             .boundleaderboard { order: 2; margin-top: 22px !important; }
-            .boundlegend { order: 3; margin-top: 22px !important; }
+          .boundweekly { order: 3; margin-top: 22px !important; }
+          .boundlegend { order: 4; margin-top: 22px !important; }
           }
         `}</style>
       </main>

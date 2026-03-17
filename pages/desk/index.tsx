@@ -25,7 +25,7 @@ export default function DeskIndexPage({ items }: { items: DeskMeta[] }) {
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 6rem" }}>
 
         {/* ── HEADER ── */}
-        <div style={{ maxWidth: 640, marginBottom: "2.5rem" }}>
+        <div className="fade-up" style={{ maxWidth: 640, marginBottom: "2.5rem" }}>
           <div className="eyebrow" style={{ marginBottom: "1rem" }}>
             The People's Verdict
           </div>
@@ -72,8 +72,9 @@ export default function DeskIndexPage({ items }: { items: DeskMeta[] }) {
 
         <div style={{ borderTop: "1px solid var(--border)", marginBottom: "3rem" }} />
 
-        {/* ── QUESTIONS LIST ── */}
-        {items.length === 0 ? (
+{/* ── QUESTIONS LIST ── */}
+<div className="fade-up-delay-2">
+{items.length === 0 ? (
           <div style={{ maxWidth: 600 }}>
             <p style={{
               fontFamily: "var(--font-body)",
@@ -186,6 +187,7 @@ export default function DeskIndexPage({ items }: { items: DeskMeta[] }) {
           </div>
         )}
 
+</div>
         <style jsx>{`
           .desk-card:hover { opacity: 0.75; }
         `}</style>

@@ -51,12 +51,58 @@ export default function DeskAskPage() {
     setSubmitted(true);
   }
 
+  if (userId === null && typeof window !== "undefined") {
+    return (
+      <>
+        <OgHead title="Ask the Desk — The People's Verdict" type="default" />
+        <main style={{ maxWidth: 680, margin: "0 auto", padding: "3rem 1.25rem 6rem" }}>
+          <div className="fade-up">
+            <Link href="/desk" style={{
+              fontFamily: "var(--font-body)", fontSize: "0.65rem", fontWeight: 600,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-faint)",
+              textDecoration: "none", display: "inline-flex", alignItems: "center",
+              gap: "0.3rem", borderBottom: "1px solid var(--border)", paddingBottom: 1,
+              marginBottom: "2.5rem",
+            }}>
+              ← The Desk
+            </Link>
+            <div className="eyebrow" style={{ marginBottom: "1rem" }}>The People's Verdict</div>
+            <h1 style={{
+              fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 5vw, 3rem)",
+              fontWeight: 400, lineHeight: 1.05, letterSpacing: "-0.02em",
+              color: "var(--text)", marginBottom: "1rem",
+            }}>
+              Ask the Desk
+            </h1>
+            <div style={{ borderTop: "1px solid var(--border)", margin: "2rem 0" }} />
+            <p style={{
+              fontFamily: "var(--font-body)", fontSize: "1rem", lineHeight: 1.75,
+              color: "var(--text-dim)", marginBottom: "1.5rem",
+            }}>
+              You need to be signed in to submit a question.
+            </p>
+            <Link href="/signin" style={{
+              display: "inline-flex", alignItems: "center",
+              fontFamily: "var(--font-body)", fontSize: "0.72rem", fontWeight: 700,
+              letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--bg)",
+              background: "var(--gold)", textDecoration: "none",
+              padding: "12px 20px", borderRadius: 3,
+            }}>
+              Sign in to continue →
+            </Link>
+          </div>
+        </main>
+      </>
+    );
+  }
+
   return (
     <>
       <OgHead title="Ask the Desk — The People's Verdict" type="default" />
       <main style={{ maxWidth: 680, margin: "0 auto", padding: "3rem 1.25rem 6rem" }}>
 
         {/* Back link */}
+        <div className="fade-up">
         <Link href="/desk" style={{
           fontFamily: "var(--font-body)",
           fontSize: "0.65rem",
@@ -301,6 +347,7 @@ export default function DeskAskPage() {
           textarea:focus { border-color: var(--gold-line) !important; }
           input:focus { border-color: var(--gold-line) !important; }
         `}</style>
+         </div>
       </main>
     </>
   );
