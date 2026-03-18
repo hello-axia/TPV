@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "../../lib/supabaseClients";
+import { createClient } from "@supabase/supabase-js";
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -8,53 +8,62 @@ export default function AuthCallback() {
   useEffect(() => {
     let redirected = false;
 
-    async function handleSession(userId: string) {
+    async function handleUser() {
       if (redirected) return;
-      redirected = true;
-      try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_complete")
-          .eq("id", userId)
-          .single();
-        if (!profile?.onboarding_complete) {
-          router.replace("/onboarding");
-        } else {
-          router.replace("/");
+
+      // Import the shared client
+      const { supabase } = await import("../../lib/supabaseClients");
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          if (redirected) return;
+          if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+            redirected = true;
+            subscription.unsubscribe();
+
+            // Create a fresh client with the session token explicitly set
+            // so RLS auth.uid() works correctly
+            const authedClient = createClient(
+              process.env.NEXT_PUBLIC_SUPABASE_URL!,
+              process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+              {
+                global: {
+                  headers: {
+                    Authorization: `Bearer ${session.access_token}`,
+                  },
+                },
+              }
+            );
+
+            try {
+              const { data: profile } = await authedClient
+                .from("profiles")
+                .select("onboarding_complete")
+                .eq("id", session.user.id)
+                .single();
+
+              if (profile?.onboarding_complete) {
+                router.replace("/");
+              } else {
+                router.replace("/onboarding");
+              }
+            } catch {
+              router.replace("/onboarding");
+            }
+          }
         }
-      } catch {
-        router.replace("/onboarding");
-      }
+      );
+
+      // Safety net — 8 seconds then give up
+      setTimeout(() => {
+        if (!redirected) {
+          redirected = true;
+          router.replace("/signin");
+        }
+      }, 8000);
     }
 
-    // Primary: wait for Supabase to fire SIGNED_IN after processing the OAuth URL
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === "SIGNED_IN" && session?.user) {
-          await handleSession(session.user.id);
-        }
-      }
-    );
-
-    // Fallback: if session already exists (page refresh), handle immediately
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user && !redirected) {
-        handleSession(data.session.user.id);
-      }
-    });
-
-    // Safety net: if nothing fires in 8 seconds, go to signin
-    const timeout = setTimeout(() => {
-      if (!redirected) {
-        redirected = true;
-        router.replace("/signin");
-      }
-    }, 8000);
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeout);
-    };
+    handleUser();
   }, [router]);
 
   return (
