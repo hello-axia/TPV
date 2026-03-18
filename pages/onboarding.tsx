@@ -308,6 +308,16 @@ export default function OnboardingPage() {
         router.replace("/signin");
         return;
       }
+      // Check if they've already completed onboarding
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_complete")
+        .eq("id", s.session.user.id)
+        .single();
+      if (profile?.onboarding_complete) {
+        router.replace("/");
+        return;
+      }
       setUser(s.session.user);
       setAuthReady(true);
     })();
