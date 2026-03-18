@@ -6,29 +6,31 @@ export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        try {
-          const { data: profile, error } = await supabase
-            .from("profiles")
-            .select("onboarding_complete")
-            .eq("id", session.user.id)
-            .single();
+    (async () => {
+      // Exchange the code in the URL for a session
+      const { data, error } = await supabase.auth.getSession();
 
-          // No row, error, or incomplete — send to onboarding
-          if (error || !profile || !profile.onboarding_complete) {
-            router.replace("/onboarding");
-          } else {
-            router.replace("/");
-          }
-        } catch {
-          // Something went wrong — still send to onboarding, not a dead end
-          router.replace("/onboarding");
-        }
+      if (error || !data.session?.user) {
+        router.replace("/signin");
+        return;
       }
-    });
 
-    return () => subscription.unsubscribe();
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("onboarding_complete")
+          .eq("id", data.session.user.id)
+          .single();
+
+        if (!profile?.onboarding_complete) {
+          router.replace("/onboarding");
+        } else {
+          router.replace("/");
+        }
+      } catch {
+        router.replace("/onboarding");
+      }
+    })();
   }, [router]);
 
   return (

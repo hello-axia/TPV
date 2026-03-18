@@ -27,7 +27,6 @@ function makeBrowserClient() {
       storageKey: "tpv-auth-token",
       storage: window.localStorage,
       autoRefreshToken: true,
-      flowType: "pkce",
     }
   });
 }
