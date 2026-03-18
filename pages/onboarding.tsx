@@ -330,16 +330,18 @@ export default function OnboardingPage() {
   async function finish(committed: boolean) {
     if (!user) return;
     setSaving(true);
-    const result = await supabase
-      .from("profiles")
-      .upsert({
-        id: user.id,
-        ...data,
-        username: data.username.trim() || null,
-        committed,
-        onboarding_complete: true,
-      });
-    console.log("upsert result:", result);
+    const { error } = await supabase
+    .from("profiles")
+    .upsert({
+      id: user.id,
+      ...data,
+      username: data.username.trim() || null,
+      committed,
+      onboarding_complete: true,
+    });
+  if (error) {
+    console.error("finish upsert error:", error);
+  }
     setSaving(false);
     router.replace("/");
   }
@@ -347,9 +349,12 @@ export default function OnboardingPage() {
   async function skip() {
     if (!user) return;
     setSaving(true);
-    await supabase
-    .from("profiles")
-    .upsert({ id: user.id, onboarding_complete: true, committed: false });
+    const { error } = await supabase
+      .from("profiles")
+      .upsert({ id: user.id, onboarding_complete: true, committed: false });
+    if (error) {
+      console.error("skip upsert error:", error);
+    }
     setSaving(false);
     router.replace("/");
   }
