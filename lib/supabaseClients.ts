@@ -24,8 +24,6 @@ function makeBrowserClient() {
     auth: {
       detectSessionInUrl: true,
       persistSession: true,
-      storageKey: "tpv-auth-token",
-      storage: window.localStorage,
       autoRefreshToken: true,
     }
   });

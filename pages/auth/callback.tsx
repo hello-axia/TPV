@@ -6,22 +6,17 @@ export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      // Exchange the code in the URL for a session
-      const { data, error } = await supabase.auth.getSession();
+    let redirected = false;
 
-      if (error || !data.session?.user) {
-        router.replace("/signin");
-        return;
-      }
-
+    async function handleSession(userId: string) {
+      if (redirected) return;
+      redirected = true;
       try {
         const { data: profile } = await supabase
           .from("profiles")
           .select("onboarding_complete")
-          .eq("id", data.session.user.id)
+          .eq("id", userId)
           .single();
-
         if (!profile?.onboarding_complete) {
           router.replace("/onboarding");
         } else {
@@ -30,7 +25,36 @@ export default function AuthCallback() {
       } catch {
         router.replace("/onboarding");
       }
-    })();
+    }
+
+    // Primary: wait for Supabase to fire SIGNED_IN after processing the OAuth URL
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          await handleSession(session.user.id);
+        }
+      }
+    );
+
+    // Fallback: if session already exists (page refresh), handle immediately
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user && !redirected) {
+        handleSession(data.session.user.id);
+      }
+    });
+
+    // Safety net: if nothing fires in 8 seconds, go to signin
+    const timeout = setTimeout(() => {
+      if (!redirected) {
+        redirected = true;
+        router.replace("/signin");
+      }
+    }, 8000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [router]);
 
   return (
