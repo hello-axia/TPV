@@ -1,4 +1,5 @@
 import { GetStaticPaths, GetStaticProps } from "next";
+import { useEffect, useState } from "react";
 import { getAllDeskMeta, getDeskBySlug } from "../../lib/desk";
 import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 import GlobalQuestion from "../../components/GlobalQuestion";
@@ -84,6 +85,29 @@ function JumpTo({ hasGlossary, hasPoll }: { hasGlossary: boolean; hasPoll: boole
   );
 }
 
+function useReaderCount(questionId?: string | null): number | null {
+  const [count, setCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (!questionId) return;
+    let alive = true;
+    (async () => {
+      try {
+        const res = await fetch(`/api/question/${encodeURIComponent(questionId)}`, {
+          cache: "no-store", credentials: "same-origin",
+        });
+        if (!res.ok || !alive) return;
+        const json = await res.json();
+        const q = json.question;
+        if (!q || !alive) return;
+        const t = (q.a_count || 0) + (q.b_count || 0) + (q.c_count || 0) + (q.d_count || 0);
+        if (t > 0) setCount(t);
+      } catch { /* fail silently */ }
+    })();
+    return () => { alive = false; };
+  }, [questionId]);
+  return count;
+}
+
 export default function DeskArticlePage({
   meta, contentHtmlNoSources, sourcesHtml, slug,
 }: {
@@ -91,6 +115,7 @@ export default function DeskArticlePage({
 }) {
   const hasGlossary = !!(meta.glossary && meta.glossary.length > 0);
   const hasPoll = !!meta.questionId;
+  const readerCount = useReaderCount(meta.questionId);
 
   return (
     <>
@@ -98,6 +123,7 @@ export default function DeskArticlePage({
       <ArticleShell
         slug={`desk/${slug}`}
         type="The Desk"
+        readerCount={readerCount}
         title={meta.title}
         date={meta.date}
         readTime={meta.readTime ?? undefined}
@@ -111,6 +137,7 @@ export default function DeskArticlePage({
           borderLeft: "2px solid var(--border-light)",
           paddingLeft: "1.25rem",
           marginBottom: "2rem",
+          marginTop: "1.5rem",
         }}>
           <div style={{
             fontFamily: "var(--font-body)", fontSize: "0.62rem", fontWeight: 700,
