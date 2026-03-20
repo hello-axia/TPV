@@ -1,43 +1,9 @@
 import { GetStaticPaths, GetStaticProps } from "next";
-import Link from "next/link";
-import { useEffect, useState } from "react";
 import { getAllDeskMeta, getDeskBySlug } from "../../lib/desk";
 import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 import GlobalQuestion from "../../components/GlobalQuestion";
+import ArticleShell, { GlossaryEntry } from "../../components/ArticleShell";
 import OgHead from "../../components/OgHead";
-
-function ReadingProgress() {
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    function update() {
-      const el = document.documentElement;
-      const scrolled = el.scrollTop || document.body.scrollTop;
-      const total = el.scrollHeight - el.clientHeight;
-      setProgress(total > 0 ? Math.min(100, (scrolled / total) * 100) : 0);
-    }
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
-  return (
-    <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: 2, zIndex: 100, background: "var(--border)" }}>
-      <div style={{ height: "100%", width: `${progress}%`, background: "var(--gold)", transition: "width 0.1s linear" }} />
-    </div>
-  );
-}
-
-function formatDate(dateStr: string) {
-  if (!dateStr) return "";
-  const parts = dateStr.split("-");
-  if (parts.length === 3 && parts[0].length === 2) {
-    const [mm, dd, yyyy] = parts;
-    return new Date(`${yyyy}-${mm}-${dd}`).toLocaleDateString("en-US", {
-      month: "long", day: "numeric", year: "numeric",
-    });
-  }
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "long", day: "numeric", year: "numeric",
-  });
-}
 
 type DeskArticleMeta = {
   title: string;
@@ -45,168 +11,138 @@ type DeskArticleMeta = {
   date: string;
   question: string;
   questionId: string | null;
+  readTime?: string | null;
+  glossary?: GlossaryEntry[] | null;
 };
 
+const DESK_TOC = [
+  { id: "what-the-question-is-really-asking", label: "What it's really asking" },
+  { id: "the-long-answer",                    label: "The long answer" },
+  { id: "the-honest-uncertainty",             label: "The honest uncertainty" },
+  { id: "bottom-line",                        label: "Bottom line" },
+];
+
+function JumpTo({ hasGlossary, hasPoll }: { hasGlossary: boolean; hasPoll: boolean }) {
+  return (
+    <div style={{ paddingTop: "1.25rem" }}>
+      <div className="eyebrow" style={{ marginBottom: "1rem" }}>Jump to</div>
+      <div style={{
+        border: "1px solid var(--border-light)", borderRadius: 4,
+        padding: "0.75rem 0", background: "var(--bg2)",
+      }}>
+        {DESK_TOC.map((item) => (
+          <a
+            key={item.id}
+            href={"#" + item.id}
+            style={{
+              textDecoration: "none", display: "flex", alignItems: "baseline",
+              justifyContent: "space-between", gap: 10, padding: "0.5rem 1rem",
+              fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 400,
+              color: "var(--text-dim)", lineHeight: 1.4,
+              transition: "color 0.15s ease, background 0.15s ease",
+            }}
+          >
+            <span>{item.label}</span>
+            <span style={{ color: "var(--text-faint)", fontSize: "0.7rem" }}>&#8594;</span>
+          </a>
+        ))}
+        {hasPoll && (
+          <a href="#tpv-question" style={{
+            textDecoration: "none", display: "flex", alignItems: "baseline",
+            justifyContent: "space-between", gap: 10, padding: "0.6rem 1rem",
+            marginTop: "0.25rem", borderTop: "1px solid var(--border)",
+            fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 500,
+            color: "var(--gold)", lineHeight: 1.4,
+          }}>
+            <span>Question</span>
+            <span style={{ fontSize: "0.7rem" }}>&#8594;</span>
+          </a>
+        )}
+        {hasGlossary && (
+          <a href="#tpv-glossary" style={{
+            textDecoration: "none", display: "flex", alignItems: "baseline",
+            justifyContent: "space-between", gap: 10, padding: "0.6rem 1rem",
+            marginTop: "0.25rem", borderTop: "1px solid var(--border)",
+            fontFamily: "var(--font-body)", fontSize: "0.82rem", fontWeight: 500,
+            color: "var(--text-faint)", lineHeight: 1.4,
+          }}>
+            <span>Key terms</span>
+            <span style={{ fontSize: "0.7rem" }}>&#8594;</span>
+          </a>
+        )}
+      </div>
+      <div style={{
+        marginTop: "0.75rem", fontFamily: "var(--font-body)", fontSize: "0.72rem",
+        lineHeight: 1.6, color: "var(--text-faint)", fontStyle: "italic",
+      }}>
+        Sections appear only if they exist in this article.
+      </div>
+      <style jsx>{`
+        a:hover { color: var(--text) !important; background: var(--bg3); }
+      `}</style>
+    </div>
+  );
+}
+
 export default function DeskArticlePage({
-  meta,
-  contentHtml,
-  slug,
+  meta, contentHtmlNoSources, sourcesHtml, slug,
 }: {
-  meta: DeskArticleMeta;
-  contentHtml: string;
-  slug: string;
+  meta: DeskArticleMeta; contentHtmlNoSources: string; sourcesHtml: string | null; slug: string;
 }) {
+  const hasGlossary = !!(meta.glossary && meta.glossary.length > 0);
+  const hasPoll = !!meta.questionId;
+
   return (
     <>
       <OgHead title={meta.title} date={meta.date} type="briefing" slug={`desk/${slug}`} />
-      <ReadingProgress />
-      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
-
-        {/* Back link */}
-        <div style={{ marginBottom: "2rem" }}>
-          <Link href="/desk" style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.65rem",
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--text-faint)",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.3rem",
-            borderBottom: "1px solid var(--border)",
-            paddingBottom: 1,
-          }}>
-            ← The Desk
-          </Link>
-        </div>
-
-        {/* Article header */}
-        <div style={{ maxWidth: 720, marginBottom: "2rem" }}>
+      <ArticleShell
+        slug={`desk/${slug}`}
+        type="The Desk"
+        title={meta.title}
+        date={meta.date}
+        readTime={meta.readTime ?? undefined}
+        summary={meta.summary}
+        backHref="/desk"
+        showSummary={false}
+        glossary={meta.glossary}
+        rightRail={<JumpTo hasGlossary={hasGlossary} hasPoll={hasPoll} />}
+      >
+        <div style={{
+          borderLeft: "2px solid var(--border-light)",
+          paddingLeft: "1.25rem",
+          marginBottom: "2rem",
+        }}>
           <div style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.65rem",
-            fontWeight: 600,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--text-faint)",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginBottom: "1rem",
-          }}>
-            <span>{formatDate(meta.date)}</span>
-            <span style={{ color: "var(--gold)" }}>· The Desk</span>
-          </div>
-
-          {/* Original question */}
-          <div style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.72rem",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-            color: "var(--text-faint)",
-            marginBottom: "0.5rem",
+            fontFamily: "var(--font-body)", fontSize: "0.62rem", fontWeight: 700,
+            letterSpacing: "0.1em", textTransform: "uppercase",
+            color: "var(--text-faint)", marginBottom: "0.5rem",
           }}>
             Reader question
           </div>
           <div style={{
             fontFamily: "var(--font-display)",
-            fontSize: "clamp(1rem, 2.5vw, 1.35rem)",
+            fontSize: "clamp(1rem, 2vw, 1.2rem)",
             fontStyle: "italic",
             color: "var(--text-dim)",
             lineHeight: 1.45,
-            marginBottom: "1.5rem",
-            paddingLeft: "1.25rem",
-            borderLeft: "2px solid var(--border-light)",
           }}>
-            "{meta.question}"
-          </div>
-
-          {/* Article title */}
-          <h1 style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(1.9rem, 4.5vw, 3rem)",
-            fontWeight: 400,
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            color: "var(--text)",
-            marginBottom: "0.75rem",
-          }}>
-            {meta.title}
-          </h1>
-
-          <div style={{ width: 36, height: 2, background: "var(--gold)", margin: "1.25rem 0" }} />
-
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "1.05rem",
-            lineHeight: 1.75,
-            color: "var(--text-dim)",
-            fontStyle: "italic",
-          }}>
-            {meta.summary}
-          </p>
-        </div>
-
-        <div style={{ borderTop: "1px solid var(--border)", margin: "2rem 0" }} />
-
-        {/* Article content */}
-        <div style={{ maxWidth: 720 }}>
-          <article
-            className="tpv-prose"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
-          />
-
-          {/* Poll if present */}
-          {meta.questionId && (
-            <div style={{ marginTop: "2.5rem" }}>
-              <div id="tpv-question" style={{ height: 1, scrollMarginTop: 120 }} />
-              <GlobalQuestion questionId={meta.questionId} />
-            </div>
-          )}
-
-          {/* Footer nav */}
-          <div style={{
-            marginTop: "3rem",
-            paddingTop: "2rem",
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "1rem",
-          }}>
-            <Link href="/desk" style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--text-faint)",
-              textDecoration: "none",
-            }}>
-              ← Back to The Desk
-            </Link>
-            <Link href="/desk/ask" style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              textDecoration: "none",
-              border: "1px solid var(--gold-line)",
-              padding: "8px 14px",
-              borderRadius: 3,
-            }}>
-              Ask a question →
-            </Link>
+            &ldquo;{meta.question}&rdquo;
           </div>
         </div>
-      </main>
+
+        <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlNoSources }} />
+
+        {hasPoll && (
+          <div style={{ marginTop: 16 }}>
+            <div id="tpv-question" style={{ height: 1, scrollMarginTop: 160 }} />
+            <GlobalQuestion questionId={meta.questionId!} />
+          </div>
+        )}
+
+        {sourcesHtml && (
+          <div dangerouslySetInnerHTML={{ __html: sourcesHtml }} />
+        )}
+      </ArticleShell>
     </>
   );
 }
@@ -223,11 +159,15 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   const slug = String(params?.slug);
   const { meta, content } = getDeskBySlug(slug);
 
-  return {
-    props: {
-      meta,
-      contentHtml: content,
-      slug,
-    },
-  };
+  let html = content;
+  if (meta.glossary && meta.glossary.length > 0) {
+    html = injectGlossarySpans(html, meta.glossary);
+  }
+
+  // Split sources block out of content so it renders after the poll
+  const sourcesMatch = html.match(/<div class="tpv-sources">[\s\S]*<\/div>\s*$/);
+  const sourcesHtml = sourcesMatch ? sourcesMatch[0] : null;
+  const contentHtmlNoSources = sourcesHtml ? html.slice(0, html.lastIndexOf(sourcesHtml)) : html;
+
+  return { props: { meta, contentHtmlNoSources, sourcesHtml, slug } };
 };

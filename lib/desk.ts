@@ -7,7 +7,9 @@ export type DeskMeta = {
   summary: string;
   date: string;
   questionId?: string | null;
-  question: string; // the original submitted question
+  question: string;
+  readTime?: string | null;
+  glossary?: { term: string; definition: string }[] | null;
 };
 
 const deskDir = path.join(process.cwd(), "content", "desk");
@@ -27,6 +29,12 @@ export function getAllDeskMeta(): DeskMeta[] {
     );
     const meta = metaMatch ? JSON.parse(metaMatch[1]) : {};
 
+    const glossary = Array.isArray(meta.glossary)
+      ? meta.glossary.filter(
+          (g: any) => g && typeof g.term === "string" && typeof g.definition === "string"
+        )
+      : [];
+
     return {
       slug,
       title: String(meta.title ?? slug),
@@ -34,6 +42,8 @@ export function getAllDeskMeta(): DeskMeta[] {
       date: String(meta.date ?? ""),
       questionId: meta.questionId ? String(meta.questionId) : null,
       question: String(meta.question ?? ""),
+      readTime: meta.readTime ? String(meta.readTime) : null,
+      glossary: glossary.length > 0 ? glossary : null,
     };
   });
 
@@ -53,6 +63,12 @@ export function getDeskBySlug(slug: string) {
     .replace(/<script[^>]+id="tpv-desk-meta"[^>]*>[\s\S]*?<\/script>/, "")
     .trim();
 
+    const glossary = Array.isArray(meta.glossary)
+    ? meta.glossary.filter(
+        (g: any) => g && typeof g.term === "string" && typeof g.definition === "string"
+      )
+    : [];
+
   return {
     slug,
     meta: {
@@ -61,6 +77,8 @@ export function getDeskBySlug(slug: string) {
       date: String(meta.date ?? ""),
       questionId: meta.questionId ? String(meta.questionId) : null,
       question: String(meta.question ?? ""),
+      readTime: meta.readTime ? String(meta.readTime) : null,
+      glossary: glossary.length > 0 ? glossary : null,
     },
     content,
   };

@@ -683,7 +683,13 @@
 .tpv-glossary-item {
   padding: 0.85rem 0;
   border-bottom: 1px solid var(--border);
-  scroll-margin-top: 120px;
+  scroll-margin-top: 160px;
+}
+
+.tpv-prose h2,
+.tpv-prose h3,
+.tpv-prose h4 {
+  scroll-margin-top: 160px;
 }
 
 .tpv-glossary-item:last-child {

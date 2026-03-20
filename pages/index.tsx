@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import GlobalQuestion from "../components/GlobalQuestion";
 import { getAllVerdictsMeta, VerdictMeta } from "../lib/verdicts";
 import { getAllBriefingsMeta, BriefingMeta } from "../lib/briefings";
+import { getAllDeskMeta, DeskMeta } from "../lib/desk";
 import OgHead from "../components/OgHead";
 
 type Post = {
-  type: "Verdict" | "Briefing";
+  type: "Verdict" | "Briefing" | "The Desk";
   slug: string;
   title: string;
   date: string;
@@ -117,7 +118,11 @@ function Hero({ post }: { post: Post | null }) {
     );
   }
 
-  const href = post.type === "Verdict" ? `/verdicts/${post.slug}` : `/briefings/${post.slug}`;
+  const href = post.type === "Verdict"
+    ? `/verdicts/${post.slug}`
+    : post.type === "The Desk"
+    ? `/desk/${post.slug}`
+    : `/briefings/${post.slug}`;
 
   return (
     <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1.25rem" }}>
@@ -198,9 +203,11 @@ function Hero({ post }: { post: Post | null }) {
 export default function HomePage({
   latestVerdicts,
   latestBriefings,
+  latestDesk,
 }: {
   latestVerdicts: VerdictMeta[];
   latestBriefings: BriefingMeta[];
+  latestDesk: DeskMeta[];
 }) {
   const verdictPosts: Post[] = latestVerdicts.map((v) => ({
     type: "Verdict",
@@ -222,7 +229,17 @@ export default function HomePage({
     questionId: (b as any).questionId,
   }));
 
-  const all = [...verdictPosts, ...briefingPosts].sort(
+  const deskPosts: Post[] = latestDesk.map((d) => ({
+    type: "The Desk",
+    slug: d.slug,
+    title: d.title,
+    date: d.date,
+    summary: d.summary,
+    readTime: d.readTime ?? undefined,
+    questionId: d.questionId ?? undefined,
+  }));
+
+  const all = [...verdictPosts, ...briefingPosts, ...deskPosts].sort(
     (a, b) => parseMDY(b.date).getTime() - parseMDY(a.date).getTime()
   );
 
@@ -370,13 +387,13 @@ export default function HomePage({
           {[
             {
               label: "Verdict",
-              freq: "Every Friday",
+              freq: "UNDER CONSTRUCTION",
               desc: "Polarizing issues broken down by values, facts, forecasts and incentives. Ends with a reader poll.",
               href: "/verdicts",
             },
             {
               label: "Briefing",
-              freq: "Every Tuesday",
+              freq: "UNDER CONSTRUCTION",
               desc: "Institutional and policy stories structured as: what happened, why it matters, what changes, what to watch.",
               href: "/briefings",
             },
@@ -499,7 +516,7 @@ export default function HomePage({
                 kicker={kicker}
                 title={p.title}
                 desc={p.summary}
-                href={p.type === "Verdict" ? `/verdicts/${p.slug}` : `/briefings/${p.slug}`}
+                href={p.type === "Verdict" ? `/verdicts/${p.slug}` : p.type === "The Desk" ? `/desk/${p.slug}` : `/briefings/${p.slug}`}
               />
             );
           })}
@@ -611,5 +628,6 @@ export default function HomePage({
 export const getStaticProps: GetStaticProps = async () => {
   const latestVerdicts = getAllVerdictsMeta();
   const latestBriefings = getAllBriefingsMeta();
-  return { props: { latestVerdicts, latestBriefings } };
+  const latestDesk = getAllDeskMeta();
+  return { props: { latestVerdicts, latestBriefings, latestDesk } };
 };

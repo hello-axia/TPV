@@ -173,7 +173,7 @@ export default function VerdictPostPage({ meta, contentHtmlParts, toc, hasPoll, 
       <article className="tpv-prose" dangerouslySetInnerHTML={{ __html: contentHtmlParts.before }} />
       {hasPoll && (
         <div style={{ marginTop: 16 }}>
-          <div id="tpv-question" style={{ height: 1, scrollMarginTop: 120 }} />
+          <div id="tpv-question" style={{ height: 1, scrollMarginTop: 160 }} />
           <GlobalQuestion questionId={meta.questionId!} />
         </div>
       )}
