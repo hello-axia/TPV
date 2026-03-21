@@ -536,8 +536,7 @@
   margin-top: 3rem;
   display: block;
 }
-/* ── Tooltip click-to-open ── */
-.tpv-gloss-term:not(.tpv-gloss-closing):hover .tpv-gloss-tooltip { opacity: 1; pointer-events: auto; }
+
 
 /* ── Sources grid ── */
 .tpv-sources { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
