@@ -176,14 +176,24 @@ export default function ArticleShell({
     }
 
     function closeAll() {
-      // Remove active class from all terms
       document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
         el.classList.remove("tpv-gloss-active");
       });
-      // Reset ALL tooltips wherever they are — body or inside terms
       document.querySelectorAll(".tpv-gloss-tooltip").forEach((t) => {
         const tt = t as HTMLElement;
         tt.style.cssText = "";
+        // If teleported to body, move back into its term
+        if (tt.parentElement === document.body) {
+          const termName = tt.querySelector(".tpv-gloss-tooltip-term")?.textContent?.trim().toLowerCase();
+          if (termName) {
+            const allTerms = document.querySelectorAll(".tpv-gloss-term");
+            allTerms.forEach((term) => {
+              if (term.textContent?.trim().toLowerCase().includes(termName)) {
+                term.appendChild(tt);
+              }
+            });
+          }
+        }
       });
     }
 
