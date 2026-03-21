@@ -726,7 +726,7 @@
 
 .tpv-gloss-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px); /* default: above — JS overrides when needed */
+  bottom: calc(100% + 8px);
   top: auto;
   left: 50%;
   transform: translateX(-50%);
@@ -742,7 +742,16 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.tpv-gloss-term:focus .tpv-gloss-tooltip {
+/* Desktop hover — only real mouse devices */
+@media (hover: hover) and (pointer: fine) {
+  .tpv-gloss-term:hover .tpv-gloss-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* JS-controlled active state (click/tap) */
+.tpv-gloss-term.tpv-gloss-active .tpv-gloss-tooltip {
   opacity: 1;
   pointer-events: auto;
 }

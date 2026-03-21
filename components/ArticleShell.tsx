@@ -123,64 +123,65 @@ export default function ArticleShell({
   useEffect(() => {
     if (!glossary || glossary.length === 0) return;
 
+    let activeTerm: HTMLElement | null = null;
     let activeTooltip: HTMLElement | null = null;
-    let activeTerm: Element | null = null;
 
-    function openTooltip(term: Element) {
-      const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
+    function openTooltip(termEl: HTMLElement) {
+      closeTooltip();
+      const tooltip = termEl.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
       if (!tooltip) return;
 
-      // On mobile only: use fixed positioning to escape transform ancestor
-      // On desktop: CSS hover handles it, JS just adds active class
-      if ('ontouchstart' in window || window.matchMedia("(hover: none)").matches) {
-        const termRect = (term as HTMLElement).getBoundingClientRect();
-        const spaceAbove = termRect.top;
-        const topPx = spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 176;
-        tooltip.style.position = "fixed";
-        tooltip.style.left = "50%";
-        tooltip.style.transform = "translateX(-50%)";
-        tooltip.style.width = "min(280px, calc(100vw - 2rem))";
-        tooltip.style.top = topPx + "px";
-        tooltip.style.bottom = "auto";
-        tooltip.style.opacity = "1";
-        tooltip.style.pointerEvents = "auto";
-        tooltip.style.zIndex = "9999";
-      }
+      const r = termEl.getBoundingClientRect();
+      const TH = 180; // estimated tooltip height
+      const PAD = 12;
+      const HEADER = 160;
 
+      let top = r.top - TH - 8;
+      if (top < HEADER) top = r.bottom + 8;
+      top = Math.max(HEADER, Math.min(top, window.innerHeight - TH - PAD));
+
+      tooltip.style.cssText = `
+        position: fixed !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        top: ${top}px !important;
+        bottom: auto !important;
+        width: min(280px, calc(100vw - 24px)) !important;
+        z-index: 9999 !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      `;
+
+      termEl.classList.add("tpv-gloss-active");
+      activeTerm = termEl;
       activeTooltip = tooltip;
-      activeTerm = term;
-      (term as HTMLElement).classList.add("tpv-gloss-active");
     }
 
     function closeTooltip() {
-      if (activeTooltip) {
-        activeTooltip.style.cssText = "";
-        activeTooltip = null;
-      }
-      if (activeTerm) {
-        const el = activeTerm as HTMLElement;
-        el.classList.remove("tpv-gloss-active");
-        el.classList.add("tpv-gloss-closing");
-        setTimeout(() => el.classList.remove("tpv-gloss-closing"), 300);
-        activeTerm = null;
+      if (activeTooltip) { activeTooltip.style.cssText = ""; activeTooltip = null; }
+      if (activeTerm) { activeTerm.classList.remove("tpv-gloss-active"); activeTerm = null; }
+    }
+
+    // Touch: tap to open, tap outside to close
+    function handleTouchEnd(e: TouchEvent) {
+      const target = e.target as HTMLElement;
+      if (target.closest(".tpv-gloss-tooltip")) return;
+      const term = target.closest(".tpv-gloss-term") as HTMLElement | null;
+      if (term) {
+        e.preventDefault();
+        term === activeTerm ? closeTooltip() : openTooltip(term);
+      } else {
+        closeTooltip();
       }
     }
 
+    // Desktop: click to open, click outside to close
     function handleClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
-      const term = target.closest(".tpv-gloss-term");
-      const clickedTooltip = target.closest(".tpv-gloss-tooltip");
-
-      if (clickedTooltip) return; // ignore clicks inside tooltip
-
+      if (target.closest(".tpv-gloss-tooltip")) return;
+      const term = target.closest(".tpv-gloss-term") as HTMLElement | null;
       if (term) {
-        e.stopPropagation();
-        if (term === activeTerm) {
-          closeTooltip(); // toggle off
-        } else {
-          closeTooltip();
-          openTooltip(term);
-        }
+        term === activeTerm ? closeTooltip() : openTooltip(term);
       } else {
         closeTooltip();
       }
@@ -188,32 +189,11 @@ export default function ArticleShell({
 
     function handleScroll() { closeTooltip(); }
 
-    // Desktop hover — only on non-touch devices
-   // Attach hover only to actual term elements, not document
-    // mouseenter/mouseleave don't bubble and don't fire on iOS touch
-    const termEls = document.querySelectorAll(".tpv-gloss-term");
-    
-    function handleTermEnter(e: Event) {
-      if (activeTerm) return;
-      openTooltip(e.currentTarget as Element);
-    }
-    function handleTermLeave() {
-      if (activeTerm) return;
-      closeTooltip();
-    }
-
-    termEls.forEach(el => {
-      el.addEventListener("mouseenter", handleTermEnter);
-      el.addEventListener("mouseleave", handleTermLeave);
-    });
-
+    document.addEventListener("touchend", handleTouchEnd, { passive: false });
     document.addEventListener("click", handleClick);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      termEls.forEach(el => {
-        el.removeEventListener("mouseenter", handleTermEnter);
-        el.removeEventListener("mouseleave", handleTermLeave);
-      });
+      document.removeEventListener("touchend", handleTouchEnd);
       document.removeEventListener("click", handleClick);
       window.removeEventListener("scroll", handleScroll);
     };
