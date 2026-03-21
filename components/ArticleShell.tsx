@@ -128,15 +128,19 @@ export default function ArticleShell({
       const term = target.closest(".tpv-gloss-term");
 
      // Close all open tooltips and reset any fixed positioning
+     // Close all open tooltips — tooltip may have been teleported to body
      document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
       el.classList.remove("tpv-gloss-active");
-      const t = el.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
-      if (t) {
-        if (t.parentElement === document.body) {
-          el.appendChild(t);
-        }
-        t.style.cssText = "";
+    });
+    // Find ALL tooltips anywhere in the document and reset them
+    document.querySelectorAll(".tpv-gloss-tooltip").forEach((t) => {
+      const tt = t as HTMLElement;
+      if (tt.parentElement === document.body) {
+        // Move back to original term — find by matching term text
+        const termEl = document.querySelector(`.tpv-gloss-term[data-term="${tt.querySelector('.tpv-gloss-tooltip-term')?.textContent?.toLowerCase()}"]`);
+        if (termEl) termEl.appendChild(tt);
       }
+      tt.style.cssText = "";
     });
 
       // If click was on a term, open it (unless we just closed it)
@@ -187,10 +191,15 @@ export default function ArticleShell({
     function handleScroll() {
       document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
         el.classList.remove("tpv-gloss-active");
-        const t = el.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
-        if (t) {
-          if (t.parentElement === document.body) el.appendChild(t);
-          t.style.cssText = "";
+      });
+      document.querySelectorAll(".tpv-gloss-tooltip").forEach((t) => {
+        const tt = t as HTMLElement;
+        tt.style.cssText = "";
+        if (tt.parentElement === document.body) {
+          // put it back — find the active term that matches
+          document.querySelectorAll(".tpv-gloss-term").forEach((term) => {
+            if (!term.querySelector(".tpv-gloss-tooltip")) term.appendChild(tt);
+          });
         }
       });
     }
