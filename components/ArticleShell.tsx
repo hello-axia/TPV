@@ -189,27 +189,32 @@ export default function ArticleShell({
     function handleScroll() { closeTooltip(); }
 
     // Desktop hover — only on non-touch devices
-    function handleMouseEnter(e: MouseEvent) {
-      if ('ontouchstart' in window) return; // skip on touch devices
-      if (activeTerm) return; // don't hover if one is click-open
-      const term = (e.target as HTMLElement).closest(".tpv-gloss-term");
-      if (term) openTooltip(term);
+   // Attach hover only to actual term elements, not document
+    // mouseenter/mouseleave don't bubble and don't fire on iOS touch
+    const termEls = document.querySelectorAll(".tpv-gloss-term");
+    
+    function handleTermEnter(e: Event) {
+      if (activeTerm) return;
+      openTooltip(e.currentTarget as Element);
     }
-
-    function handleMouseLeave(e: MouseEvent) {
-      if ('ontouchstart' in window) return;
+    function handleTermLeave() {
       if (activeTerm) return;
       closeTooltip();
     }
 
+    termEls.forEach(el => {
+      el.addEventListener("mouseenter", handleTermEnter);
+      el.addEventListener("mouseleave", handleTermLeave);
+    });
+
     document.addEventListener("click", handleClick);
-    document.addEventListener("mouseover", handleMouseEnter);
-    document.addEventListener("mouseout", handleMouseLeave);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
+      termEls.forEach(el => {
+        el.removeEventListener("mouseenter", handleTermEnter);
+        el.removeEventListener("mouseleave", handleTermLeave);
+      });
       document.removeEventListener("click", handleClick);
-      document.removeEventListener("mouseover", handleMouseEnter);
-      document.removeEventListener("mouseout", handleMouseLeave);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [glossary]);
