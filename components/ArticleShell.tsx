@@ -123,87 +123,67 @@ export default function ArticleShell({
   useEffect(() => {
     if (!glossary || glossary.length === 0) return;
 
+    let activeTooltip: HTMLElement | null = null;
+    let activeTerm: Element | null = null;
+
+    function openTooltip(term: Element) {
+      const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
+      if (!tooltip) return;
+      const termRect = (term as HTMLElement).getBoundingClientRect();
+      const spaceAbove = termRect.top;
+      const topPx = spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 176;
+
+      tooltip.style.position = "fixed";
+      tooltip.style.left = "50%";
+      tooltip.style.transform = "translateX(-50%)";
+      tooltip.style.width = "min(280px, calc(100vw - 2rem))";
+      tooltip.style.top = topPx + "px";
+      tooltip.style.bottom = "auto";
+      tooltip.style.opacity = "1";
+      tooltip.style.pointerEvents = "auto";
+      tooltip.style.zIndex = "9999";
+
+      activeTooltip = tooltip;
+      activeTerm = term;
+      (term as HTMLElement).classList.add("tpv-gloss-active");
+    }
+
+    function closeTooltip() {
+      if (activeTooltip) {
+        activeTooltip.style.cssText = "";
+        activeTooltip = null;
+      }
+      if (activeTerm) {
+        (activeTerm as HTMLElement).classList.remove("tpv-gloss-active");
+        activeTerm = null;
+      }
+    }
+
     function handleClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
       const term = target.closest(".tpv-gloss-term");
+      const clickedTooltip = target.closest(".tpv-gloss-tooltip");
 
-     // Close all open tooltips and reset any fixed positioning
-     closeAll();
+      if (clickedTooltip) return; // ignore clicks inside tooltip
 
-      // If click was on a term, open it (unless we just closed it)
       if (term) {
         e.stopPropagation();
-        const wasActive = term.getAttribute("data-was-active") === "1";
-        if (!wasActive) {
-          term.classList.add("tpv-gloss-active");
-
-          // On mobile: nudge tooltip so it never bleeds off screen edges
-          const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
-          if (tooltip) {
-            const termRect = (term as HTMLElement).getBoundingClientRect();
-            const spaceAbove = termRect.top;
-          
-            // Teleport to body to escape any CSS transform ancestors
-            document.body.appendChild(tooltip);
-          
-            tooltip.style.cssText = `
-    position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    width: min(280px, calc(100vw - 2rem));
-    z-index: 9999;
-    top: ${spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 168}px;
-    bottom: auto;
-    opacity: 1;
-    pointer-events: auto;
-  `;
-  tooltip.onclick = (ev) => ev.stopPropagation();
-          }
+        if (term === activeTerm) {
+          closeTooltip(); // toggle off
+        } else {
+          closeTooltip();
+          openTooltip(term);
         }
+      } else {
+        closeTooltip();
       }
     }
 
-    // Track which term was active before the click so we can toggle
-    function handleMouseDown(e: MouseEvent) {
-      const target = e.target as HTMLElement;
-      const term = target.closest(".tpv-gloss-term");
-      document.querySelectorAll(".tpv-gloss-term").forEach((el) =>
-        el.removeAttribute("data-was-active")
-      );
-      if (term?.classList.contains("tpv-gloss-active")) {
-        term.setAttribute("data-was-active", "1");
-      }
-    }
+    function handleScroll() { closeTooltip(); }
 
-    function closeAll() {
-      document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
-        el.classList.remove("tpv-gloss-active");
-      });
-      document.querySelectorAll(".tpv-gloss-tooltip").forEach((t) => {
-        const tt = t as HTMLElement;
-        tt.style.cssText = "";
-        // If teleported to body, move back into its term
-        if (tt.parentElement === document.body) {
-          const termName = tt.querySelector(".tpv-gloss-tooltip-term")?.textContent?.trim().toLowerCase();
-          if (termName) {
-            const allTerms = document.querySelectorAll(".tpv-gloss-term");
-            allTerms.forEach((term) => {
-              if (term.textContent?.trim().toLowerCase().includes(termName)) {
-                term.appendChild(tt);
-              }
-            });
-          }
-        }
-      });
-    }
-
-    function handleScroll() { closeAll(); }
-
-    document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("click", handleClick);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("click", handleClick);
       window.removeEventListener("scroll", handleScroll);
     };
@@ -415,7 +395,7 @@ export default function ArticleShell({
 
         {/* ── ARTICLE LAYOUT ── */}
         <div className="tpv-article">
-          <section className="prose fade-up-delay-1" style={{ minWidth: 0 }}>
+        <section className="prose" style={{ minWidth: 0 }}>
             {children}
             {glossary && glossary.length > 0 && (
               <GlossarySection entries={glossary} />
