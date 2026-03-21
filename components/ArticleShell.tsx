@@ -172,18 +172,20 @@ if (tooltip) {
     tooltip.style.bottom = "calc(100% + 8px)";
   }
 
-  const TOOLTIP_W = 260;
-  const PAD = 12;
-
-  // Where we want the tooltip's left edge to be in viewport coords
-  let desiredViewportLeft = termRect.left + termRect.width / 2 - TOOLTIP_W / 2;
-  // Clamp to viewport
-  desiredViewportLeft = Math.max(PAD, Math.min(desiredViewportLeft, window.innerWidth - TOOLTIP_W - PAD));
-
-  // tooltip left is relative to the term (position:relative)
-  // so subtract the term's own left edge in viewport coords
-  tooltip.style.left = desiredViewportLeft + "px";
-  tooltip.style.transform = "none";
+  // On mobile: center on screen using fixed positioning
+  if (window.innerWidth <= 768) {
+    tooltip.style.position = "fixed";
+    tooltip.style.left = "50%";
+    tooltip.style.transform = "translateX(-50%)";
+    tooltip.style.width = "min(300px, calc(100vw - 2rem))";
+    tooltip.style.bottom = "auto";
+    tooltip.style.top = (termRect.top - 8 + window.scrollY > 200
+      ? termRect.top - 8 - 160
+      : termRect.bottom + 8) + "px";
+  } else {
+    tooltip.style.left = "50%";
+    tooltip.style.transform = "translateX(-50%)";
+  }
 }
         }
       }
