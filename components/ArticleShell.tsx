@@ -182,7 +182,7 @@ if (tooltip) {
 
   // tooltip left is relative to the term (position:relative)
   // so subtract the term's own left edge in viewport coords
-  tooltip.style.left = (desiredViewportLeft - termRect.left) + "px";
+  tooltip.style.left = desiredViewportLeft + "px";
   tooltip.style.transform = "none";
 }
         }
