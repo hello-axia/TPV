@@ -157,7 +157,10 @@ export default function ArticleShell({
         activeTooltip = null;
       }
       if (activeTerm) {
-        (activeTerm as HTMLElement).classList.remove("tpv-gloss-active");
+        const el = activeTerm as HTMLElement;
+        el.classList.remove("tpv-gloss-active");
+        el.classList.add("tpv-gloss-closing");
+        setTimeout(() => el.classList.remove("tpv-gloss-closing"), 300);
         activeTerm = null;
       }
     }

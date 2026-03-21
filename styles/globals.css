@@ -745,7 +745,7 @@
 }
 
 @media (hover: hover) {
-  .tpv-gloss-term:hover .tpv-gloss-tooltip {
+  .tpv-gloss-term:not(.tpv-gloss-closing):hover .tpv-gloss-tooltip {
     opacity: 1;
     pointer-events: auto;
   }
