@@ -150,7 +150,10 @@ export default function ArticleShell({
 
     function closeTooltip() {
       if (activeTooltip) {
-        activeTooltip.style.cssText = "";
+        activeTooltip.style.opacity = "0";
+        activeTooltip.style.pointerEvents = "none";
+        const t = activeTooltip;
+        setTimeout(() => { t.style.cssText = ""; }, 150);
         activeTooltip = null;
       }
       if (activeTerm) {
