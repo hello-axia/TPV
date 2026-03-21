@@ -188,10 +188,28 @@ export default function ArticleShell({
 
     function handleScroll() { closeTooltip(); }
 
+    // Desktop hover — only on non-touch devices
+    function handleMouseEnter(e: MouseEvent) {
+      if ('ontouchstart' in window) return; // skip on touch devices
+      if (activeTerm) return; // don't hover if one is click-open
+      const term = (e.target as HTMLElement).closest(".tpv-gloss-term");
+      if (term) openTooltip(term);
+    }
+
+    function handleMouseLeave(e: MouseEvent) {
+      if ('ontouchstart' in window) return;
+      if (activeTerm) return;
+      closeTooltip();
+    }
+
     document.addEventListener("click", handleClick);
+    document.addEventListener("mouseover", handleMouseEnter);
+    document.addEventListener("mouseout", handleMouseLeave);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       document.removeEventListener("click", handleClick);
+      document.removeEventListener("mouseover", handleMouseEnter);
+      document.removeEventListener("mouseout", handleMouseLeave);
       window.removeEventListener("scroll", handleScroll);
     };
   }, [glossary]);

@@ -742,12 +742,6 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-@media (hover: hover) {
-  .tpv-gloss-term:not(.tpv-gloss-closing):hover .tpv-gloss-tooltip {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
 .tpv-gloss-term:focus .tpv-gloss-tooltip {
   opacity: 1;
   pointer-events: auto;
