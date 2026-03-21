@@ -744,7 +744,6 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.tpv-gloss-term:hover .tpv-gloss-tooltip,
 .tpv-gloss-term:focus .tpv-gloss-tooltip {
   opacity: 1;
   pointer-events: auto;
