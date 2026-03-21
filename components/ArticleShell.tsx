@@ -172,22 +172,18 @@ if (tooltip) {
     tooltip.style.bottom = "calc(100% + 8px)";
   }
 
- // Calculate position from term rect — no tooltip measurement needed
- const TOOLTIP_W = 260;
- const PAD = 12;
- 
- // Center tooltip on the term
- let offsetX = termRect.left + termRect.width / 2 - TOOLTIP_W / 2;
- // Clamp so it never goes off either edge
- offsetX = Math.max(PAD, Math.min(offsetX, window.innerWidth - TOOLTIP_W - PAD));
- 
- // Position relative to the term's parent (which is position:relative)
- // We need left relative to the term element itself
- const termLeft = termRect.left;
- const relativeLeft = offsetX - termLeft;
- 
- tooltip.style.left = relativeLeft + "px";
- tooltip.style.transform = "none";
+  const TOOLTIP_W = 260;
+  const PAD = 12;
+
+  // Where we want the tooltip's left edge to be in viewport coords
+  let desiredViewportLeft = termRect.left + termRect.width / 2 - TOOLTIP_W / 2;
+  // Clamp to viewport
+  desiredViewportLeft = Math.max(PAD, Math.min(desiredViewportLeft, window.innerWidth - TOOLTIP_W - PAD));
+
+  // tooltip left is relative to the term (position:relative)
+  // so subtract the term's own left edge in viewport coords
+  tooltip.style.left = (desiredViewportLeft - termRect.left) + "px";
+  tooltip.style.transform = "none";
 }
         }
       }
