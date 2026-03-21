@@ -537,8 +537,7 @@
   display: block;
 }
 /* ── Tooltip click-to-open ── */
-.tpv-gloss-term .tpv-gloss-tooltip { opacity: 0; pointer-events: none; }
-.tpv-gloss-term.tpv-gloss-active .tpv-gloss-tooltip { opacity: 1; pointer-events: auto; }
+.tpv-gloss-term:not(.tpv-gloss-closing):hover .tpv-gloss-tooltip { opacity: 1; pointer-events: auto; }
 
 /* ── Sources grid ── */
 .tpv-sources { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border); }
