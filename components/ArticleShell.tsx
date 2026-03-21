@@ -160,7 +160,6 @@ if (tooltip) {
 
   const termRect = (term as HTMLElement).getBoundingClientRect();
   const tooltipHeight = 160; // estimated tooltip height in px
-  const PAD = 12;
   const spaceAbove = termRect.top;
   const spaceBelow = window.innerHeight - termRect.bottom;
 
@@ -173,36 +172,22 @@ if (tooltip) {
     tooltip.style.bottom = "calc(100% + 8px)";
   }
 
-  // Horizontal: center it, then nudge if it bleeds off screen
-  tooltip.style.left = "50%";
-  tooltip.style.transform = "translateX(-50%)";
-
-// On mobile, switch to fixed positioning to avoid overflow clipping
-requestAnimationFrame(() => {
-  if (window.innerWidth <= 600) {
-    const termR = (term as HTMLElement).getBoundingClientRect();
-    const tooltipWidth = Math.min(220, window.innerWidth - 24);
-    let left = termR.left + termR.width / 2 - tooltipWidth / 2;
-    // Clamp to viewport
-    left = Math.max(12, Math.min(left, window.innerWidth - tooltipWidth - 12));
-    const showBelow = termR.top < 180;
-    tooltip.style.position = "fixed";
-    tooltip.style.width = tooltipWidth + "px";
-    tooltip.style.left = left + "px";
-    tooltip.style.transform = "none";
-    tooltip.style.bottom = showBelow ? "auto" : (window.innerHeight - termR.top + 8) + "px";
-    tooltip.style.top = showBelow ? (termR.bottom + 8) + "px" : "auto";
-  } else {
-    const tr = tooltip.getBoundingClientRect();
-    if (tr.left < PAD) {
-      const nudge = PAD - tr.left;
-      tooltip.style.transform = `translateX(calc(-50% + ${nudge}px))`;
-    } else if (tr.right > window.innerWidth - PAD) {
-      const nudge = tr.right - (window.innerWidth - PAD);
-      tooltip.style.transform = `translateX(calc(-50% - ${nudge}px))`;
-    }
-  }
-});
+ // Calculate position from term rect — no tooltip measurement needed
+ const TOOLTIP_W = 260;
+ const PAD = 12;
+ 
+ // Center tooltip on the term
+ let offsetX = termRect.left + termRect.width / 2 - TOOLTIP_W / 2;
+ // Clamp so it never goes off either edge
+ offsetX = Math.max(PAD, Math.min(offsetX, window.innerWidth - TOOLTIP_W - PAD));
+ 
+ // Position relative to the term's parent (which is position:relative)
+ // We need left relative to the term element itself
+ const termLeft = termRect.left;
+ const relativeLeft = offsetX - termLeft;
+ 
+ tooltip.style.left = relativeLeft + "px";
+ tooltip.style.transform = "none";
 }
         }
       }
