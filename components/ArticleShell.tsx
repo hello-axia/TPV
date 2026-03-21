@@ -176,23 +176,14 @@ export default function ArticleShell({
     }
 
     function closeAll() {
+      // Remove active class from all terms
       document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
         el.classList.remove("tpv-gloss-active");
       });
-      // Find teleported tooltips in body and put them back
-      document.querySelectorAll(".tpv-gloss-term").forEach((termEl) => {
-        if (!termEl.querySelector(".tpv-gloss-tooltip")) {
-          // tooltip was teleported — find it in body
-          const termName = termEl.querySelector(".tpv-gloss-tooltip-term");
-          document.body.querySelectorAll(":scope > .tpv-gloss-tooltip").forEach((t) => {
-            const tt = t as HTMLElement;
-            tt.style.cssText = "";
-            termEl.appendChild(tt);
-          });
-        } else {
-          const t = termEl.querySelector(".tpv-gloss-tooltip") as HTMLElement;
-          if (t) t.style.cssText = "";
-        }
+      // Reset ALL tooltips wherever they are — body or inside terms
+      document.querySelectorAll(".tpv-gloss-tooltip").forEach((t) => {
+        const tt = t as HTMLElement;
+        tt.style.cssText = "";
       });
     }
 
