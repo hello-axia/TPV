@@ -132,7 +132,7 @@ export default function ArticleShell({
 
       // On mobile only: use fixed positioning to escape transform ancestor
       // On desktop: CSS hover handles it, JS just adds active class
-      if (window.matchMedia("(hover: none)").matches) {
+      if ('ontouchstart' in window || window.matchMedia("(hover: none)").matches) {
         const termRect = (term as HTMLElement).getBoundingClientRect();
         const spaceAbove = termRect.top;
         const topPx = spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 176;
