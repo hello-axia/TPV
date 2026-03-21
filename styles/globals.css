@@ -746,14 +746,14 @@
 
 @media (max-width: 600px) {
   .tpv-gloss-tooltip {
-    width: 200px;
-    left: 0 !important;
-    transform: translateX(0) !important;
-    right: auto;
-  }
-  .tpv-gloss-term:nth-child(n) .tpv-gloss-tooltip {
-    left: 0 !important;
-    transform: none !important;
+    position: fixed !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: 320px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    top: auto !important;
+    bottom: 5rem !important;
+    right: auto !important;
   }
 }
 
