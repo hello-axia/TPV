@@ -132,12 +132,10 @@ export default function ArticleShell({
       el.classList.remove("tpv-gloss-active");
       const t = el.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
       if (t) {
-        t.style.position = "";
-        t.style.width = "";
-        t.style.left = "";
-        t.style.top = "";
-        t.style.bottom = "";
-        t.style.transform = "";
+        if (t.parentElement === document.body) {
+          el.appendChild(t);
+        }
+        t.style.cssText = "";
       }
     });
 
@@ -150,43 +148,25 @@ export default function ArticleShell({
 
           // On mobile: nudge tooltip so it never bleeds off screen edges
           const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
-if (tooltip) {
-  // Reset previous positioning
-  tooltip.style.left = "";
-  tooltip.style.transform = "";
-  tooltip.style.right = "";
-  tooltip.style.bottom = "";
-  tooltip.style.top = "";
-
-  const termRect = (term as HTMLElement).getBoundingClientRect();
-  const tooltipHeight = 160; // estimated tooltip height in px
-  const spaceAbove = termRect.top;
-  const spaceBelow = window.innerHeight - termRect.bottom;
-
-  // Vertical: spawn below if not enough room above
-  if (spaceAbove < tooltipHeight + 16) {
-    tooltip.style.bottom = "auto";
-    tooltip.style.top = "calc(100% + 8px)";
-  } else {
-    tooltip.style.top = "auto";
-    tooltip.style.bottom = "calc(100% + 8px)";
-  }
-
-  // On mobile: center on screen using fixed positioning
-  if (window.innerWidth <= 768) {
-    tooltip.style.position = "fixed";
-    tooltip.style.left = "50%";
-    tooltip.style.transform = "translateX(-50%)";
-    tooltip.style.width = "min(300px, calc(100vw - 2rem))";
-    tooltip.style.bottom = "auto";
-    tooltip.style.top = (termRect.top - 8 + window.scrollY > 200
-      ? termRect.top - 8 - 160
-      : termRect.bottom + 8) + "px";
-  } else {
-    tooltip.style.left = "50%";
-    tooltip.style.transform = "translateX(-50%)";
-  }
-}
+          if (tooltip) {
+            const termRect = (term as HTMLElement).getBoundingClientRect();
+            const spaceAbove = termRect.top;
+          
+            // Teleport to body to escape any CSS transform ancestors
+            document.body.appendChild(tooltip);
+          
+            tooltip.style.cssText = `
+              position: fixed;
+              left: 50%;
+              transform: translateX(-50%);
+              width: min(280px, calc(100vw - 2rem));
+              z-index: 9999;
+              top: ${spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 168}px;
+              bottom: auto;
+              opacity: 1;
+              pointer-events: auto;
+            `;
+          }
         }
       }
     }
