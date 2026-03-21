@@ -744,11 +744,16 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
   .tpv-gloss-tooltip {
-    width: 220px;
-    left: 0;
-    transform: translateX(0);
+    width: 200px;
+    left: 0 !important;
+    transform: translateX(0) !important;
+    right: auto;
+  }
+  .tpv-gloss-term:nth-child(n) .tpv-gloss-tooltip {
+    left: 0 !important;
+    transform: none !important;
   }
 }
 

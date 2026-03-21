@@ -127,10 +127,19 @@ export default function ArticleShell({
       const target = e.target as HTMLElement;
       const term = target.closest(".tpv-gloss-term");
 
-      // Close all open tooltips
-      document.querySelectorAll(".tpv-gloss-active").forEach((el) =>
-        el.classList.remove("tpv-gloss-active")
-      );
+     // Close all open tooltips and reset any fixed positioning
+     document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
+      el.classList.remove("tpv-gloss-active");
+      const t = el.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
+      if (t) {
+        t.style.position = "";
+        t.style.width = "";
+        t.style.left = "";
+        t.style.top = "";
+        t.style.bottom = "";
+        t.style.transform = "";
+      }
+    });
 
       // If click was on a term, open it (unless we just closed it)
       if (term) {
@@ -168,8 +177,22 @@ if (tooltip) {
   tooltip.style.left = "50%";
   tooltip.style.transform = "translateX(-50%)";
 
-  // Need a tick for the browser to apply positioning before measuring
-  requestAnimationFrame(() => {
+// On mobile, switch to fixed positioning to avoid overflow clipping
+requestAnimationFrame(() => {
+  if (window.innerWidth <= 600) {
+    const termR = (term as HTMLElement).getBoundingClientRect();
+    const tooltipWidth = Math.min(220, window.innerWidth - 24);
+    let left = termR.left + termR.width / 2 - tooltipWidth / 2;
+    // Clamp to viewport
+    left = Math.max(12, Math.min(left, window.innerWidth - tooltipWidth - 12));
+    const showBelow = termR.top < 180;
+    tooltip.style.position = "fixed";
+    tooltip.style.width = tooltipWidth + "px";
+    tooltip.style.left = left + "px";
+    tooltip.style.transform = "none";
+    tooltip.style.bottom = showBelow ? "auto" : (window.innerHeight - termR.top + 8) + "px";
+    tooltip.style.top = showBelow ? (termR.bottom + 8) + "px" : "auto";
+  } else {
     const tr = tooltip.getBoundingClientRect();
     if (tr.left < PAD) {
       const nudge = PAD - tr.left;
@@ -178,7 +201,8 @@ if (tooltip) {
       const nudge = tr.right - (window.innerWidth - PAD);
       tooltip.style.transform = `translateX(calc(-50% - ${nudge}px))`;
     }
-  });
+  }
+});
 }
         }
       }
