@@ -156,16 +156,17 @@ export default function ArticleShell({
             document.body.appendChild(tooltip);
           
             tooltip.style.cssText = `
-              position: fixed;
-              left: 50%;
-              transform: translateX(-50%);
-              width: min(280px, calc(100vw - 2rem));
-              z-index: 9999;
-              top: ${spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 168}px;
-              bottom: auto;
-              opacity: 1;
-              pointer-events: auto;
-            `;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(280px, calc(100vw - 2rem));
+    z-index: 9999;
+    top: ${spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 168}px;
+    bottom: auto;
+    opacity: 1;
+    pointer-events: auto;
+  `;
+  tooltip.onclick = (ev) => ev.stopPropagation();
           }
         }
       }
@@ -183,11 +184,24 @@ export default function ArticleShell({
       }
     }
 
+    function handleScroll() {
+      document.querySelectorAll(".tpv-gloss-active").forEach((el) => {
+        el.classList.remove("tpv-gloss-active");
+        const t = el.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
+        if (t) {
+          if (t.parentElement === document.body) el.appendChild(t);
+          t.style.cssText = "";
+        }
+      });
+    }
+
     document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("click", handleClick);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("click", handleClick);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [glossary]);
 
