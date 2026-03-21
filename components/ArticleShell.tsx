@@ -129,19 +129,23 @@ export default function ArticleShell({
     function openTooltip(term: Element) {
       const tooltip = term.querySelector(".tpv-gloss-tooltip") as HTMLElement | null;
       if (!tooltip) return;
-      const termRect = (term as HTMLElement).getBoundingClientRect();
-      const spaceAbove = termRect.top;
-      const topPx = spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 176;
 
-      tooltip.style.position = "fixed";
-      tooltip.style.left = "50%";
-      tooltip.style.transform = "translateX(-50%)";
-      tooltip.style.width = "min(280px, calc(100vw - 2rem))";
-      tooltip.style.top = topPx + "px";
-      tooltip.style.bottom = "auto";
-      tooltip.style.opacity = "1";
-      tooltip.style.pointerEvents = "auto";
-      tooltip.style.zIndex = "9999";
+      // On mobile only: use fixed positioning to escape transform ancestor
+      // On desktop: CSS hover handles it, JS just adds active class
+      if (window.matchMedia("(hover: none)").matches) {
+        const termRect = (term as HTMLElement).getBoundingClientRect();
+        const spaceAbove = termRect.top;
+        const topPx = spaceAbove < 220 ? termRect.bottom + 8 : termRect.top - 176;
+        tooltip.style.position = "fixed";
+        tooltip.style.left = "50%";
+        tooltip.style.transform = "translateX(-50%)";
+        tooltip.style.width = "min(280px, calc(100vw - 2rem))";
+        tooltip.style.top = topPx + "px";
+        tooltip.style.bottom = "auto";
+        tooltip.style.opacity = "1";
+        tooltip.style.pointerEvents = "auto";
+        tooltip.style.zIndex = "9999";
+      }
 
       activeTooltip = tooltip;
       activeTerm = term;
@@ -150,10 +154,7 @@ export default function ArticleShell({
 
     function closeTooltip() {
       if (activeTooltip) {
-        activeTooltip.style.opacity = "0";
-        activeTooltip.style.pointerEvents = "none";
-        const t = activeTooltip;
-        setTimeout(() => { t.style.cssText = ""; }, 150);
+        activeTooltip.style.cssText = "";
         activeTooltip = null;
       }
       if (activeTerm) {
