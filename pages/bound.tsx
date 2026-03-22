@@ -327,7 +327,7 @@ export default function BoundPage() {
 
   async function fetchLeaderboardAndPercentile(sec?: number) {
     try {
-      const lb = await fetch(`/api/bound/leaderboard?day=${localDayKeyState}`);
+      const lb = await fetch(`/api/bound/leaderboard?day=${localDayKeyState}&puzzle_id=${puzzleNumber}`);
       if (lb.ok) {
         const j = await lb.json();
         setLeaderboard(j.leaderboard ?? []);

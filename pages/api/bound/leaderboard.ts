@@ -7,17 +7,23 @@ const supabase = createClient(
 );
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { day } = req.query;
+  const { day, puzzle_id } = req.query;
   if (!day || typeof day !== "string") {
     return res.status(400).json({ error: "Missing day param" });
   }
 
-  const { data: submissions, error } = await supabase
+  let query = supabase
     .from("bound_submissions")
     .select("seconds, user_id, word")
     .eq("local_day_key", day)
     .order("seconds", { ascending: true })
     .limit(5);
+
+  if (puzzle_id && typeof puzzle_id === "string") {
+    query = query.eq("puzzle_id", parseInt(puzzle_id, 10));
+  }
+
+  const { data: submissions, error } = await query;
 
   if (error) return res.status(500).json({ error: error.message });
 
