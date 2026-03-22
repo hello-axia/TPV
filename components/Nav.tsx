@@ -87,7 +87,7 @@ export default function Nav() {
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "rgba(12,12,11,0.92)",
+          background: "var(--header-bg)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border)",
         }}
@@ -195,7 +195,7 @@ export default function Nav() {
         {/* CHIN — desktop nav */}
         <div className="tpv-chin" style={{
           borderTop: "1px solid var(--border)",
-          background: "rgba(12,12,11,0.92)",
+          background: "var(--header-bg)",
           backdropFilter: "blur(12px)",
         }}>
           <div style={{

@@ -214,6 +214,22 @@
       .fact-grid { grid-template-columns: 1fr; }
       .two-sides { grid-template-columns: 1fr; }
     }
+    @media (prefers-color-scheme: light) {
+      .tpv-prose { color: var(--text); }
+      .tpv-prose p { color: var(--text-dim); }
+      .tpv-prose h2 { color: var(--text) !important; border-bottom-color: var(--border) !important; }
+      .tpv-prose strong { color: var(--text); }
+      .tpv-prose li { color: var(--text-faint); }
+      .fact-grid { background: var(--border); border-color: var(--border); }
+      .fact-item { background: var(--bg2); }
+      .fact-value { color: var(--text); }
+      .two-sides { background: var(--border); }
+      .side-card { background: var(--bg2); }
+      .callout { background: var(--gold-dim); color: var(--text); }
+      .tpv-sources { border-top-color: var(--border); }
+      .tpv-sources-list { border-color: var(--border); }
+      .tpv-source-item { border-bottom-color: var(--border); color: var(--text-faint); }
+    }
   </style>
   
   <span class="section-marker">I. What Happened</span>

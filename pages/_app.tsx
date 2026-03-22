@@ -8,7 +8,8 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-      <title>The People's Verdict</title>
+        <title>The People's Verdict</title>
+        <meta name="color-scheme" content="light dark" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png" />

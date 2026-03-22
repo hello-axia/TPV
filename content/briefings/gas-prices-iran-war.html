@@ -142,6 +142,29 @@
     .scenarios { grid-template-columns: 1fr; }
     .pb-label { min-width: 110px; font-size: 0.75rem; }
   }
+  @media (prefers-color-scheme: light) {
+    .tpv-prose p { color: var(--text-dim); }
+    .tpv-prose h2 { color: var(--text) !important; border-bottom-color: var(--border) !important; }
+    .tpv-prose strong { color: var(--text); }
+    .fact-grid { background: var(--border); border-color: var(--border); }
+    .fact-item { background: var(--bg2); }
+    .fact-value { color: var(--text); }
+    .price-breakdown { background: var(--bg2); border-color: var(--border); }
+    .pb-row { border-bottom-color: var(--border); }
+    .pb-bar-wrap { background: var(--border-light); }
+    .scenarios { background: var(--border); }
+    .scenario-card { background: var(--bg2); }
+    .scenario-price { color: var(--text); }
+    .scenario-desc { color: var(--text-faint); }
+    .callout { background: var(--gold-dim); color: var(--text); }
+    .callout-red { background: rgba(231,76,60,0.05); color: var(--text-faint); }
+    .ripple-item { border-bottom-color: var(--border); }
+    .ripple-title { color: var(--text); }
+    .ripple-desc { color: var(--text-faint); }
+    .tpv-sources { border-top-color: var(--border); }
+    .tpv-sources-list { border-color: var(--border); }
+    .tpv-source-item { border-bottom-color: var(--border); color: var(--text-faint); }
+  }
 </style>
 
 <!-- I. THE RECAP -->

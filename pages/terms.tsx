@@ -106,7 +106,7 @@ export default function TermsPage() {
                   fontFamily: "var(--font-body)",
                   fontSize: "0.95rem",
                   lineHeight: 1.8,
-                  color: "#d4cec8",
+                  color: "var(--text-dim)",
                   marginBottom: section.list ? "0.85rem" : 0,
                 }}>
                   {section.body}

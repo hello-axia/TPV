@@ -323,17 +323,17 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
           color: var(--gold);
         }
         .bar-track {
-  height: 3px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
-  overflow: hidden;
-}
+          height: 3px;
+          background: var(--border-light);
+          border-radius: 2px;
+          overflow: hidden;
+        }
         .bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.15);
-  transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
+          height: 100%;
+          border-radius: 2px;
+          background: var(--border-light);
+          transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
         .bar-fill.mine {
           background: var(--gold);
         }

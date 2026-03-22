@@ -40,6 +40,24 @@
     --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
   }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg:           #f9f7f4;
+      --bg2:          #f0ede8;
+      --bg3:          #e8e4de;
+      --bg-hover:     #e2ddd6;
+      --text:         #141210;
+      --text-dim:     #2a2520;
+      --text-faint:   #5a5248;
+      --border:       #dcd8d2;
+      --border-light: #ccc8c1;
+      --gold:         #9a7238;
+      --gold-dim:     rgba(154,114,56,0.10);
+      --gold-line:    rgba(154,114,56,0.28);
+      --header-bg: rgba(249,247,244,0.95);
+    }
+  }
    
    /* ---- Reset ---- */
    *, *::before, *::after {
@@ -201,7 +219,7 @@
   font-family: var(--font-body);
   font-size: 1.05rem;
   line-height: 1.85;
-  color: #d4cec8;
+  color: var(--text-dim);
 }
 
 .prose h2 {
@@ -238,7 +256,7 @@
   padding-left: 0;
   position: relative;
   margin-bottom: 1rem;
-  color: #d4cec8;
+  color: var(--text-dim);
   font-size: 1.05rem;
   line-height: 1.8;
   border-left: 2px solid var(--border);

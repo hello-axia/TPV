@@ -55,7 +55,7 @@ export default function AboutPage() {
             }}>
               A community built on writing.
             </h2>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
               TPV is text-only by design. Video and short form content is optimized for dopamine rushes — it can make a bad argument sound compelling and a good one seem boring. Writing can't hide behind delivery. Every claim has to stand on its own, every argument has to be precise enough to put into words, and every reader has to slow down enough to actually follow it. That's not a limitation. That's the point. The people who read TPV are here because they chose depth, and that shared choice is what makes this a community worth being part of.
             </p>
           </div>
@@ -76,10 +76,10 @@ export default function AboutPage() {
             }}>
               Your most politically informed friend, on paper.
             </h2>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
               Think about the most politically aware person you know. Not the loudest one. The one who, when something big happens, you actually want to talk to because they help you understand why people are fighting about it instead of just picking a side.
             </p>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>
               That's what TPV is trying to be. Sharp enough to cut through the noise, structured enough to actually be useful. Every piece maps out the real components of a disagreement: the values underneath it, the facts that matter, the incentives driving the loudest voices, and what a reasonable person might actually conclude.
             </p>
           </div>
@@ -100,10 +100,10 @@ export default function AboutPage() {
             }}>
               Most news tells you what happened. Almost none of it helps you think.
             </h2>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
               Breaking news gives you facts without context. Opinion gives you conclusions without reasoning. Social media gives you takes designed to make you angry, not informed.
             </p>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>
               TPV focuses on a different question: how should this actually be interpreted? Every article uses the same repeatable structure so you know what to expect, you can go straight to the sections that matter to you, and you walk away with a real sense of where you land and why.
             </p>
           </div>
@@ -124,10 +124,10 @@ export default function AboutPage() {
             }}>
               We end every Verdict with a question.
             </h2>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)", marginBottom: "0.85rem" }}>
               After breaking down the issue, we ask readers where they land. Not because we think votes settle anything, but because seeing how a politically diverse readership splits on a question is itself useful information.
             </p>
-            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "#d4cec8", fontFamily: "var(--font-body)" }}>
+            <p style={{ fontSize: "1rem", lineHeight: 1.8, color: "var(--text-dim)", fontFamily: "var(--font-body)" }}>
               You can see if you're in the majority, which camp you're closest to, and whether reading the breakdown changed anything. It turns a passive article into an actual conversation.
             </p>
           </div>
@@ -171,7 +171,7 @@ export default function AboutPage() {
                     gap: "0.5rem",
                     fontFamily: "var(--font-body)",
                     fontSize: "0.82rem",
-                    color: "#d4cec8",
+                    color: "var(--text-dim)",
                   }}>
                     <span style={{ color: "var(--gold)", fontSize: "0.55rem" }}>▸</span>
                     {item}
@@ -211,7 +211,7 @@ export default function AboutPage() {
                     gap: "0.5rem",
                     fontFamily: "var(--font-body)",
                     fontSize: "0.82rem",
-                    color: "#d4cec8",
+                    color: "var(--text-dim)"
                   }}>
                     <span style={{ color: "var(--gold)", fontSize: "0.55rem" }}>▸</span>
                     {item}
