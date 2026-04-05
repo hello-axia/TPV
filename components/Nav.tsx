@@ -24,6 +24,7 @@ function displayNameFromUser(u: User | null) {
 
 const links = [
   { href: "/", label: "Home", sub: null },
+  { href: "/bulletin", label: "The Bulletin", sub: "Daily morning update" },
   { href: "/verdicts", label: "Verdicts", sub: "Deep issue breakdowns" },
   { href: "/briefings", label: "Briefings", sub: "Quick context on what's trending" },
   { href: "/desk", label: "The Desk", sub: "Reader questions answered" },
@@ -93,24 +94,6 @@ export default function Nav() {
         }}
       >
 
-        {/* CONSTRUCTION BANNER */}
-        <div style={{
-          background: "rgba(180, 40, 40, 0.12)",
-          borderBottom: "1px solid rgba(180, 40, 40, 0.25)",
-          padding: "8px var(--space-lg)",
-          textAlign: "center",
-          fontFamily: "var(--font-body)",
-          fontSize: "0.75rem",
-          color: "var(--text-faint)",
-          letterSpacing: "0.02em",
-        }}>
-          TPV is being restructured. Will be back with daily updates by{" "}
-          <span style={{ color: "var(--text-dim)", fontWeight: 600 }}>April 5</span>.{" "}
-          <Link href="/bound" style={{ color: "var(--gold)", textDecoration: "none", fontWeight: 500 }}>
-            Bound
-          </Link>{" "}
-          continues daily as usual.
-        </div>
         {/* TOP BAR */}
         <div style={{
           maxWidth: 1100,

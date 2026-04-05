@@ -10,6 +10,7 @@ const supabase = createClient(
 const ADMIN_EMAIL = "ello.axia@gmail.com";
 
 const mainLinks = [
+  { href: "/bulletin", label: "The Bulletin" },
   { href: "/verdicts", label: "Verdicts" },
   { href: "/briefings", label: "Briefings" },
   { href: "/desk", label: "The Desk" },

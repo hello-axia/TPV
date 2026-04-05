@@ -74,7 +74,7 @@ export default function ArticleShell({
   glossary,
   slug,
 }: {
-  type: "Verdict" | "Briefing" | "The Desk";
+  type: "Verdict" | "Briefing" | "The Desk" | "The Bulletin";
   title: string;
   date: string;
   readTime?: string;

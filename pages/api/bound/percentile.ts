@@ -23,10 +23,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     .eq("local_day_key", day)
     .gt("seconds", sec);
 
-  if (!total || total === 0) {
-    return res.status(200).json({ percentile: null, total: 0 });
-  }
-
-  const percentile = Math.round(((slower ?? 0) / total) * 1000) / 10;
-  res.status(200).json({ percentile, total });
+    if (!total || total === 0) {
+      return res.status(200).json({ percentile: null, total: 0 });
+    }
+  
+    if (total === 1) {
+      return res.status(200).json({ percentile: 100, total: 1 });
+    }
+  
+    const percentile = Math.round(((slower ?? 0) / (total - 1)) * 100);
+    res.status(200).json({ percentile, total });
 }
