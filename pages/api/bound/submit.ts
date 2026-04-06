@@ -73,15 +73,12 @@ function basePointsFromAoA(aoaYears: number) {
 // Uses your smoothing: below + 0.5*count(bin)
 function percentileFromHistogram(counts: number[], bin: number) {
   const total = counts.reduce((a, b) => a + b, 0);
-  if (total <= 0) return 0;
-
-  let below = 0;
-  for (let i = 0; i < bin; i++) below += counts[i] || 0;
-
-  const inBin = counts[bin] || 0;
-  below += 0.5 * inBin;
-
-  return clamp(below / total, 0, 1);
+  if (total <= 0) return 1; // first player gets 100%
+  let slower = 0;
+  for (let i = bin + 1; i < counts.length; i++) slower += counts[i] || 0;
+  if (total === 1) return 1; // only player
+  const rank = total - slower;
+  return clamp((total - rank) / (total - 1), 0, 1);
 }
 
 // Supabase admin

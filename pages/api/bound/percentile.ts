@@ -31,6 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(200).json({ percentile: 100, total: 1 });
     }
   
-    const percentile = Math.round(((slower ?? 0) / (total - 1)) * 100);
-    res.status(200).json({ percentile, total });
+    const rank = total - (slower ?? 0);
+    const percentile = total === 1 ? 100 : Math.round(((total - rank) / (total - 1)) * 100);
+    res.status(200).json({ percentile, total, rank });
 }
