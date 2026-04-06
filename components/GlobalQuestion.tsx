@@ -96,13 +96,6 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     }
   }
 
-  useEffect(() => {
-    if (!authReady) return;
-    if (user && !accessToken) return;
-    firstLoadDone.current = false;
-    load({ silent: false });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionId, authReady, user, accessToken]);
 
   useEffect(() => {
     let mounted = true;
@@ -207,7 +200,7 @@ export default function GlobalQuestion({ questionId }: { questionId: string }) {
     ? { A: q.a_text, B: q.b_text, C: q.c_text, D: q.d_text }
     : { A: "", B: "", C: "", D: "" };
 
-  if (!authReady || (loading && !q) || !q) return null;
+    if (!q) return null;
 
   const peerMessage = voted ? getPeerMessage(voted, totals, pct) : null;
 

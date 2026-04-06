@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { injectGlossarySpans } from "../../lib/injectGlossarySpans";
 import type { GlossaryEntry } from "../../lib/injectGlossarySpans";
 import ArticleShell from "../../components/ArticleShell";
+import GlobalQuestion from "../../components/GlobalQuestion";
 
 // ── Market ticker types ──
 type MarketTicker = {
@@ -173,25 +174,33 @@ type Props = {
     subhead: string;
     readTime?: string;
     glossary: GlossaryEntry[] | null;
+    questionId?: string | null;
   };
   content: string;
 };
 
 export default function BulletinPage({ slug, meta, content }: Props) {
   return (
-    <ArticleShell
-      type="The Bulletin"
-      title={meta.title}
-      date={meta.date}
-      readTime={meta.readTime}
-      summary={meta.subhead}
-      backHref="/bulletin"
-      showSummary={true}
-      glossary={meta.glossary}
-      slug={slug}
-    >
-      <BulletinContent html={content} />
-    </ArticleShell>
+    <>
+      <ArticleShell
+        type="The Bulletin"
+        title={meta.title}
+        date={meta.date}
+        readTime={meta.readTime}
+        summary={meta.subhead}
+        backHref="/bulletin"
+        showSummary={true}
+        glossary={meta.glossary}
+        slug={slug}
+      >
+        <BulletinContent html={content} />
+      </ArticleShell>
+      {meta.questionId && (
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 1.25rem 4rem" }}>
+          <GlobalQuestion questionId={meta.questionId} />
+        </div>
+      )}
+    </>
   );
 }
 
@@ -215,11 +224,14 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       ? injectGlossarySpans(bulletin.content, bulletin.meta.glossary)
       : bulletin.content;
 
-  return {
-    props: {
-      slug,
-      meta: bulletin.meta,
-      content: injectedContent,
-    },
-  };
+      return {
+        props: {
+          slug,
+          meta: {
+            ...bulletin.meta,
+            questionId: bulletin.meta.questionId ?? null,
+          },
+          content: injectedContent,
+        },
+      };
 };

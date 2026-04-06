@@ -13,6 +13,7 @@ export type BulletinMeta = {
   subhead: string;
   readTime?: string;
   publishAt?: string | null;
+  questionId?: string | null;
 };
 
 const bulletinDir = path.join(process.cwd(), "content", "bulletin");
@@ -77,9 +78,10 @@ export function getBulletinBySlug(slug: string): {
     readTime?: string;
     publishAt?: string | null;
     glossary: GlossaryEntry[] | null;
+    questionId?: string | null;
   };
   content: string;
-} {
+}{
   const fullPath = path.join(bulletinDir, `${slug}.html`);
   const raw = fs.readFileSync(fullPath, "utf8");
 
@@ -109,6 +111,7 @@ export function getBulletinBySlug(slug: string): {
       readTime: meta.readTime ? String(meta.readTime) : undefined,
       publishAt: meta.publishAt ? String(meta.publishAt) : null,
       glossary: glossary.length > 0 ? glossary : null,
+      questionId: meta.questionId ? String(meta.questionId) : null,
     },
     content,
   };

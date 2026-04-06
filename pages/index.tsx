@@ -299,14 +299,14 @@ function WeeklyCarousel() {
         })}
       </div>
 
-      {/* Panel */}
-      <div style={{
+     {/* Panel */}
+     <div style={{
         border: "1px solid var(--border)",
         borderTop: "none",
         background: "var(--bg2)",
         borderRadius: "0 0 4px 4px",
         padding: "1.5rem",
-        minHeight: 120,
+        minHeight: 100,
       }}>
         {activeDay === -1 ? (
           <p style={{
@@ -319,7 +319,47 @@ function WeeklyCarousel() {
             Day 1 unlocks Monday, April 6. Come back then for the first section.
           </p>
         ) : (
-          <CarouselDayContent day={selectedDay} />
+          <div>
+            <div style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.62rem",
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase" as const,
+              color: "var(--gold)",
+              marginBottom: "0.4rem",
+            }}>
+              {["The Overview","The Disagreement","The Architecture","The Record","The Verdict"][selectedDay]}
+            </div>
+            <p style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.88rem",
+              color: "var(--text-dim)",
+              lineHeight: 1.65,
+              margin: "0 0 1rem",
+            }}>
+              {[
+                "NYC's youngest mayor in modern history. 95 days in. A $5.4B deficit, a budget standoff, and the question of whether socialist governance can survive contact with New York City.",
+                "The surface argument is about buses and grocery stores. The real argument is older. Two theories of what a city is for — and neither is obviously wrong.",
+                "Before you can evaluate Mamdani's policies, you have to know what they actually are. Four terms are doing most of the work in this debate — and all four are being used imprecisely.",
+                "The 95-day ledger. The wins, the stalls, and the unexpected. More complicated than either side wants to admit.",
+                "Ninety-five days is not enough to know if the model works. It is enough to identify what it's actually being tested on.",
+              ][selectedDay]}
+            </p>
+            <Link href="/bulletin/april-6-2026" style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase" as const,
+              color: "var(--gold)",
+              textDecoration: "none",
+              borderBottom: "1px solid var(--gold-line)",
+              paddingBottom: "2px",
+            }}>
+              Read in today's bulletin →
+            </Link>
+          </div>
         )}
       </div>
     </div>
