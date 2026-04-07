@@ -163,7 +163,7 @@ function BulletinHero({ bulletin }: { bulletin: BulletinPreview }) {
 }
 
 // ── Weekly Carousel (placeholder — Step 5 will flesh this out) ─────
-function WeeklyCarousel() {
+function WeeklyCarousel({ bulletinSlug }: { bulletinSlug: string }) {
   const UNLOCK_DATES = [
     new Date("2026-04-06T00:00:00"), // Day 1 Mon
     new Date("2026-04-07T00:00:00"), // Day 2 Tue
@@ -346,7 +346,7 @@ function WeeklyCarousel() {
                 "Ninety-five days is not enough to know if the model works. It is enough to identify what it's actually being tested on.",
               ][selectedDay]}
             </p>
-            <Link href="/bulletin/april-6-2026" style={{
+            <Link href={`/bulletin/${bulletinSlug}`} style={{
               fontFamily: "var(--font-body)",
               fontSize: "0.72rem",
               fontWeight: 700,
@@ -979,7 +979,7 @@ export default function HomePage({
           {/* Left column — bulletin + carousel */}
           <div>
             <BulletinHero bulletin={latestBulletin} />
-            <WeeklyCarousel />
+            <WeeklyCarousel bulletinSlug={latestBulletin?.slug ?? ""} />
           </div>
 
           {/* Right column — recent articles */}

@@ -66,7 +66,7 @@ export function injectGlossarySpans(
           // Only match exact tooltip container — "tpv-gloss-tooltip" followed by " or ' or space
           // This excludes tpv-gloss-tooltip-term, tpv-gloss-tooltip-def, tpv-gloss-tooltip-link
           if (/tpv-gloss-tooltip["' ]/.test(seg)) depth.glossTooltip++;
-          if (/tpv-glossary/.test(seg))      depth.glossary++;
+          if (/tpv-glossary|tpv-sources/.test(seg))      depth.glossary++;
           if (/^h[1-4]$/.test(tag))          depth.heading++;
         } else {
           // Mutually exclusive: one </span> decrements only one counter

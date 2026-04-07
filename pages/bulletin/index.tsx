@@ -20,52 +20,124 @@ function formatDisplayDate(dateStr: string) {
   });
 }
 
-export default function BulletinIndex({
-  bulletins,
-}: {
-  bulletins: BulletinMeta[];
-}) {
+function BulletinCard({ b }: { b: BulletinMeta }) {
+  return (
+    <Link
+      href={`/bulletin/${b.slug}`}
+      style={{ textDecoration: "none", color: "inherit", display: "block" }}
+      className="bulletin-card"
+    >
+      <div
+        style={{
+          borderTop: "1px solid var(--border)",
+          paddingTop: "1.25rem",
+          paddingBottom: "1.25rem",
+          transition: "opacity 0.15s ease",
+        }}
+      >
+        {/* Meta */}
+        <div
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.62rem",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--text-faint)",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginBottom: "0.65rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <span>{formatDisplayDate(b.date)}</span>
+          {b.readTime && (
+            <>
+              <span>·</span>
+              <span>{b.readTime}</span>
+            </>
+          )}
+          <span style={{ color: "var(--gold)" }}>· The Bulletin</span>
+        </div>
+
+        {/* Title */}
+        <div
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(1.1rem, 2vw, 1.35rem)",
+            lineHeight: 1.2,
+            color: "var(--text)",
+            marginBottom: "0.6rem",
+          }}
+        >
+          {b.title}
+        </div>
+
+        {/* Subhead */}
+        <div
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.85rem",
+            lineHeight: 1.7,
+            color: "var(--text-faint)",
+          }}
+        >
+          {b.subhead}
+        </div>
+
+        {/* Read link */}
+        <div
+          style={{
+            marginTop: "0.75rem",
+            fontFamily: "var(--font-body)",
+            fontSize: "0.65rem",
+            fontWeight: 600,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--gold)",
+            opacity: 0,
+            transition: "opacity 0.15s ease",
+          }}
+          className="read-link"
+        >
+          Read →
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+export default function BulletinIndex({ bulletins }: { bulletins: BulletinMeta[] }) {
   return (
     <>
       <OgHead title="The Bulletin — TPV" type="default" />
-      <main
-        style={{ maxWidth: 1100, margin: "0 auto", padding: "3rem 1.25rem 5rem" }}
-      >
+      <main style={{ maxWidth: 1100, margin: "0 auto", padding: "2.5rem 1.25rem 5rem" }}>
+
         {/* Header */}
-        <div style={{ marginBottom: "2.5rem" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.65rem",
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "var(--gold)",
-              marginBottom: "0.75rem",
-            }}
-          >
-            The Bulletin
-          </div>
+        <div className="fade-up" style={{ marginBottom: "2rem", maxWidth: 640 }}>
+          <div className="eyebrow" style={{ marginBottom: "1rem" }}>The Bulletin</div>
           <h1
             style={{
               fontFamily: "var(--font-display)",
-              fontSize: "clamp(2rem, 5vw, 3rem)",
+              fontSize: "clamp(1.9rem, 4vw, 2.75rem)",
               fontWeight: 400,
-              color: "var(--text)",
               lineHeight: 1.1,
               letterSpacing: "-0.02em",
-              marginBottom: "0.75rem",
+              color: "var(--text)",
+              marginBottom: "1rem",
             }}
           >
-            Daily updates, every morning.
+            Daily updates,<br /><em>every morning.</em>
           </h1>
+          <div className="divider" />
           <p
             style={{
               fontFamily: "var(--font-body)",
-              fontSize: "1rem",
+              fontSize: "0.95rem",
               lineHeight: 1.75,
               color: "var(--text-dim)",
-              maxWidth: 540,
+              marginTop: "1rem",
             }}
           >
             What you need to know before your day starts: markets, politics,
@@ -73,87 +145,38 @@ export default function BulletinIndex({
           </p>
         </div>
 
-        <div style={{ borderTop: "1px solid var(--border)", marginBottom: "2rem" }} />
+        <div style={{ borderTop: "1px solid var(--border)", margin: "0 0 0.5rem" }} />
 
-        {/* Bulletin list */}
+        {/* Grid */}
         {bulletins.length === 0 ? (
-          <p style={{ color: "var(--text-faint)", fontFamily: "var(--font-body)" }}>
+          <p style={{ color: "var(--text-faint)", fontFamily: "var(--font-body)", paddingTop: "1.5rem" }}>
             Nothing here yet. Check back tomorrow.
           </p>
         ) : (
-          <div style={{ display: "grid", gap: "0" }}>
-            {bulletins.map((b, i) => (
-              <Link
-                key={b.slug}
-                href={`/bulletin/${b.slug}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                <div
-                  style={{
-                    borderTop: i === 0 ? "none" : "1px solid var(--border)",
-                    padding: "1.5rem 0",
-                    display: "grid",
-                    gridTemplateColumns: "180px 1fr",
-                    gap: "2rem",
-                    alignItems: "start",
-                    transition: "opacity 0.15s",
-                  }}
-                  className="bulletin-row"
-                >
-                  {/* Date */}
-                  <div
-                    style={{
-                      fontFamily: "var(--font-body)",
-                      fontSize: "0.78rem",
-                      color: "var(--text-faint)",
-                      fontWeight: 500,
-                      paddingTop: "0.2rem",
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {formatDisplayDate(b.date)}
-                  </div>
-
-                  {/* Content */}
-                  <div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-display)",
-                        fontSize: "clamp(1.1rem, 2vw, 1.35rem)",
-                        color: "var(--text)",
-                        lineHeight: 1.25,
-                        marginBottom: "0.4rem",
-                        fontWeight: 400,
-                      }}
-                    >
-                      {b.title}
-                    </div>
-                    <div
-                      style={{
-                        fontFamily: "var(--font-body)",
-                        fontSize: "0.85rem",
-                        color: "var(--text-faint)",
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {b.subhead}
-                    </div>
-                  </div>
-                </div>
-              </Link>
+          <div className="bulletin-grid fade-up-delay-2">
+            {bulletins.map((b) => (
+              <BulletinCard key={b.slug} b={b} />
             ))}
           </div>
         )}
 
         <style jsx>{`
-          .bulletin-row:hover {
-            opacity: 0.72;
+          .bulletin-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0;
           }
-          @media (max-width: 600px) {
-            .bulletin-row {
-              grid-template-columns: 1fr !important;
-              gap: 0.4rem !important;
+          @media (min-width: 900px) {
+            .bulletin-grid {
+              grid-template-columns: repeat(3, 1fr);
+              gap: 0 2rem;
             }
+          }
+          :global(.bulletin-card:hover .read-link) {
+            opacity: 1 !important;
+          }
+          :global(.bulletin-card:hover > div) {
+            opacity: 0.8;
           }
         `}</style>
       </main>
@@ -162,7 +185,7 @@ export default function BulletinIndex({
 }
 
 export const getStaticProps: GetStaticProps = async () => {
-    const { getAllBulletinsMeta } = require("../../lib/bulletin");
-    const bulletins = getAllBulletinsMeta();
-    return { props: { bulletins } };
-  };
+  const { getAllBulletinsMeta } = require("../../lib/bulletin");
+  const bulletins = getAllBulletinsMeta();
+  return { props: { bulletins } };
+};
