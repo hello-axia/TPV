@@ -122,6 +122,42 @@ type Props = {
 
 export default function BulletinPage({ slug, meta, before, after, hasPoll }: Props) {
   const readerCount = useReaderCount(meta.questionId);
+
+  useEffect(() => {
+    (window as any).tpvCarousel = {
+      show: function(idx: number) {
+        document.querySelectorAll('[id^="tpv-panel-"]').forEach((p: any) => {
+          p.style.display = 'none';
+        });
+        const panel = document.getElementById('tpv-panel-' + idx);
+        if (panel) panel.style.display = 'block';
+
+        for (let i = 0; i < 5; i++) {
+          const tab = document.getElementById('tab-' + i) as any;
+          if (!tab) continue;
+          const isActive = i === idx;
+          tab.style.background = isActive ? 'var(--bg2)' : 'var(--bg3)';
+          tab.style.opacity = isActive ? '1' : '0.7';
+
+          const ind = tab.querySelector('.tab-active-indicator');
+          if (isActive && !ind) {
+            const s = document.createElement('span');
+            s.className = 'tab-active-indicator';
+            s.style.cssText = 'position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--gold);';
+            tab.appendChild(s);
+          } else if (!isActive && ind) {
+            ind.remove();
+          }
+
+          const dayLabel = tab.querySelector('span:first-child') as any;
+          const nameLabel = tab.querySelectorAll('span')[1] as any;
+          if (dayLabel) dayLabel.style.color = isActive ? 'var(--gold)' : 'var(--text-faint)';
+          if (nameLabel) nameLabel.style.color = isActive ? 'var(--text)' : 'var(--text-faint)';
+        }
+      }
+    };
+  }, []);
+
   return (
     <ArticleShell
       type="The Bulletin"
