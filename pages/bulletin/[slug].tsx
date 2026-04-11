@@ -115,12 +115,14 @@ type Props = {
     glossary: GlossaryEntry[] | null;
     questionId?: string | null;
   };
+  beforeReader: string;
   before: string;
   after: string;
   hasPoll: boolean;
+  hasReaderMarker: boolean;
 };
 
-export default function BulletinPage({ slug, meta, before, after, hasPoll }: Props) {
+export default function BulletinPage({ slug, meta, beforeReader, before, after, hasPoll, hasReaderMarker }: Props) {
   const readerCount = useReaderCount(meta.questionId);
 
   useEffect(() => {
@@ -169,7 +171,6 @@ export default function BulletinPage({ slug, meta, before, after, hasPoll }: Pro
       showSummary={true}
       glossary={meta.glossary}
       slug={slug}
-      readerCount={readerCount}
     >
       <style jsx global>{`
         .bulletin-prose .bulletin-item {
@@ -216,7 +217,32 @@ export default function BulletinPage({ slug, meta, before, after, hasPoll }: Pro
           }
         }
       `}</style>
-      <MarketTickerRow />
+     <article className="bulletin-prose" dangerouslySetInnerHTML={{ __html: beforeReader }} />
+      {hasReaderMarker && readerCount != null && readerCount > 0 && (
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          gap: "1rem", padding: "0.85rem 1.1rem", background: "var(--gold-dim)",
+          border: "1px solid var(--gold-line)", borderRadius: 3,
+          margin: "1.5rem 0 0", maxWidth: 720, flexWrap: "wrap",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--gold)", flexShrink: 0 }} />
+            <span style={{
+              fontFamily: "var(--font-body)", fontSize: "0.82rem",
+              color: "var(--text-dim)", fontWeight: 500,
+            }}>
+              {readerCount} {readerCount === 1 ? "reader has" : "readers have"} weighed in on this week's verdict.
+            </span>
+          </div>
+          <a href="#tpv-question" style={{
+            fontFamily: "var(--font-body)", fontSize: "0.72rem", fontWeight: 700,
+            letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--gold)",
+            textDecoration: "none", whiteSpace: "nowrap",
+          }}>
+            Where do you land? →
+          </a>
+        </div>
+      )}
       <article className="bulletin-prose" dangerouslySetInnerHTML={{ __html: before }} />
       {hasPoll && (
         <div style={{ marginTop: 16 }}>
@@ -255,18 +281,42 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     POLL_DIV
   );
 
+  const READER_DIV = `<div id="tpv-reader-marker"></div>`;
+
+  injectedContent = injectedContent.replace(
+    /<div[^>]+id="tpv-reader-marker"[^>]*><\/div>/,
+    READER_DIV
+  );
+  
   const splitIndex = injectedContent.indexOf(POLL_DIV);
-  const before = splitIndex >= 0 ? injectedContent.slice(0, splitIndex) : injectedContent;
-  const after = splitIndex >= 0 ? injectedContent.slice(splitIndex + POLL_DIV.length) : "";
+  const readerIndex = injectedContent.indexOf(READER_DIV);
+
+  let beforeReader: string;
+  let afterReader: string;
+
+  if (readerIndex >= 0) {
+    beforeReader = injectedContent.slice(0, readerIndex);
+    afterReader = injectedContent.slice(readerIndex + READER_DIV.length);
+  } else {
+    beforeReader = injectedContent;
+    afterReader = "";
+  }
+
+  const pollIndexInAfter = afterReader.indexOf(POLL_DIV);
+  const before = pollIndexInAfter >= 0 ? afterReader.slice(0, pollIndexInAfter) : afterReader;
+  const after = pollIndexInAfter >= 0 ? afterReader.slice(pollIndexInAfter + POLL_DIV.length) : "";
   const hasPoll = splitIndex >= 0 && !!bulletin.meta.questionId;
+  const hasReaderMarker = readerIndex >= 0;
 
   return {
     props: {
       slug,
       meta: { ...bulletin.meta, questionId: bulletin.meta.questionId ?? null },
+      beforeReader,
       before,
       after,
       hasPoll,
+      hasReaderMarker,
     },
   };
 };
