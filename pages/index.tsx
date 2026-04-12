@@ -976,11 +976,69 @@ export default function HomePage({
           gap: "2rem",
           alignItems: "start",
         }}>
-          {/* Left column — bulletin + carousel */}
-          <div>
-            <BulletinHero bulletin={latestBulletin} />
-            <WeeklyCarousel bulletinSlug={latestBulletin?.slug ?? ""} />
-          </div>
+          {/* Left column — bulletin + verdict card */}
+<div>
+  <BulletinHero bulletin={latestBulletin} />
+  {latestVerdicts.length > 0 && (() => {
+    const v = latestVerdicts[0];
+    return (
+      <div style={{
+        borderTop: "1px solid var(--border)",
+        paddingTop: "1.25rem",
+        marginBottom: "2.5rem",
+      }}>
+        <div style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "0.62rem",
+          fontWeight: 700,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "var(--gold)",
+          marginBottom: "0.3rem",
+        }}>
+          This week's verdict
+        </div>
+        <h2 style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "clamp(1.5rem, 3.5vw, 2.25rem)",
+          fontWeight: 400,
+          lineHeight: 1.15,
+          letterSpacing: "-0.02em",
+          color: "var(--text)",
+          marginBottom: "0.6rem",
+        }}>
+          {v.title}
+        </h2>
+        <p style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "0.95rem",
+          lineHeight: 1.65,
+          color: "var(--text-faint)",
+          marginBottom: "1.1rem",
+          maxWidth: 540,
+        }}>
+          {v.summary}
+        </p>
+        <Link href={`/verdicts/${v.slug}`} style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.4rem",
+          fontFamily: "var(--font-body)",
+          fontSize: "0.72rem",
+          fontWeight: 700,
+          letterSpacing: "0.1em",
+          textTransform: "uppercase",
+          color: "var(--gold)",
+          textDecoration: "none",
+          borderBottom: "1px solid var(--gold-line)",
+          paddingBottom: "2px",
+        }}>
+          Read the verdict →
+        </Link>
+      </div>
+    );
+  })()}
+</div>
 
           {/* Right column — recent articles */}
           <div className="recent-sidebar" style={{ display: "grid", gap: "1.25rem" }}>
@@ -1005,6 +1063,7 @@ export default function HomePage({
                 {[
                   { href: "/verdicts", label: "Verdicts" },
                   { href: "/briefings", label: "Briefings" },
+                  { href: "/desk", label: "The Desk" },
                 ].map((l) => (
                   <Link key={l.href} href={l.href} style={{
                     fontFamily: "var(--font-body)",

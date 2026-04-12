@@ -36,6 +36,9 @@ const VERDICT_TOC_ORDER: TocItem[] = [
   { id: "the-incentives",       label: "The incentives" },
   { id: "the-persuasion-point", label: "The persuasion point" },
   { id: "the-conclusion",       label: "The conclusion" },
+  { id: "the-architecture",     label: "The architecture" },
+  { id: "the-record",           label: "The record" },
+  { id: "the-verdict",          label: "The verdict" },
 ];
 
 
@@ -224,7 +227,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   // Inject glossary spans at build time — before React ever touches the HTML.
   // This avoids dangerouslySetInnerHTML re-renders wiping client-side DOM mutations.
-  if (meta.glossary && meta.glossary.length > 0) {
+  if (!isHtml && meta.glossary && meta.glossary.length > 0) {
     html = injectGlossarySpans(html, meta.glossary);
   }
 
