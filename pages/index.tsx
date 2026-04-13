@@ -162,210 +162,6 @@ function BulletinHero({ bulletin }: { bulletin: BulletinPreview }) {
   );
 }
 
-// ── Weekly Carousel (placeholder — Step 5 will flesh this out) ─────
-function WeeklyCarousel({ bulletinSlug }: { bulletinSlug: string }) {
-  const UNLOCK_DATES = [
-    new Date("2026-04-06T00:00:00"), // Day 1 Mon
-    new Date("2026-04-07T00:00:00"), // Day 2 Tue
-    new Date("2026-04-08T00:00:00"), // Day 3 Wed
-    new Date("2026-04-09T00:00:00"), // Day 4 Thu
-    new Date("2026-04-10T00:00:00"), // Day 5 Fri
-  ];
-
-  const DAY_LABELS = [
-    { day: "Mon", label: "The Overview" },
-    { day: "Tue", label: "The Disagreement" },
-    { day: "Wed", label: "The Architecture" },
-    { day: "Thu", label: "The Record" },
-    { day: "Fri", label: "The Verdict" },
-  ];
-
-  const now = new Date();
-  const activeDay = UNLOCK_DATES.reduce((acc, date, i) => {
-    return now >= date ? i : acc;
-  }, -1);
-
-  const [selectedDay, setSelectedDay] = useState(Math.max(0, activeDay));
-
-  return (
-    <div style={{ marginBottom: "2.5rem" }}>
-      {/* Series header */}
-      <div style={{
-        borderTop: "1px solid var(--border)",
-        paddingTop: "1.25rem",
-        marginBottom: "1rem",
-        display: "flex",
-        alignItems: "baseline",
-        justifyContent: "space-between",
-        gap: "1rem",
-        flexWrap: "wrap",
-      }}>
-        <div>
-          <div style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.62rem",
-            fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            color: "var(--gold)",
-            marginBottom: "0.3rem",
-          }}>
-            This week's verdict
-          </div>
-          <div style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "clamp(1rem, 2vw, 1.25rem)",
-            color: "var(--text)",
-            lineHeight: 1.2,
-          }}>
-            Is Mamdani's New York a Socialist Experiment?
-          </div>
-        </div>
-        <div style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "0.72rem",
-          color: "var(--text-faint)",
-          fontWeight: 500,
-        }}>
-          One section unlocks per day
-        </div>
-      </div>
-
-      {/* Tab bar */}
-      <div style={{
-        display: "flex",
-        gap: 2,
-        background: "var(--bg3)",
-        border: "1px solid var(--border)",
-        borderBottom: "none",
-        borderRadius: "4px 4px 0 0",
-        overflow: "hidden",
-      }}>
-        {DAY_LABELS.map((item, i) => {
-          const unlocked = now >= UNLOCK_DATES[i];
-          const active = selectedDay === i;
-          return (
-            <button
-              key={i}
-              onClick={() => { if (unlocked) setSelectedDay(i); }}
-              disabled={!unlocked}
-              style={{
-                flex: 1,
-                background: active ? "var(--bg2)" : "transparent",
-                border: "none",
-                padding: "0.65rem 0.4rem",
-                cursor: unlocked ? "pointer" : "not-allowed",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: 3,
-                position: "relative",
-                opacity: unlocked ? 1 : 0.4,
-                transition: "background 0.15s",
-              }}
-            >
-              {active && (
-                <span style={{
-                  position: "absolute",
-                  bottom: 0, left: 0, right: 0,
-                  height: 2,
-                  background: "var(--gold)",
-                }} />
-              )}
-              <span style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.56rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: active ? "var(--gold)" : "var(--text-faint)",
-              }}>
-                {item.day}
-              </span>
-              <span style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "0.68rem",
-                fontWeight: 600,
-                color: active ? "var(--text)" : "var(--text-faint)",
-                textAlign: "center",
-                lineHeight: 1.2,
-              }}
-              className="tab-label"
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-     {/* Panel */}
-     <div style={{
-        border: "1px solid var(--border)",
-        borderTop: "none",
-        background: "var(--bg2)",
-        borderRadius: "0 0 4px 4px",
-        padding: "1.5rem",
-        minHeight: 100,
-      }}>
-        {activeDay === -1 ? (
-          <p style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "0.88rem",
-            color: "var(--text-faint)",
-            lineHeight: 1.65,
-            margin: 0,
-          }}>
-            Day 1 unlocks Monday, April 6. Come back then for the first section.
-          </p>
-        ) : (
-          <div>
-            <div style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.62rem",
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase" as const,
-              color: "var(--gold)",
-              marginBottom: "0.4rem",
-            }}>
-              {["The Overview","The Disagreement","The Architecture","The Record","The Verdict"][selectedDay]}
-            </div>
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.88rem",
-              color: "var(--text-dim)",
-              lineHeight: 1.65,
-              margin: "0 0 1rem",
-            }}>
-              {[
-                "NYC's youngest mayor in modern history. 95 days in. A $5.4B deficit, a budget standoff, and the question of whether socialist governance can survive contact with New York City.",
-                "The surface argument is about buses and grocery stores. The real argument is older. Two theories of what a city is for — and neither is obviously wrong.",
-                "Before you can evaluate Mamdani's policies, you have to know what they actually are. Four terms are doing most of the work in this debate — and all four are being used imprecisely.",
-                "The 95-day ledger. The wins, the stalls, and the unexpected. More complicated than either side wants to admit.",
-                "Ninety-five days is not enough to know if the model works. It is enough to identify what it's actually being tested on.",
-              ][selectedDay]}
-            </p>
-            <Link href={`/bulletin/${bulletinSlug}`} style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "0.72rem",
-              fontWeight: 700,
-              letterSpacing: "0.1em",
-              textTransform: "uppercase" as const,
-              color: "var(--gold)",
-              textDecoration: "none",
-              borderBottom: "1px solid var(--gold-line)",
-              paddingBottom: "2px",
-            }}>
-              Read in today's bulletin →
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ── Carousel Day Content ───────────────────────────────────────────
 function CarouselDayContent({ day }: { day: number }) {
   const content = [
@@ -1019,7 +815,7 @@ export default function HomePage({
         }}>
           {v.summary}
         </p>
-        <Link href={`/verdicts/${v.slug}`} style={{
+        <Link href={v.bulletinSlug ? `/bulletin/${v.bulletinSlug}` : `/verdicts/${v.slug}`} style={{
           display: "inline-flex",
           alignItems: "center",
           gap: "0.4rem",
@@ -1033,7 +829,7 @@ export default function HomePage({
           borderBottom: "1px solid var(--gold-line)",
           paddingBottom: "2px",
         }}>
-          Read the verdict →
+          {v.bulletinSlug ? "Read in today's bulletin →" : "Read the verdict →"}
         </Link>
       </div>
     );

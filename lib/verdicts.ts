@@ -18,6 +18,7 @@ export type VerdictMeta = {
   keyTension?: string | null;
   glossary?: GlossaryEntry[] | null;
   publishAt?: string | null;
+  bulletinSlug?: string | null;
 };
 const verdictsDir = path.join(process.cwd(), "content", "verdicts");
 
@@ -44,6 +45,7 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
         readTime: meta.readTime ? String(meta.readTime) : null,
         questionId: meta.questionId ? String(meta.questionId) : null,
         publishAt: meta.publishAt ? String(meta.publishAt) : null,
+        bulletinSlug: meta.bulletinSlug ? String(meta.bulletinSlug) : null,
       };
     }
 
@@ -56,6 +58,7 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
       readTime: data.readTime ? String(data.readTime) : undefined,
       questionId: data.questionId ? String(data.questionId) : undefined,
       publishAt: data.publishAt ? String(data.publishAt) : null,
+      bulletinSlug: data.bulletinSlug ? String(data.bulletinSlug) : null,
     };
   });
 

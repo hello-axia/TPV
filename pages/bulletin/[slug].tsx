@@ -196,13 +196,16 @@ export default function BulletinPage({ slug, meta, beforeReader, before, after, 
           opacity: 0.9;
         }
         .bulletin-prose .bulletin-headline {
-          font-family: var(--font-display);
-          font-size: clamp(1rem, 2vw, 1.2rem);
-          font-weight: 400;
-          color: var(--text);
-          line-height: 1.25;
-          margin-bottom: 0.5rem;
-        }
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--border-light);
+}
         .bulletin-prose .bulletin-body {
           font-family: var(--font-body);
           font-size: 1rem;
