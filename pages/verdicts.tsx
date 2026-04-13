@@ -143,7 +143,7 @@ export default function VerdictsPage({ items }: { items: VerdictMeta[] }) {
             title={v.title}
             summary={v.summary}
             date={v.date}
-            readTime={v.readTime}
+            readTime={v.readTime ?? undefined}
             href={`/verdicts/${v.slug}`}
             questionId={(v as any).questionId}
           />

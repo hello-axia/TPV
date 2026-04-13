@@ -12,11 +12,11 @@ export type VerdictMeta = {
   title: string;
   date: string;
   summary: string;
-  readTime?: string;
-  questionId?: string;
-  tldr?: string[];
-  keyTension?: string;
-  glossary?: GlossaryEntry[];
+  readTime?: string | null;
+  questionId?: string | null;
+  tldr?: string[] | null;
+  keyTension?: string | null;
+  glossary?: GlossaryEntry[] | null;
   publishAt?: string | null;
 };
 const verdictsDir = path.join(process.cwd(), "content", "verdicts");
@@ -41,8 +41,8 @@ export function getAllVerdictsMeta(): VerdictMeta[] {
         title: String(meta.title ?? slug),
         date: String(meta.date ?? ""),
         summary: String(meta.summary ?? ""),
-        readTime: meta.readTime ? String(meta.readTime) : undefined,
-        questionId: meta.questionId ? String(meta.questionId) : undefined,
+        readTime: meta.readTime ? String(meta.readTime) : null,
+        questionId: meta.questionId ? String(meta.questionId) : null,
         publishAt: meta.publishAt ? String(meta.publishAt) : null,
       };
     }
@@ -98,8 +98,8 @@ export function getVerdictBySlug(slug: string) {
         title: String(meta.title ?? slug),
         date: String(meta.date ?? ""),
         summary: String(meta.summary ?? ""),
-        readTime: meta.readTime ? String(meta.readTime) : undefined,
-        questionId: meta.questionId ? String(meta.questionId) : undefined,
+        readTime: meta.readTime ? String(meta.readTime) : null,
+        questionId: meta.questionId ? String(meta.questionId) : null,
         tldr: Array.isArray(meta.tldr) ? meta.tldr : null,
         keyTension: meta.keyTension ? String(meta.keyTension) : null,
         glossary: glossary.length > 0 ? glossary : null,

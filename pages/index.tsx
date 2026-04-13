@@ -14,8 +14,8 @@ type Post = {
   title: string;
   date: string;
   summary: string;
-  readTime?: string;
-  questionId?: string;
+  readTime?: string | null;
+  questionId?: string | null;
 };
 
 type BulletinPreview = {
