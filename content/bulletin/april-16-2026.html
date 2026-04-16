@@ -1,0 +1,315 @@
+<script type="application/json" id="tpv-bulletin-meta">
+    {
+      "title": "Promise by promise: what Trump said, and what actually happened.",
+      "date": "04-16-2026",
+      "subhead": "What you need to know to start Thursday.",
+      "readTime": "5 min read",
+      "publishAt": "2026-04-16T09:00:00Z",
+      "glossary": [
+        {
+          "term": "federal income tax",
+          "definition": "The tax the federal government levies on individual earnings. It is progressive — higher earners pay a higher percentage. It is separate from payroll taxes, which fund Social Security and Medicare. The One Big Beautiful Bill's tips and overtime exemptions only apply to this tax, not payroll taxes."
+        },
+        {
+          "term": "payroll taxes",
+          "definition": "Taxes automatically withheld from paychecks to fund Social Security and Medicare. Unlike income taxes, payroll taxes are flat — everyone pays the same percentage regardless of income, up to a cap. The tips and overtime exemptions in the One Big Beautiful Bill do not reduce payroll taxes."
+        },
+        {
+          "term": "exclude or deduct",
+          "definition": "Two ways of reducing taxable income. An exclusion removes income from your gross income entirely before taxes are calculated. A deduction reduces your taxable income after gross income is established. Both lower your tax bill — the One Big Beautiful Bill allows workers to exclude up to $25,000 in tips and $12,500 in overtime from federal taxable income."
+        },
+        {
+          "term": "14th Amendment",
+          "definition": "A constitutional amendment ratified in 1868, primarily to grant citizenship to formerly enslaved people. Its Citizenship Clause states that anyone born on US soil is automatically a citizen. Trump's executive order sought to end this — courts immediately blocked it, ruling it contradicts the amendment's plain text."
+        },
+        {
+          "term": "birthright citizenship",
+          "definition": "The legal principle, grounded in the 14th Amendment, that anyone born on US soil is automatically a US citizen regardless of the immigration status of their parents. The US is one of roughly 30 countries that grant birthright citizenship."
+        },
+        {
+          "term": "One Big Beautiful Bill",
+          "definition": "A sweeping legislative package signed by Trump on July 4, 2025. It made the 2017 Trump tax cuts permanent, created federal income tax exemptions for tips and overtime pay, and included a range of other Republican priorities. It passed along party lines in both chambers."
+        }
+      ]
+    }
+    </script>
+    
+    <div class="bulletin-item">
+      <div><span class="bulletin-tag" style="color:#e74c3c;">IRAN + US</span></div>
+      <div>
+        <div class="bulletin-headline">Basically the same as yesterday.</div>
+        <p class="bulletin-body">
+          The ceasefire holds. The blockade remains in effect. A second round of talks is still pending. No significant developments to report since yesterday's bulletin.
+        </p>
+      </div>
+    </div>
+    
+    <div class="bulletin-item">
+      <div><span class="bulletin-tag" style="color:#c8a96e;">FROM THE EDITOR</span></div>
+      <div>
+        <div class="bulletin-headline">I am taking a break today.</div>
+        <p class="bulletin-body">
+          Please text me (Enoch) if you are actually reading! I feel like I am writing to a wall right now, but that is ok! We are learning about news writing, the market, and how to begin distributions. I'm just really tired and stressed, so I am taking a break today! Please forgive me if you actually read this daily :D
+        </p>
+      </div>
+    </div>
+    
+    <!-- ── Carousel ── -->
+    <div style="margin-top: 2.5rem; padding-top: 1.75rem; border-top: 1px solid var(--border);">
+      <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem;">
+        This Week's Verdict · Day 4
+      </div>
+      <div style="font-family: var(--font-display); font-size: clamp(1.1rem, 2.5vw, 1.45rem); font-weight: 400; color: var(--text); line-height: 1.25; margin-bottom: 1.5rem;">
+        Is Trump Delivering? A Verdict on the Second Term
+      </div>
+    
+      <!-- Tab bar -->
+      <div style="display: flex; gap: 2px; background: var(--bg3); border: 1px solid var(--border); border-bottom: none; border-radius: 4px 4px 0 0; overflow: hidden;">
+        <button onclick="tpvCarousel.show(0)" id="tab-0" style="flex: 1; background: var(--bg3); border: none; padding: 0.65rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; opacity: 0.7;">
+          <span style="font-family: var(--font-body); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint);">MON</span>
+          <span style="font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; color: var(--text-faint);">The Overview</span>
+        </button>
+        <button onclick="tpvCarousel.show(1)" id="tab-1" style="flex: 1; background: var(--bg3); border: none; padding: 0.65rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; opacity: 0.7;">
+          <span style="font-family: var(--font-body); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint);">TUE</span>
+          <span style="font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; color: var(--text-faint);">The Disagreement</span>
+        </button>
+        <button onclick="tpvCarousel.show(2)" id="tab-2" style="flex: 1; background: var(--bg3); border: none; padding: 0.65rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; opacity: 0.7;">
+          <span style="font-family: var(--font-body); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint);">WED</span>
+          <span style="font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; color: var(--text-faint);">The Architecture</span>
+        </button>
+        <button onclick="tpvCarousel.show(3)" id="tab-3" style="flex: 1; background: var(--bg2); border: none; padding: 0.65rem 0.4rem; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; position: relative; transition: background 0.15s;">
+          <span style="font-family: var(--font-body); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold);">THU</span>
+          <span style="font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; color: var(--text);">The Record</span>
+          <span style="position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--gold);"></span>
+        </button>
+        <button disabled style="flex: 1; background: var(--bg3); border: none; padding: 0.65rem 0.4rem; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; gap: 3px; opacity: 0.4;">
+          <span style="font-family: var(--font-body); font-size: 0.56rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint);">FRI</span>
+          <span style="font-family: var(--font-body); font-size: 0.68rem; font-weight: 600; color: var(--text-faint);">The Verdict</span>
+        </button>
+      </div>
+    
+      <!-- Panel wrapper -->
+      <div style="border: 1px solid var(--border); border-top: none; background: var(--bg2); border-radius: 0 0 4px 4px; padding: 1.5rem;">
+    
+        <!-- DAY 1 PANEL -->
+        <div id="tpv-panel-0" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border); flex-wrap: wrap;">
+            <div style="font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 3px 10px; border-radius: 3px;">Day 1</div>
+            <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint);">4 min read</div>
+          </div>
+          <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem;">The Overview</div>
+          <h2 style="font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 400; color: var(--text); line-height: 1.15; letter-spacing: -0.02em; margin-top: 0.25rem; margin-bottom: 1.25rem;">The Most Consequential Fifteen Months in a Generation</h2>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 0.9rem;">Donald Trump returned to the White House on January 20, 2025 with a huge voter base, running on three promises: stopping the border, bringing prices down, and stopping — not starting — any wars. Fifteen months later, the Trump second presidency has been one of extraordinary turbulence and transformation.</p>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 0.9rem;">The volume of action Trump has undertaken is not in dispute. By the end of his first year, Trump had signed over 221 executive orders. Most presidents average around 100–200 for their entire term. His administration dismantled DEI programs across the federal government, pulled the US out of the World Health Organization and the Paris Climate framework, launched the largest and most public immigration enforcement operation in modern history, and restructured the executive branch. The word most often used by admirers and critics alike is velocity: the sheer speed at which Trump puts his plans into motion.</p>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 1.25rem;">But velocity is not the same as delivery. The central question: is Donald Trump delivering on the promises he made during his 2024 campaign and January 2025 inauguration? AP News maintains a tight track record of Trump's promises. In this verdict, we will be analyzing what the President has done, what he still has yet to do, and why his approval rating is sitting at −19.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 1.25rem; background: var(--border);">
+            <div style="background: var(--bg3); padding: 12px 14px;">
+              <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;">Executive orders signed</div>
+              <div style="font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--text);">221+ in year one</div>
+            </div>
+            <div style="background: var(--bg3); padding: 12px 14px;">
+              <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;">Current approval rating</div>
+              <div style="font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--text);">−19 net approval</div>
+            </div>
+            <div style="background: var(--bg3); padding: 12px 14px;">
+              <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;">Campaign promises tracked</div>
+              <div style="font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--text);">100+ per AP News tracker</div>
+            </div>
+            <div style="background: var(--bg3); padding: 12px 14px;">
+              <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 4px;">Days in office</div>
+              <div style="font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; color: var(--text);">~450 as of April 2026</div>
+            </div>
+          </div>
+        </div><!-- end day 1 -->
+    
+        <!-- DAY 2 PANEL -->
+        <div id="tpv-panel-1" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border); flex-wrap: wrap;">
+            <div style="font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 3px 10px; border-radius: 3px;">Day 2</div>
+            <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint);">5 min read</div>
+          </div>
+          <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem;">The Disagreement</div>
+          <h2 style="font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 400; color: var(--text); line-height: 1.15; letter-spacing: -0.02em; margin-top: 0.25rem; margin-bottom: 1.25rem;">The People Who Elected Him Are the Ones Asking the Hardest Questions</h2>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 0.9rem;">The standard argument about Trump's second term is the left-right argument. Supporters say he is delivering; critics say he is failing. Both sides are largely talking past each other. The most revealing disagreement is happening inside Trump's own party: among the voters who gave him the second term in the first place.</p>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 1.25rem;">Trump's 2024 victory was not a standard Republican win. It was a landslide — 312 to 226. Working-class whites, Hispanic men, low-income rural communities, and first-time voters all broke toward him on the promise of fixing the cost of living. Fifteen months later, there is significant change — but not the change many were hoping to see.</p>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 2px; margin-bottom: 1.5rem; background: var(--border);">
+            <div style="background: var(--bg3); padding: 1rem 1.25rem; display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center;">
+              <div style="font-family: var(--font-body); font-size: 2rem; font-weight: 700; color: #e74c3c; line-height: 1;">−21</div>
+              <div>
+                <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.3rem;">Working-Class White Voters</div>
+                <div style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.6;">+17 net approval in March 2025 → −4 net in March 2026. A 21-point swing in 12 months.</div>
+              </div>
+            </div>
+            <div style="background: var(--bg3); padding: 1rem 1.25rem; display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center;">
+              <div style="font-family: var(--font-body); font-size: 2rem; font-weight: 700; color: #e74c3c; line-height: 1;">−50</div>
+              <div>
+                <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.3rem;">Hispanic Voters</div>
+                <div style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.6;">−12 net in January 2025 → −50 net in March 2026. A 38-point collapse.</div>
+              </div>
+            </div>
+            <div style="background: var(--bg3); padding: 1rem 1.25rem; display: grid; grid-template-columns: auto 1fr; gap: 1rem; align-items: center;">
+              <div style="font-family: var(--font-body); font-size: 2rem; font-weight: 700; color: #e74c3c; line-height: 1;">33%</div>
+              <div>
+                <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 0.3rem;">Overall Approval — April 2026</div>
+                <div style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.6;">Down from nearly 50% in February 2025. 67% disapproval.</div>
+              </div>
+            </div>
+          </div>
+        </div><!-- end day 2 -->
+    
+        <!-- DAY 3 PANEL -->
+        <div id="tpv-panel-2" style="display: none;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border); flex-wrap: wrap;">
+            <div style="font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 3px 10px; border-radius: 3px;">Day 3</div>
+            <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint);">6 min read</div>
+          </div>
+          <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem;">The Architecture</div>
+          <h2 style="font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 400; color: var(--text); line-height: 1.15; letter-spacing: -0.02em; margin-top: 0.25rem; margin-bottom: 1.25rem;">A President with Nothing Left to Lose, and Everything to Prove</h2>
+          <p style="font-family: var(--font-body); font-size: 1rem; line-height: 1.75; color: var(--text); margin-bottom: 0.9rem;">There is a structural fact about Donald Trump's second term that shapes everything else: he never has to run again. What this does is replace an electoral incentive with legacy. Trump seems to be pursuing a goal of leaving his mark on America with maximum velocity, through maximum executive power, regardless of whether Congress agrees or not.</p>
+          <div style="border-left: 2px solid var(--gold); padding: 1.1rem 1.25rem; background: var(--gold-dim); border-radius: 0 3px 3px 0; margin-bottom: 0.5rem; margin-top: 1rem;">
+            <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem;">The Core Architectural Tension</div>
+            <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; margin: 0; font-style: italic;">Trump's presidency moves fastest in the domain of things that can be undone, but slowest in the domain of things that would actually change working-class economic life. This is the structural limit of executive power.</p>
+          </div>
+        </div><!-- end day 3 -->
+    
+        <!-- DAY 4 PANEL -->
+        <div id="tpv-panel-3" style="display: block;">
+          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 0.85rem; border-bottom: 1px solid var(--border); flex-wrap: wrap;">
+            <div style="font-family: var(--font-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 3px 10px; border-radius: 3px;">Day 4</div>
+            <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint);">6 min read</div>
+          </div>
+    
+          <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.2rem;">The Record</div>
+          <h2 style="font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.25rem); font-weight: 400; color: var(--text); line-height: 1.15; letter-spacing: -0.02em; margin-top: 0.25rem; margin-bottom: 0.75rem;">Promise by Promise: What He Said, and What Actually Happened</h2>
+          <p style="font-family: var(--font-body); font-size: 0.93rem; color: var(--text-faint); line-height: 1.7; margin-bottom: 1.5rem; font-style: italic;">Trump's 2024 campaign made specific promises. The record below evaluates the most significant ones against available data up to April 2026. Data taken primarily from AP News.</p>
+    
+          <!-- DELIVERED / IN PROGRESS -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; margin-top: 0.5rem;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #2ecc71; flex-shrink: 0;"></div>
+            <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #2ecc71;">Delivered / In Progress</div>
+          </div>
+    
+          <div style="display: grid; grid-template-columns: 1fr; gap: 2px; margin-bottom: 1.75rem; background: var(--border);">
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid #2ecc71;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Close the Border / Largest Deportation Program in History</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2ecc71; background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.25); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">In Progress</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Achieved by: Executive Order</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">This is the clearest kept promise of his second term. Border crossings fell significantly. The administration achieved what is described as the first year of negative net migration in over 50 years. A caveat: enforcement swept well beyond violent criminals, and the political backlash has been measurable.</p>
+            </div>
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid #2ecc71;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Paris Agreement / WHO Withdrawal</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2ecc71; background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.25); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Kept</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Achieved by: Executive Order</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Both were withdrawn by executive order on January 20, 2025.</p>
+            </div>
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid #2ecc71;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Making Expiring Tax Cuts Permanent / No Tax on Tips / No Tax on Overtime</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #2ecc71; background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.25); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Kept / In Progress</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Achieved by: Congressional Action — the <span class="tpv-gloss-term">One Big Beautiful Bill<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">One Big Beautiful Bill</span><span class="tpv-gloss-tooltip-def">A sweeping legislative package signed by Trump on July 4, 2025. It made the 2017 Trump tax cuts permanent, created federal income tax exemptions for tips and overtime pay, and included a range of other Republican priorities. It passed along party lines in both chambers.</span></span></span></div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">The One Big Beautiful Bill made the 2017 Trump tax cuts permanent and created exemptions for tips and overtime pay. However, these exemptions only apply to <span class="tpv-gloss-term">federal income tax<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">Federal Income Tax</span><span class="tpv-gloss-tooltip-def">The tax the federal government levies on individual earnings. It is progressive — higher earners pay a higher percentage. It is separate from payroll taxes, which fund Social Security and Medicare. The One Big Beautiful Bill's tips and overtime exemptions only apply to this tax, not payroll taxes.</span></span></span>, not <span class="tpv-gloss-term">payroll taxes<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">Payroll Taxes</span><span class="tpv-gloss-tooltip-def">Taxes automatically withheld from paychecks to fund Social Security and Medicare. Unlike income taxes, payroll taxes are flat — everyone pays the same percentage regardless of income, up to a cap. The tips and overtime exemptions in the One Big Beautiful Bill do not reduce payroll taxes.</span></span></span>. Workers may <span class="tpv-gloss-term">exclude or deduct<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">Exclude or Deduct</span><span class="tpv-gloss-tooltip-def">Two ways of reducing taxable income. An exclusion removes income from your gross income entirely before taxes are calculated. A deduction reduces your taxable income after gross income is established. The One Big Beautiful Bill allows workers to exclude up to $25,000 in tips and $12,500 in overtime from federal taxable income.</span></span></span> up to $25,000 in tips and $12,500 in overtime from federal taxable income — but those earnings still contribute to Social Security and Medicare.</p>
+            </div>
+    
+          </div>
+    
+          <!-- COMPLICATED -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--gold); flex-shrink: 0;"></div>
+            <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold);">It's Complicated</div>
+          </div>
+    
+          <div style="display: grid; grid-template-columns: 1fr; gap: 2px; margin-bottom: 1.75rem; background: var(--border);">
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid var(--gold);">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Tariffs on Countries to Make the US Rich</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Complicated</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Achieved by: Executive Order</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Trump imposed 25% tariffs on Canada and Mexico in February 2025 and pursued expanded customs enforcement. Tariff revenue rose, but consumer prices also increased. Economists have said the tariff strategy has not yet "Made America Rich," even though this remains central to Trump's economic agenda.</p>
+            </div>
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid var(--gold);">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Eliminate Taxes on Social Security</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Complicated</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Method: Congressional Action</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Trump campaigned explicitly: "Seniors should not have to pay taxes on Social Security." The One Big Beautiful Bill did not include this provision. The Senate blocked it. What Social Security holders received instead was a 2.6% cost-of-living boost.</p>
+            </div>
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid var(--gold);">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">End <span class="tpv-gloss-term">Birthright Citizenship<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">Birthright Citizenship</span><span class="tpv-gloss-tooltip-def">The legal principle, grounded in the 14th Amendment, that anyone born on US soil is automatically a US citizen regardless of the immigration status of their parents. The US is one of roughly 30 countries that grant birthright citizenship.</span></span></span></div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); background: var(--gold-dim); border: 1px solid var(--gold-line); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Complicated</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Method: Executive Order</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Trump signed an executive order on day one, but multiple federal courts blocked it immediately, citing that it contradicts the <span class="tpv-gloss-term">14th Amendment<span class="tpv-gloss-tooltip"><span class="tpv-gloss-tooltip-term">14th Amendment</span><span class="tpv-gloss-tooltip-def">A constitutional amendment ratified in 1868, primarily to grant citizenship to formerly enslaved people. Its Citizenship Clause states that anyone born on US soil is automatically a citizen. Trump's executive order sought to end this — courts immediately blocked it, ruling it contradicts the amendment's plain text.</span></span></span>. The case will move to the Supreme Court. The promise is in legal limbo: neither kept nor abandoned.</p>
+            </div>
+    
+          </div>
+    
+          <!-- NOT DELIVERED -->
+          <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #e74c3c; flex-shrink: 0;"></div>
+            <div style="font-family: var(--font-body); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #e74c3c;">Not Delivered</div>
+          </div>
+    
+          <div style="display: grid; grid-template-columns: 1fr; gap: 2px; margin-bottom: 1.75rem; background: var(--border);">
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid #e74c3c;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">Cut Energy Prices in Half within 12–18 Months</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e74c3c; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.25); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Not Delivered</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Method: Executive Order / Congressional Action</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Energy is getting more expensive, especially with the closing of the Strait of Hormuz. Trump has not delivered on this promise.</p>
+            </div>
+    
+            <div style="background: var(--bg2); padding: 1rem 1.25rem; border-left: 3px solid #e74c3c;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.4rem; flex-wrap: wrap;">
+                <div style="font-family: var(--font-body); font-size: 0.82rem; font-weight: 700; color: var(--text);">End the Russia-Ukraine War</div>
+                <div style="font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #e74c3c; background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.25); padding: 2px 8px; border-radius: 2px; white-space: nowrap;">Not Delivered</div>
+              </div>
+              <div style="font-family: var(--font-body); font-size: 0.72rem; color: var(--text-faint); margin-bottom: 0.6rem;">Method: Diplomacy</div>
+              <p style="font-family: var(--font-body); font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin: 0;">Trump said he would end the war before he even took office. He did not. Diplomatic engagement has continued, but the war has continued through April 2026.</p>
+            </div>
+    
+          </div>
+    
+          <!-- The Pattern -->
+          <div style="border-left: 2px solid var(--gold); padding: 1.1rem 1.25rem; background: var(--gold-dim); border-radius: 0 3px 3px 0;">
+            <div style="font-family: var(--font-body); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 0.5rem;">The Pattern</div>
+            <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; margin: 0; font-style: italic;">The promises Trump could keep through executive power alone, he has largely delivered. The promises that required Congress, economic results, or diplomacy are in limbo. This is neither praise nor critique of Trump — it is the structural logic of the presidency. In order for Trump to deliver on everything he has promised, he must gain the approval of Congress.</p>
+          </div>
+    
+        </div><!-- end day 4 -->
+    
+      </div><!-- end panel wrapper -->
+    </div><!-- end carousel -->
+    
+    <div id="tpv-poll-marker"></div>
+    
+    <!-- ── Sources ── -->
+    <div class="tpv-sources">
+      <div class="tpv-sources-title">Sources</div>
+    
+      <div class="tpv-sources-category">
+        <div class="tpv-sources-category-label">Trump Verdict — Day 4</div>
+        <div class="tpv-sources-list">
+          <div class="tpv-source-item"><span class="tpv-source-pub">AP News</span><a href="https://apnews.com/projects/trump-campaign-promise-tracker/" target="_blank" rel="noopener">Trump Campaign Promise Tracker</a></div>
+          <div class="tpv-source-item"><span class="tpv-source-pub">White House</span><a href="https://www.whitehouse.gov/releases/2026/03/america-first-in-action-u-s-records-net-negative-migration-across-every-metro-area/" target="_blank" rel="noopener">America First in Action: US Records Net Negative Migration</a></div>
+          <div class="tpv-source-item"><span class="tpv-source-pub">AP News</span><a href="https://apnews.com/article/trump-inflation-utility-bills-16cf846b44369b5b9660238be7112a4d" target="_blank" rel="noopener">Trump, Inflation, and Utility Bills</a></div>
+          <div class="tpv-source-item"><span class="tpv-source-pub">AP News</span><a href="https://apnews.com/article/retirement-social-security-trump-bessent-0be15d5f1285cd1b774a8f5c59167b90" target="_blank" rel="noopener">Social Security, Retirement, and the Trump Budget</a></div>
+        </div>
+      </div>
+    
+    </div>
